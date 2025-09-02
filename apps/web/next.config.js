@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@zv/db'],
+  transpilePackages: ['@zv/contracts', '@zv/utils'],
   images: {
     domains: ['localhost'],
     remotePatterns: [

@@ -135,6 +135,68 @@ export const CreateClubDto = z.object({
 
 export const UpdateClubDto = CreateClubDto.partial();
 
+// Admin Users DTOs
+export const AdminUsersListQueryDto = z.object({
+  page: z.coerce.number().min(1).default(1),
+  pageSize: z.coerce.number().refine(val => [10, 20, 50, 100].includes(val), 'pageSize должен быть 10, 20, 50 или 100').default(20),
+  search: z.string().optional(),
+  roles: z.array(z.enum(['PLAYER', 'MASTER', 'MODERATOR', 'SUPERADMIN'])).optional(),
+  sortBy: z.enum(['createdAt', 'email', 'name']).default('createdAt'),
+  sortDir: z.enum(['asc', 'desc']).default('desc'),
+});
+
+export const AdminUserDto = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string().email(),
+  tel: z.string().nullable(),
+  tgId: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  roles: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const AdminUsersListResponseDto = z.object({
+  items: z.array(AdminUserDto),
+  page: z.number(),
+  pageSize: z.number(),
+  total: z.number(),
+});
+
+export const AdminUserDetailDto = z.object({
+  user: z.object({
+    id: z.string(),
+    name: z.string().nullable(),
+    email: z.string().email(),
+    tel: z.string().nullable(),
+    tgId: z.string().nullable(),
+    avatarUrl: z.string().nullable(),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+  }),
+  roles: z.array(z.string()),
+});
+
+export const AdminUpdateUserDto = z.object({
+  name: z.string().min(1, 'Имя не может быть пустым').max(255, 'Имя слишком длинное').optional(),
+  email: z.string().email('Некорректный email').max(255, 'Email слишком длинный').optional(),
+  tel: z.string().max(50, 'Номер телефона слишком длинный').optional().transform(val => val?.trim() || null),
+  tgId: z.string().max(50, 'Telegram ID слишком длинный').optional().transform(val => val?.trim() || null),
+  avatarUrl: z.string().url('Некорректная ссылка на аватар').optional().transform(val => val?.trim() || null),
+});
+
+export const AdminManageUserRolesDto = z.object({
+  add: z.array(z.enum(['PLAYER', 'MASTER', 'MODERATOR', 'SUPERADMIN'])).optional(),
+  remove: z.array(z.enum(['PLAYER', 'MASTER', 'MODERATOR', 'SUPERADMIN'])).optional(),
+}).refine(data => data.add || data.remove, {
+  message: 'Необходимо указать роли для добавления или удаления',
+});
+
+export const AdminManageUserRolesResponseDto = z.object({
+  roles: z.array(z.string()),
+});
+
 // Export types
 export type LoginDtoType = z.infer<typeof LoginDto>;
 export type RegisterDtoType = z.infer<typeof RegisterDto>;
@@ -161,33 +223,13 @@ export type CreateOrderDtoType = z.infer<typeof CreateOrderDto>;
 export type CreateBattlepassDtoType = z.infer<typeof CreateBattlepassDto>;
 export type CreateClubDtoType = z.infer<typeof CreateClubDto>;
 export type UpdateClubDtoType = z.infer<typeof UpdateClubDto>;
+export type AdminUsersListQueryDtoType = z.infer<typeof AdminUsersListQueryDto>;
+export type AdminUserDtoType = z.infer<typeof AdminUserDto>;
+export type AdminUsersListResponseDtoType = z.infer<typeof AdminUsersListResponseDto>;
+export type AdminUserDetailDtoType = z.infer<typeof AdminUserDetailDto>;
+export type AdminUpdateUserDtoType = z.infer<typeof AdminUpdateUserDto>;
+export type AdminManageUserRolesDtoType = z.infer<typeof AdminManageUserRolesDto>;
+export type AdminManageUserRolesResponseDtoType = z.infer<typeof AdminManageUserRolesResponseDto>;
 
-// Export schemas
-export {
-  LoginDto,
-  RegisterDto,
-  UpdateProfileDto,
-  CreatePlayerProfileDto,
-  UpdatePlayerProfileDto,
-  CreateMasterProfileDto,
-  UpdateMasterProfileDto,
-  CreateCharacterDto,
-  UpdateCharacterDto,
-  CreateGroupDto,
-  UpdateGroupDto,
-  CreateSessionDto,
-  UpdateSessionDto,
-  CreateEnrollmentDto,
-  UpdateEnrollmentDto,
-  CreateReportDto,
-  UpdateReportDto,
-  CreateRuleDto,
-  UpdateRuleDto,
-  CreateProductDto,
-  UpdateProductDto,
-  CreateOrderDto,
-  CreateBattlepassDto,
-  CreateClubDto,
-  UpdateClubDto,
-};
+// All schemas are already exported individually above
 

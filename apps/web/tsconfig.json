@@ -34,6 +34,18 @@
       ],
       "@/types/*": [
         "./src/types/*"
+      ],
+      "@zv/db": [
+        "../../packages/db/src"
+      ],
+      "@zv/contracts": [
+        "../../packages/contracts/src"
+      ],
+      "@zv/contracts/*": [
+        "../../packages/contracts/src/*"
+      ],
+      "@zv/utils": [
+        "../../packages/utils/src"
       ]
     },
     "target": "ES2017"
