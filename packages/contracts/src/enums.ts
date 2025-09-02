@@ -1,0 +1,95 @@
+// Роли пользователей
+export enum UserRole {
+  PLAYER = 'PLAYER',
+  MASTER = 'MASTER',
+  MODERATOR = 'MODERATOR',
+  SUPERADMIN = 'SUPERADMIN'
+}
+
+// Форматы игр
+export enum GameFormat {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+  MIXED = 'MIXED'
+}
+
+// Статусы участников группы
+export enum MemberStatus {
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  LEFT = 'LEFT'
+}
+
+// Статусы записи на игру
+export enum EnrollmentStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED',
+  WAITLIST = 'WAITLIST'
+}
+
+// Типы товаров
+export enum ProductType {
+  BATTLEPASS = 'BATTLEPASS',
+  MERCH = 'MERCH',
+  ADDON = 'ADDON'
+}
+
+// Статусы заказов
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
+}
+
+// Платёжные провайдеры
+export enum PaymentProvider {
+  YOOKASSA = 'YOOKASSA'
+}
+
+// Типы баттлпассов
+export enum BattlepassKind {
+  SEASON = 'SEASON',
+  FOUR = 'FOUR',
+  SINGLE = 'SINGLE'
+}
+
+// Статусы баттлпассов
+export enum BattlepassStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  USED_UP = 'USED_UP'
+}
+
+// Приоритеты уведомлений
+export enum NotificationPriority {
+  LOW = 'LOW',
+  NORMAL = 'NORMAL',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT'
+}
+
+// Типы уведомлений
+export enum NotificationType {
+  EMAIL = 'EMAIL',
+  TELEGRAM = 'TELEGRAM',
+  PUSH = 'PUSH',
+  SMS = 'SMS'
+}
+
+// HTTP статус коды для API
+export enum ApiStatusCode {
+  OK = 200,
+  CREATED = 201,
+  NO_CONTENT = 204,
+  BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  FORBIDDEN = 403,
+  NOT_FOUND = 404,
+  CONFLICT = 409,
+  UNPROCESSABLE_ENTITY = 422,
+  INTERNAL_SERVER_ERROR = 500,
+  SERVICE_UNAVAILABLE = 503
+}
+

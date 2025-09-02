@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Brand font from Tilda export */
+  @font-face {
+    font-family: 'Balkara';
+    src: url('https://static.tildacdn.com/tild3031-3335-4161-a333-666137336539/TTWPGOTT_1.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Balkara';
+    src: url('https://static.tildacdn.com/tild6433-3636-4865-b935-386532313166/ofontru_Balkara-Cond.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Balkara';
+    src: url('https://static.tildacdn.com/tild3263-3630-4034-b837-396336623836/TTWPGOTT.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Balkara';
+    src: url('https://static.tildacdn.com/tild3336-3066-4435-a638-613265366264/AnyConvcom__Koch_Fra.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    /* Brand palette from image */
+    /* paper / bg: #F4F3F3 */
+    --background: 300 4% 96%;
+    /* ink / primary text: #1E1B1B */
+    --foreground: 0 5% 11%;
+    /* card/paper blocks */
+    --card: 300 4% 96%;
+    --card-foreground: 0 5% 11%;
+    --popover: 300 4% 96%;
+    --popover-foreground: 0 5% 11%;
+    /* accent / red: #B42430 */
+    --primary: 355 67% 42%;
+    --primary-foreground: 0 0% 100%;
+    /* secondary surfaces (paper-alt: #DFD6D6) */
+    --secondary: 0 7% 85%;
+    --secondary-foreground: 0 5% 11%;
+    /* ink-muted / secondary text: #665C5B */
+    --muted: 6 7% 38%;
+    --muted-foreground: 6 7% 38%;
+    /* accent-muted / rose: #BE9999 for borders/background accents */
+    --accent: 0 19% 68%;
+    --accent-foreground: 0 5% 11%;
+    /* destructive matches accent red */
+    --destructive: 355 67% 42%;
+    --destructive-foreground: 0 0% 100%;
+    /* borders closer to accent-muted */
+    --border: 0 19% 68%;
+    --input: 0 19% 68%;
+    --ring: 355 67% 42%;
+    /* radius on taste */
+    --radius: 0.375rem;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 355 67% 52%;
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 60%;
+    --muted-foreground: 0 0% 75%;
+    --accent: 0 12% 28%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 355 67% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 12% 28%;
+    --input: 0 12% 28%;
+    --ring: 355 67% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Balkara', Arial, sans-serif;
+  }
+  a {
+    color: hsl(var(--primary));
+  }
+  a:hover {
+    color: hsl(var(--primary) / 0.85);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 py-2 px-4;
+  }
+  
+  .btn-outline {
+    @apply btn border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4;
+  }
+  
+  .card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+  }
+  
+  .input {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
+

@@ -1,0 +1,31 @@
+{
+  "name": "@zv/db",
+  "version": "1.0.0",
+  "description": "Database package with Drizzle ORM schemas and migrations",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "seed": "tsx src/seed.ts",
+    "create-user": "tsx src/create_user.ts",
+    "cleanup-demo": "tsx src/cleanup_demo.ts",
+    "studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^24.3.0",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "drizzle-orm": "^0.38.4",
+    "postgres": "^3.4.7"
+  }
+}

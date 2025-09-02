@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: zv_postgres
+    environment:
+      POSTGRES_DB: zvezdnoe_vereteno
+      POSTGRES_USER: zv_user
+      POSTGRES_PASSWORD: zv_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  
+
+volumes:
+  postgres_data:
+
