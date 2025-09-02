@@ -50,6 +50,37 @@ make db-studio       # открыть Drizzle Studio (CLI)
 make db-studio-open  # открыть Studio и авто-открыть браузер
 ```
 
+### Устранение неполадок
+
+#### Проблемы со стилями (CSS не загружается)
+Если стили слетели и приложение выглядит неправильно:
+```bash
+# 1. Остановить dev сервер
+pkill -f "next dev"
+
+# 2. Очистить кэш Next.js
+cd apps/web && rm -rf .next
+
+# 3. Переустановить зависимости (при необходимости)
+cd /home/damir/projects/ZV && pnpm --filter web install
+
+# 4. Перезапустить сервер
+make dev
+```
+
+После этого обновите страницу в браузере (Ctrl+F5).
+
+#### Проблемы с базой данных
+Если возникают ошибки о несуществующих колонках:
+```bash
+# Применить все миграции
+DATABASE_URL="postgresql://zv_user:zv_password@localhost:5433/zvezdnoe_vereteno" make db-migrate
+
+# Или сгенерировать и применить новые миграции
+make db-generate
+make db-migrate
+```
+
 ### Порты и параметры
 - Next.js dev сервер: переменная `NEXT_PORT` (по умолчанию 3000)
 - Drizzle Studio: переменная `STUDIO_PORT` (по умолчанию 4983)

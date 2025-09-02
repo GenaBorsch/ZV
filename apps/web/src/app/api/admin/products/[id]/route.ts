@@ -8,13 +8,13 @@ function isAdmin(roles: string[] | undefined): boolean {
   return r.includes('MODERATOR') || r.includes('SUPERADMIN');
 }
 
-export async function PATCH(_req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions as any);
     const roles = (session?.user as any)?.roles as string[] | undefined;
     if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 
-    const id = params.id;
+    const { id } = await params;
     const body = await _req.json();
     const update: any = {};
     const fields = ['sku','title','description','priceRub','bpUsesTotal','active','visible','sortIndex','seasonRequired','archivedAt'];
@@ -46,11 +46,11 @@ export async function PATCH(_req: Request, { params }: { params: { id: string } 
   }
 }
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions as any);
   const roles = (session?.user as any)?.roles as string[] | undefined;
   if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-  const id = params.id;
+  const { id } = await params;
   const [item] = await db.select().from(products).where(eq(products.id, id)).limit(1);
   if (!item) return NextResponse.json({ error: 'not_found' }, { status: 404 });
   return NextResponse.json({ item });
