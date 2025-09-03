@@ -22,6 +22,7 @@ export const orderStatusEnum = pgEnum('order_status', ['PENDING', 'PAID', 'CANCE
 export const paymentProviderEnum = pgEnum('payment_provider', ['YOOKASSA', 'MANUAL']);
 export const battlepassKindEnum = pgEnum('battlepass_kind', ['SEASON', 'FOUR', 'SINGLE']);
 export const battlepassStatusEnum = pgEnum('battlepass_status', ['ACTIVE', 'EXPIRED', 'USED_UP']);
+export const rpgExperienceEnum = pgEnum('rpg_experience', ['NOVICE', 'INTERMEDIATE', 'VETERAN']);
 
 // Таблицы
 export const users = pgTable('users', {
@@ -32,6 +33,9 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }),
   avatarUrl: text('avatar_url'),
   passwordHash: text('password_hash'),
+  // Новые поля для профиля
+  rpgExperience: rpgExperienceEnum('rpg_experience'),
+  contacts: varchar('contacts', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -419,3 +423,4 @@ export type OrderStatus = typeof orderStatusEnum.enumValues[number];
 export type PaymentProvider = typeof paymentProviderEnum.enumValues[number];
 export type BattlepassKind = typeof battlepassKindEnum.enumValues[number];
 export type BattlepassStatus = typeof battlepassStatusEnum.enumValues[number];
+export type RpgExperience = typeof rpgExperienceEnum.enumValues[number];

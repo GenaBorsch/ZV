@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,6 +23,7 @@ export default function RegisterPage() {
     setError(null);
     setSuccess(null);
     try {
+      // Регистрируем пользователя
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -27,7 +31,26 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Ошибка регистрации');
-      window.location.href = '/auth/login';
+
+      // После успешной регистрации автоматически входим
+      const signInResult = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        throw new Error('Ошибка автоматического входа');
+      }
+
+      // Проверяем, нужно ли заполнить профиль
+      if (data.needsProfile) {
+        router.push('/profile?welcome=true');
+      } else {
+        // Перенаправляем в личный кабинет в зависимости от роли
+        // По умолчанию новые пользователи получают роль PLAYER
+        router.push('/player');
+      }
     } catch (err: any) {
       setError(err.message || 'Ошибка регистрации');
     } finally {

@@ -7,26 +7,54 @@ export const LoginDto = z.object({
 
 export const RegisterDto = z.object({
   email: z.string().email('Некорректный email'),
-  name: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
+  name: z.string().optional(), // Делаем имя опциональным при регистрации
   tel: z.string().optional(),
   tgId: z.string().optional(),
 });
 
 // Profile DTOs
+export const rpgExperienceEnum = z.enum(['NOVICE', 'INTERMEDIATE', 'VETERAN']);
+
 export const UpdateProfileDto = z.object({
-  name: z.string().min(2, 'Имя должно содержать минимум 2 символа').optional(),
-  avatarUrl: z.string().url('Некорректная ссылка на аватар').optional(),
+  name: z.string().min(2, 'Имя должно содержать минимум 2 символа').max(255, 'Имя слишком длинное').optional(),
+  avatarUrl: z.string().url('Некорректная ссылка на аватар').optional().or(z.literal('')),
+  rpgExperience: rpgExperienceEnum.optional(),
+  contacts: z.string().max(255, 'Контакты не должны превышать 255 символов').optional(),
+});
+
+// DTO для получения полного профиля
+export const ProfileDto = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  rpgExperience: rpgExperienceEnum.nullable(),
+  contacts: z.string().nullable(),
+  // Роль-специфичные поля
+  playerProfile: z.object({
+    nickname: z.string().nullable(),
+    notes: z.string().nullable(), // используется как "О себе" для игроков
+  }).nullable(),
+  masterProfile: z.object({
+    bio: z.string().nullable(), // "О себе" для мастеров
+    format: z.enum(['ONLINE', 'OFFLINE', 'MIXED']),
+    location: z.string().nullable(),
+    clubId: z.string().nullable(),
+  }).nullable(),
+  roles: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export const CreatePlayerProfileDto = z.object({
   nickname: z.string().min(2, 'Никнейм должен содержать минимум 2 символа').optional(),
-  notes: z.string().optional(),
+  notes: z.string().max(500, 'Заметки не должны превышать 500 символов').optional(),
 });
 
 export const UpdatePlayerProfileDto = CreatePlayerProfileDto.partial();
 
 export const CreateMasterProfileDto = z.object({
-  bio: z.string().optional(),
+  bio: z.string().max(500, 'Биография не должна превышать 500 символов').optional(),
   format: z.enum(['ONLINE', 'OFFLINE', 'MIXED']),
   location: z.string().optional(),
   clubId: z.string().optional(),
@@ -213,6 +241,8 @@ export const AdminManageUserRolesResponseDto = z.object({
 export type LoginDtoType = z.infer<typeof LoginDto>;
 export type RegisterDtoType = z.infer<typeof RegisterDto>;
 export type UpdateProfileDtoType = z.infer<typeof UpdateProfileDto>;
+export type ProfileDtoType = z.infer<typeof ProfileDto>;
+export type RpgExperienceType = z.infer<typeof rpgExperienceEnum>;
 export type CreatePlayerProfileDtoType = z.infer<typeof CreatePlayerProfileDto>;
 export type UpdatePlayerProfileDtoType = z.infer<typeof UpdatePlayerProfileDto>;
 export type CreateMasterProfileDtoType = z.infer<typeof CreateMasterProfileDto>;

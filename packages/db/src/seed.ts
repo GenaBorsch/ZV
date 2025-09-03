@@ -48,6 +48,16 @@ async function createDemoProfiles() {
     .limit(1);
 
   if (demoMaster[0]) {
+    // Обновляем основные поля профиля в таблице users
+    await db.update(users)
+      .set({
+        name: demoMaster[0].name || 'Демо Мастер',
+        rpgExperience: 'VETERAN',
+        contacts: 'Telegram: @demo_master, VK: vk.com/demo_master',
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, demoMaster[0].id));
+
     // Проверить, есть ли уже профиль мастера
     const existingMasterProfile = await db
       .select()
@@ -58,9 +68,9 @@ async function createDemoProfiles() {
     if (existingMasterProfile.length === 0) {
       await db.insert(masterProfiles).values({
         userId: demoMaster[0].id,
-        bio: 'Демо-мастер для тестирования системы',
+        bio: 'Опытный мастер с 10+ летним стажем. Специализируюсь на эпическом фэнтези и космоопере. Люблю глубокие сюжеты и проработанных персонажей.',
         format: 'MIXED',
-        location: 'Онлайн/Офлайн',
+        location: 'Москва/Онлайн',
       });
       console.log('✅ Создан профиль мастера для demomaster@zvezdnoe-vereteno.ru');
     } else {
@@ -78,6 +88,16 @@ async function createDemoProfiles() {
     .limit(1);
 
   if (demoPlayer[0]) {
+    // Обновляем основные поля профиля в таблице users
+    await db.update(users)
+      .set({
+        name: demoPlayer[0].name || 'Демо Игрок',
+        rpgExperience: 'INTERMEDIATE',
+        contacts: 'Discord: demo_player#1234',
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, demoPlayer[0].id));
+
     // Проверить, есть ли уже профиль игрока
     const existingPlayerProfile = await db
       .select()
@@ -88,8 +108,8 @@ async function createDemoProfiles() {
     if (existingPlayerProfile.length === 0) {
       await db.insert(playerProfiles).values({
         userId: demoPlayer[0].id,
-        nickname: 'Демо-игрок',
-        notes: 'Тестовый аккаунт игрока',
+        nickname: 'Искатель приключений',
+        notes: 'Люблю играть за воинов и паладинов. Предпочитаю ролевые взаимодействия и эпические битвы. Всегда готов помочь команде!',
       });
       console.log('✅ Создан профиль игрока для demoplayer@zvezdnoe-vereteno.ru');
     } else {

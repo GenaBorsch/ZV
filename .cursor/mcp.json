@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "Endgame": {
+      "command": "npx",
+      "args": [
+        "endgame-mcp@latest"
+      ],
+      "env": {
+        "API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ODg2NTY2Y2JmYTc5Mjk0NTNlZGZjYzMiLCJlbWFpbCI6Im5vY29kZXJlZHdzQGdtYWlsLmNvbSIsInR5cGUiOiJhcGkiLCJpYXQiOjE3NTM2MzQ0MTJ9.-rO0iCp1DsjLorma_UyTrVZlg1TfHKbS7fNWm1MPzv0"
+      }
+    },
+    "render": {
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "Bearer rnd_NAYUBAJQwUNqMyJcaLoVmBQHTnlw"
+      }
+    },
+    "Figma": {
+      "url": "http://127.0.0.1:3845/sse"
+    },
+    "Linear": {
+      "command": "npx -y mcp-remote https://mcp.linear.app/sse",
+      "env": {}
+    }
+  }
+}

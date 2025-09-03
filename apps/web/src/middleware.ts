@@ -4,6 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 const PROTECTED_PREFIXES = ['/player', '/master', '/admin'];
 const ADMIN_ONLY_PATHS = ['/admin/users'];
+const PROFILE_REQUIRED_PATHS = ['/player', '/master'];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -24,6 +25,16 @@ export async function middleware(req: NextRequest) {
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const userRoles = (token?.roles as string[]) || [];
+    const userName = token?.name as string | null;
+
+    // Проверяем, нужно ли заполнить профиль
+    const requiresProfile = PROFILE_REQUIRED_PATHS.some((path) => pathname.startsWith(path));
+    if (requiresProfile && !userName && pathname !== '/profile') {
+      const url = req.nextUrl.clone();
+      url.pathname = '/profile';
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
+    }
 
     // Проверка ролей для админских маршрутов
     const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((path) => pathname.startsWith(path));
@@ -73,7 +84,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/player/:path*', '/master/:path*', '/admin/:path*'],
+  matcher: ['/player/:path*', '/master/:path*', '/admin/:path*', '/profile'],
 };
 
 

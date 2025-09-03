@@ -6,6 +6,7 @@ import { signIn, getSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { getRedirectUrlByRoles, needsProfileCompletion } from '@/lib/redirectUtils';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,13 +33,17 @@ export default function LoginPage() {
         window.location.href = callbackUrl;
       } else {
         const session = await getSession();
-        const roles: string[] = ((session?.user as any)?.roles) || [];
-        const dest = roles.includes('MASTER')
-          ? '/master'
-          : (roles.includes('MODERATOR') || roles.includes('SUPERADMIN'))
-          ? '/admin'
-          : '/player';
-        window.location.href = dest;
+        const user = session?.user as any;
+        const roles: string[] = user?.roles || [];
+        
+        // Проверяем, нужно ли заполнить профиль
+        if (needsProfileCompletion(user)) {
+          window.location.href = '/profile?welcome=true';
+        } else {
+          // Перенаправляем в соответствующий раздел
+          const redirectUrl = getRedirectUrlByRoles(roles);
+          window.location.href = redirectUrl;
+        }
       }
     }
     setLoading(false);
