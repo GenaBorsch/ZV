@@ -3,7 +3,7 @@
 Источник: `packages/db/src/schema.ts`
 
 ### Пользователи и роли
-- `User (users)`: email (unique), tel?, tgId?, name?, avatarUrl?, timestamps
+- `User (users)`: email (unique), tel?, tgId?, name?, avatarUrl?, **rpgExperience?** (NOVICE|INTERMEDIATE|VETERAN), **contacts?**, timestamps
 - `UserRole (user_roles)`: (userId, role) unique; enum `Role`: PLAYER, MASTER, MODERATOR, SUPERADMIN
 
 Профили (1–1 от `User`):
@@ -68,7 +68,30 @@
 - Транзакционная безопасность операций
 - Подсчёт текущих участников в реальном времени
 
+#### ProfilesRepo (packages/db/src/repositories/profilesRepo.ts)
+Новый репозиторий для работы с профилями пользователей:
+
+**Методы управления профилем:**
+- `getProfile(userId: string)` - получение полного профиля пользователя
+- `updateProfile(userId: string, data: UpdateProfileDto)` - обновление основного профиля
+- `updatePlayerProfile(userId: string, data: UpdatePlayerProfileDto)` - обновление профиля игрока
+- `updateMasterProfile(userId: string, data: UpdateMasterProfileDto)` - обновление профиля мастера
+- `createPlayerProfile(userId: string, data?: CreatePlayerProfileDto)` - создание профиля игрока
+- `createMasterProfile(userId: string, data?: CreateMasterProfileDto)` - создание профиля мастера
+
+**Особенности:**
+- Автоматическое создание профилей при первом обращении
+- Транзакционная безопасность операций обновления
+- Полная поддержка роль-специфичных полей
+- Валидация данных через DTO схемы
+
 #### API Endpoints
+
+**Управление профилями:**
+- `GET/PATCH /api/profile` - получение и обновление основного профиля
+- `POST /api/profile/complete` - завершение заполнения профиля
+- `GET/PATCH /api/profile/player` - управление профилем игрока
+- `GET/PATCH /api/profile/master` - управление профилем мастера
 
 **Управление группами:**
 - `GET/POST /api/groups` - список групп (роль-зависимый) и создание
@@ -87,6 +110,15 @@
 ### Контракты и валидация
 
 **DTO схемы (packages/contracts/src/dto.ts):**
+
+**Профили пользователей:**
+- `UpdateProfileDto` - обновление основного профиля (name, avatarUrl, rpgExperience, contacts)
+- `ProfileDto` - полная схема профиля пользователя с роль-специфичными полями
+- `CreatePlayerProfileDto` / `UpdatePlayerProfileDto` - управление профилем игрока
+- `CreateMasterProfileDto` / `UpdateMasterProfileDto` - управление профилем мастера
+- `RegisterDto` - регистрация пользователя (имя теперь опциональное)
+
+**Группы:**
 - `CreateGroupDto` - создание группы (name, description, maxMembers, isRecruiting, format, place)
 - `UpdateGroupDto` - обновление группы (частичные данные)
 - `JoinGroupDto` - присоединение по коду (referralCode)
