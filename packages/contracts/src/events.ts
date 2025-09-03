@@ -105,6 +105,28 @@ export interface BattlepassUsedEvent extends BaseEvent {
   };
 }
 
+// События групп
+export interface GroupCreatedEvent extends BaseEvent {
+  type: 'group.created';
+  payload: {
+    groupId: string;
+    name: string;
+    masterId: string;
+    seasonId: string;
+    referralCode: string;
+  };
+}
+
+export interface PlayerJoinedGroupEvent extends BaseEvent {
+  type: 'group.player.joined';
+  payload: {
+    groupId: string;
+    playerId: string;
+    masterId: string;
+    referralCode: string;
+  };
+}
+
 // Объединённый тип всех событий
 export type SystemEvent = 
   | PaymentPaidEvent
@@ -115,5 +137,7 @@ export type SystemEvent =
   | UserRegisteredEvent
   | UserRoleChangedEvent
   | BattlepassActivatedEvent
-  | BattlepassUsedEvent;
+  | BattlepassUsedEvent
+  | GroupCreatedEvent
+  | PlayerJoinedGroupEvent;
 

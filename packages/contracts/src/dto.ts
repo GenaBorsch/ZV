@@ -44,14 +44,9 @@ export const CreateCharacterDto = z.object({
 
 export const UpdateCharacterDto = CreateCharacterDto.partial();
 
-// Group DTOs
-export const CreateGroupDto = z.object({
-  name: z.string().min(3, 'Название группы должно содержать минимум 3 символа'),
-  seasonId: z.string().cuid('Некорректный ID сезона'),
-  clubId: z.string().cuid('Некорректный ID клуба').optional(),
-});
-
-export const UpdateGroupDto = CreateGroupDto.partial();
+// Legacy Group DTOs (будут удалены)
+// export const CreateGroupDto - перенесено ниже
+// export const UpdateGroupDto - будет добавлено позже
 
 // Session DTOs
 export const CreateSessionDto = z.object({
@@ -125,6 +120,23 @@ export const CreateBattlepassDto = z.object({
   usesTotal: z.number().min(1, 'Общее количество использований должно быть больше 0'),
   usesLeft: z.number().min(0, 'Оставшееся количество использований не может быть отрицательным'),
 });
+
+// Group DTOs
+export const CreateGroupDto = z.object({
+  name: z.string().min(3, 'Название должно содержать минимум 3 символа').max(50, 'Название не должно превышать 50 символов'),
+  description: z.string().max(500, 'Описание не должно превышать 500 символов').optional(),
+  maxMembers: z.number().int().min(1, 'Минимум 1 участник').max(10, 'Максимум 10 участников').default(4),
+  isRecruiting: z.boolean().default(false),
+  clubId: z.string().uuid('Некорректный ID клуба').nullable().optional(),
+  format: z.enum(['ONLINE', 'OFFLINE', 'MIXED']).default('ONLINE'),
+  place: z.string().max(200, 'Место проведения не должно превышать 200 символов').optional(),
+});
+
+export const JoinGroupDto = z.object({
+  referralCode: z.string().uuid('Некорректный код приглашения'),
+});
+
+export const UpdateGroupDto = CreateGroupDto.partial();
 
 // Club DTOs
 export const CreateClubDto = z.object({

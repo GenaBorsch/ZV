@@ -12,7 +12,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-switch": "^1.2.6",
     "@tanstack/react-query": "^5.85.5",
+    "@types/uuid": "^10.0.0",
     "@zv/db": "workspace:*",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
@@ -28,6 +32,7 @@
     "react-markdown": "^9.1.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.6.0",
+    "uuid": "^11.1.0",
     "zod": "^3.25.76",
     "zustand": "^4.5.7"
   },

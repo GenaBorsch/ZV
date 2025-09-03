@@ -93,6 +93,14 @@ export const groups = pgTable('groups', {
   seasonId: uuid('season_id').notNull().references(() => seasons.id, { onDelete: 'cascade' }),
   masterId: uuid('master_id').notNull().references(() => masterProfiles.id),
   clubId: uuid('club_id').references(() => clubs.id),
+  description: text('description'),
+  maxMembers: integer('max_members').default(4).notNull(),
+  isRecruiting: boolean('is_recruiting').default(false).notNull(),
+  referralCode: varchar('referral_code', { length: 36 }).unique(),
+  format: gameFormatEnum('format').default('ONLINE').notNull(),
+  place: varchar('place', { length: 200 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const groupMembers = pgTable('group_members', {
@@ -101,6 +109,7 @@ export const groupMembers = pgTable('group_members', {
   playerId: uuid('player_id').notNull().references(() => playerProfiles.id, { onDelete: 'cascade' }),
   characterId: uuid('character_id'),
   status: memberStatusEnum('status').default('ACTIVE').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const sessions = pgTable('sessions', {

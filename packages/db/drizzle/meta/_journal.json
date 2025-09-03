@@ -15,6 +15,20 @@
       "when": 1756828403594,
       "tag": "0001_ambiguous_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756893237753,
+      "tag": "0002_organic_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1756895440603,
+      "tag": "0003_even_meteorite",
+      "breakpoints": true
     }
   ]
 }
