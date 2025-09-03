@@ -5,6 +5,7 @@
 - Содержимое:
   - `api.ts`: `ApiResponse`, пагинация, фильтры поиска
   - `dto.ts`: zod-схемы для Auth, Profiles, Characters, Groups, Sessions, Enrollments, Reports, Rules, Products, Orders, Battlepasses, Clubs
+  - ✅ **`admin.ts`**: **новые zod-схемы для админ-панели** (AdminUsersListQuery, AdminUserDto, AdminManageUserRoles и др.)
   - `enums.ts`: перечисления домена (роли, статусы, провайдеры и др.)
   - `events.ts`: типы событий (платежи, записи, отчёты, пользователи, баттлпассы)
 - Экспорт из `index.ts`
@@ -12,6 +13,10 @@
 ### `packages/db`
 - Назначение: Drizzle ORM, схема, миграции, сиды
 - `src/schema.ts`: модель данных проекта (Drizzle)
+- ✅ **`src/repositories/`**: **новый слой репозиториев для инкапсуляции бизнес-логики**
+  - ✅ **`usersRepo.ts`**: методы для работы с пользователями (list, getById, update, delete и др.)
+  - ✅ **`rolesRepo.ts`**: методы для управления ролями (add, remove, manageUserRoles и др.)
+- `src/create_user.ts`: скрипт для создания пользователей
 - Скрипты в корне монорепо проксируют генерацию/миграции: `pnpm db:generate`, `pnpm db:migrate`, `pnpm db:seed`
 
 ### `packages/ui`

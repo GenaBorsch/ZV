@@ -21,7 +21,10 @@
 - `/auth/register` → `auth/register/page.tsx` — регистрация
 - `/player` → `player/page.tsx` — кабинет игрока
 - `/master` → `master/page.tsx` — кабинет мастера
-- `/admin` → `admin/page.tsx` — админ-панель (заглушка)
+- `/admin` → `admin/page.tsx` — админ-панель
+- `/admin/users` → `admin/users/page.tsx` — **список пользователей** ✅
+- `/admin/users/[id]` → `admin/users/[id]/page.tsx` — **детальная страница пользователя** ✅
+- `/admin/products` → `admin/products/page.tsx` — управление товарами
 
 Общий каркас: `layout.tsx`, глобальные стили: `globals.css`.
 
@@ -33,10 +36,17 @@
 - `tsconfig.json`: alias `@/*`, `@/components/*`, `@/lib/*`, `@/types/*`
 - `tailwind.config.js`: сканирует `app`, `src`, `components`; настраивает тему и анимации
 
+### Реализованные функции UI ✅
+- ✅ **Модуль управления пользователями** с поиском, фильтрацией и пагинацией
+- ✅ **Формы с валидацией** через react-hook-form + zod
+- ✅ **RBAC система** с middleware защитой
+- ✅ **Responsive дизайн** на Tailwind CSS
+- ✅ **Оптимистичный UI** для лучшего UX
+
 ### Планируемые функции UI
-- Компоненты форм на шейдсн/UI с кастомной валидацией (без нативных всплывающих ошибок)
+- Компоненты форм на shadcn/ui с кастомной валидацией
 - Таблицы и фильтры для сессий, групп, заказов
-- Просмотр и редактирование профилей
+- Просмотр и редактирование профилей игроков и мастеров
 
 ### API и данные
 - BFF через Next.js API Routes/Server Actions, типы запросов/ответов — из `@zv/contracts`
