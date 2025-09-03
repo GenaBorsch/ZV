@@ -1,5 +1,8 @@
 'use client';
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

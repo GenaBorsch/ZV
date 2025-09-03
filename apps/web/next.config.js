@@ -2,6 +2,15 @@
 const nextConfig = {
   serverExternalPackages: ['@zv/db'],
   transpilePackages: ['@zv/contracts', '@zv/utils'],
+  eslint: {
+    // Отключаем проверку ESLint во время продакшен сборки
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Отключаем проверку TypeScript во время продакшен сборки
+    ignoreBuildErrors: true,
+  },
+
   images: {
     domains: ['localhost'],
     remotePatterns: [

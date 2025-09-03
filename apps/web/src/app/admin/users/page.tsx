@@ -1,5 +1,8 @@
 "use client";
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';

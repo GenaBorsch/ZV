@@ -1,5 +1,8 @@
 "use client";
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { signIn, getSession } from 'next-auth/react';

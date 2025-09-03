@@ -5,6 +5,7 @@ SHELL := /usr/bin/bash
 ROOT := $(CURDIR)
 COMPOSE_SIMPLE := $(ROOT)/docker-compose.simple.yml
 COMPOSE_FULL := $(ROOT)/docker-compose.yml
+COMPOSE_PROD := $(ROOT)/docker-compose.prod.yml
 # Авто-детект: сначала пробуем docker compose, иначе docker-compose
 COMPOSE_CMD := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
 PNPM := pnpm
@@ -14,7 +15,7 @@ PNPM := pnpm
 	start-db start-stack stop logs-db logs-minio \
 	db-generate db-migrate db-seed db-studio check-pnpm \
 	first-run db-push db-reset format test db-studio-open env-check \
-	docker-access
+	docker-access prod-build prod-up prod-down prod-logs
 
 help:
 	@echo "Доступные команды:"
@@ -43,6 +44,11 @@ help:
 	@echo "  make format          - авто-исправление линтом (web)"
 	@echo "  make test            - запустить тесты (если настроены)"
 	@echo "  make docker-access   - настроить доступ к Docker без sudo (требует sudo)"
+	@echo "  -- Продакшен --"
+	@echo "  make prod-build      - собрать Docker образ для продакшена"
+	@echo "  make prod-up         - запустить продакшен стек"
+	@echo "  make prod-down       - остановить продакшен стек"
+	@echo "  make prod-logs       - показать логи продакшен приложения"
 
 STUDIO_PORT ?= 4983
 NEXT_PORT ?= 3000
@@ -165,5 +171,30 @@ db-studio-open: check-pnpm
 	# Запуск Studio на фиксированном порту и авто-открытие браузера (Linux)
 	$(PNPM) --filter db exec drizzle-kit studio --port $(STUDIO_PORT) & \
 		sleep 1 && xdg-open http://127.0.0.1:$(STUDIO_PORT) >/dev/null 2>&1 || true
+
+# === ПРОДАКШЕН КОМАНДЫ ===
+prod-build:
+	@echo "Собираю Docker образ для продакшена..."
+	docker build -t zvezdnoe-vereteno:latest .
+	@echo "Образ собран: zvezdnoe-vereteno:latest"
+
+prod-up:
+	@echo "Запускаю продакшен стек..."
+	@if [ ! -f .env.prod ]; then \
+		echo "Создайте .env.prod файл на основе env.prod.example"; \
+		echo "cp env.prod.example .env.prod"; \
+		echo "Затем отредактируйте .env.prod с вашими настройками"; \
+		exit 1; \
+	fi
+	$(COMPOSE_CMD) -f $(COMPOSE_PROD) --env-file .env.prod up -d
+	@echo "Продакшен стек запущен"
+
+prod-down:
+	@echo "Останавливаю продакшен стек..."
+	$(COMPOSE_CMD) -f $(COMPOSE_PROD) down --remove-orphans
+	@echo "Продакшен стек остановлен"
+
+prod-logs:
+	$(COMPOSE_CMD) -f $(COMPOSE_PROD) logs -f web
 
 
