@@ -17,7 +17,7 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
     const { id } = await params;
     const body = await _req.json();
     const update: any = {};
-    const fields = ['sku','title','description','priceRub','bpUsesTotal','active','visible','sortIndex','seasonRequired','archivedAt'];
+    const fields = ['sku','title','description','imageUrl','priceRub','bpUsesTotal','active','visible','sortIndex','seasonRequired','archivedAt'];
     for (const f of fields) {
       if (f in body) {
         const v = body[f];

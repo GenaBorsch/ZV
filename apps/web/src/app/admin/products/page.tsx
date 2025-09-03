@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { db, products, and, eq, ilike, or } from '@zv/db';
+import { ProductImage } from '@/components/ProductImage';
 
 async function getData(searchParams: Record<string, string | string[] | undefined>) {
   const q = (searchParams.q as string) || '';
@@ -43,6 +44,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         <table className="w-full text-sm">
           <thead className="bg-accent/30">
             <tr>
+              <th className="p-2 text-left">Изображение</th>
               <th className="p-2 text-left">SKU</th>
               <th className="p-2 text-left">Название</th>
               <th className="p-2 text-left">Цена</th>
@@ -55,6 +57,19 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <tbody>
             {items.map((p) => (
               <tr key={p.id} className="border-t border-border">
+                <td className="p-2">
+                  {p.imageUrl ? (
+                    <ProductImage 
+                      src={p.imageUrl} 
+                      alt={p.title}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      Нет
+                    </div>
+                  )}
+                </td>
                 <td className="p-2">{p.sku}</td>
                 <td className="p-2">{p.title}</td>
                 <td className="p-2">{p.priceRub} ₽</td>

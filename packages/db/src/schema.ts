@@ -161,6 +161,7 @@ export const products = pgTable('products', {
   type: productTypeEnum('type').notNull(),
   priceRub: integer('price_rub').notNull(),
   description: text('description'),
+  imageUrl: text('image_url'),
   bpUsesTotal: integer('bp_uses_total').default(1).notNull(),
   visible: boolean('visible').default(true).notNull(),
   sortIndex: integer('sort_index').default(0).notNull(),

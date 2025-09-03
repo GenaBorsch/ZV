@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const {
-      type = 'BATTLEPASS', sku, title, description,
+      type = 'BATTLEPASS', sku, title, description, imageUrl,
       priceRub, bpUsesTotal, active = true, visible = true,
       sortIndex = 0, seasonRequired = false,
     } = body || {};
@@ -70,6 +70,7 @@ export async function POST(req: Request) {
       sku,
       title,
       description: description ?? null,
+      imageUrl: imageUrl ?? null,
       priceRub: priceRubNum,
       bpUsesTotal: bpUsesTotalNum,
       active: activeBool,

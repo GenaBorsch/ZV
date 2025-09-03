@@ -28,6 +28,7 @@ export default function AdminEditProductPage() {
       sku: String(form.sku || ''),
       title: String(form.title || ''),
       description: form.description ?? '',
+      imageUrl: form.imageUrl ?? '',
       priceRub: Number(form.priceRub ?? 0),
       bpUsesTotal: Number(form.bpUsesTotal ?? 1),
       sortIndex: Number(form.sortIndex ?? 0),
@@ -66,6 +67,10 @@ export default function AdminEditProductPage() {
         <div>
           <label className="block text-sm mb-1">Описание</label>
           <textarea className="input w-full" value={form.description || ''} onChange={(e) => update('description', e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-sm mb-1">URL изображения</label>
+          <input type="url" className="input w-full" value={form.imageUrl || ''} onChange={(e) => update('imageUrl', e.target.value)} placeholder="https://example.com/image.jpg" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { db, products } from '@zv/db';
+import { ProductImage } from '@/components/ProductImage';
 
 export default async function PlayerBattlepassPage() {
   const all = await db.select().from(products);
@@ -20,6 +21,15 @@ export default async function PlayerBattlepassPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {items.map((p: any) => (
               <div key={p.id} className="card p-4 flex flex-col">
+                {p.imageUrl && (
+                  <div className="mb-3">
+                    <ProductImage 
+                      src={p.imageUrl} 
+                      alt={p.title}
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  </div>
+                )}
                 <div className="text-sm text-muted-foreground mb-1">{p.sku}</div>
                 <div className="text-lg font-medium text-foreground">{p.title}</div>
                 {p.description && <div className="mt-1 text-sm text-muted-foreground">{p.description}</div>}
