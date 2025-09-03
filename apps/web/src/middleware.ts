@@ -20,12 +20,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Проверка ролей для админских маршрутов
-  const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((path) => pathname.startsWith(path));
-  if (isAdminOnlyPath || pathname.startsWith('/admin')) {
-    try {
-      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-      const userRoles = (token?.roles as string[]) || [];
+  // Получаем токен для проверки ролей
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const userRoles = (token?.roles as string[]) || [];
+
+    // Проверка ролей для админских маршрутов
+    const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((path) => pathname.startsWith(path));
+    if (isAdminOnlyPath || pathname.startsWith('/admin')) {
       const hasAdminRole = userRoles.includes('MODERATOR') || userRoles.includes('SUPERADMIN');
       
       if (!hasAdminRole) {
@@ -33,13 +35,38 @@ export async function middleware(req: NextRequest) {
         url.pathname = '/';
         return NextResponse.redirect(url);
       }
-    } catch (error) {
-      // Если не можем получить токен, редиректим на авторизацию
-      const url = req.nextUrl.clone();
-      url.pathname = '/auth/login';
-      url.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(url);
     }
+
+    // Проверка ролей для страниц игрока
+    if (pathname.startsWith('/player')) {
+      const hasPlayerRole = userRoles.includes('PLAYER');
+      
+      if (!hasPlayerRole) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // Проверка ролей для страниц мастера
+    if (pathname.startsWith('/master')) {
+      const hasMasterRole = userRoles.includes('MASTER') || 
+                           userRoles.includes('MODERATOR') || 
+                           userRoles.includes('SUPERADMIN');
+      
+      if (!hasMasterRole) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+    }
+
+  } catch (error) {
+    // Если не можем получить токен, редиректим на авторизацию
+    const url = req.nextUrl.clone();
+    url.pathname = '/auth/login';
+    url.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
