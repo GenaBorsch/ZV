@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
 import { MasterDashboardContent } from '@/components/MasterDashboardContent';
 import { useMasterCheck } from '@/lib/hooks/useRoleCheck';
+import { useSession } from 'next-auth/react';
 
 export default function MasterDashboard() {
   const { isLoading, hasRequiredRole } = useMasterCheck();
+  const { data: session } = useSession();
 
   if (isLoading) {
     return (
@@ -42,9 +44,13 @@ export default function MasterDashboard() {
               <h1 className="text-xl font-semibold text-foreground">
                 Кабинет мастера
               </h1>
-              <span className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
-                Мастер
-              </span>
+              <Link 
+                href="/profile" 
+                className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full hover:bg-accent/50 transition-colors cursor-pointer"
+                title="Редактировать профиль"
+              >
+                {session?.user?.name || 'Мастер'}
+              </Link>
             </div>
             <nav className="flex space-x-4">
               <Link href="/" className="text-muted-foreground hover:text-foreground">
