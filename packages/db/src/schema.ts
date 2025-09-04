@@ -10,6 +10,7 @@ import {
   json,
   pgEnum,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 
 // Энумы
@@ -77,9 +78,22 @@ export const characters = pgTable('characters', {
   id: uuid('id').primaryKey().defaultRandom(),
   playerId: uuid('player_id').notNull().references(() => playerProfiles.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
-  archetype: varchar('archetype', { length: 255 }),
-  sheetUrl: text('sheet_url'),
+  archetype: varchar('archetype', { length: 100 }),
+  level: integer('level').default(1).notNull(),
+  avatarUrl: varchar('avatar_url', { length: 512 }),
+  backstory: text('backstory'),
+  journal: text('journal'),
+  isAlive: boolean('is_alive').default(true).notNull(),
+  deathDate: varchar('death_date', { length: 10 }), // формат дд.мм.ггг
   notes: text('notes'),
+  sheetUrl: text('sheet_url'),
+  updatedBy: uuid('updated_by').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    levelCheck: sql`CHECK (${table.level} >= 1)`,
+  };
 });
 
 export const seasons = pgTable('seasons', {
@@ -111,7 +125,7 @@ export const groupMembers = pgTable('group_members', {
   id: uuid('id').primaryKey().defaultRandom(),
   groupId: uuid('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
   playerId: uuid('player_id').notNull().references(() => playerProfiles.id, { onDelete: 'cascade' }),
-  characterId: uuid('character_id'),
+  characterId: uuid('character_id').references(() => characters.id, { onDelete: 'set null' }),
   status: memberStatusEnum('status').default('ACTIVE').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -276,6 +290,10 @@ export const charactersRelations = relations(characters, ({ one }) => ({
     fields: [characters.playerId],
     references: [playerProfiles.id],
   }),
+  updatedBy: one(users, {
+    fields: [characters.updatedBy],
+    references: [users.id],
+  }),
 }));
 
 export const seasonsRelations = relations(seasons, ({ many }) => ({
@@ -308,6 +326,10 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   player: one(playerProfiles, {
     fields: [groupMembers.playerId],
     references: [playerProfiles.id],
+  }),
+  character: one(characters, {
+    fields: [groupMembers.characterId],
+    references: [characters.id],
   }),
 }));
 

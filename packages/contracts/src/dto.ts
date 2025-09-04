@@ -64,13 +64,64 @@ export const UpdateMasterProfileDto = CreateMasterProfileDto.partial();
 
 // Character DTOs
 export const CreateCharacterDto = z.object({
-  name: z.string().min(2, 'Имя персонажа должно содержать минимум 2 символа'),
-  archetype: z.string().optional(),
-  sheetUrl: z.string().url('Некорректная ссылка на лист персонажа').optional(),
+  name: z.string().min(1, 'Имя персонажа обязательно').max(255, 'Имя персонажа не должно превышать 255 символов'),
+  archetype: z.string().max(100, 'Архетип не должен превышать 100 символов').optional(),
+  level: z.number().int().min(1, 'Уровень должен быть не менее 1').default(1),
+  avatarUrl: z.string().url('Некорректная ссылка на аватар').max(512, 'URL аватара слишком длинный').optional(),
+  backstory: z.string().max(5000, 'Предыстория не должна превышать 5000 символов').optional(),
+  journal: z.string().max(5000, 'Журнал не должен превышать 5000 символов').optional(),
+  isAlive: z.boolean().default(true),
+  deathDate: z.string().regex(/^\d{2}\.\d{2}\.\d{3}$/, 'Дата смерти должна быть в формате дд.мм.ггг').optional(),
   notes: z.string().optional(),
+  sheetUrl: z.string().url('Некорректная ссылка на лист персонажа').optional(),
+}).refine(data => {
+  // Если персонаж мертв, дата смерти может быть указана
+  if (!data.isAlive && !data.deathDate) {
+    return true; // Дата смерти опциональна даже для мертвых персонажей
+  }
+  return true;
+}, {
+  message: 'Некорректные данные персонажа',
 });
 
-export const UpdateCharacterDto = CreateCharacterDto.partial();
+export const UpdateCharacterDto = z.object({
+  name: z.string().min(1, 'Имя персонажа обязательно').max(255, 'Имя персонажа не должно превышать 255 символов').optional(),
+  archetype: z.string().max(100, 'Архетип не должен превышать 100 символов').optional(),
+  level: z.number().int().min(1, 'Уровень должен быть не менее 1').optional(),
+  avatarUrl: z.string().url('Некорректная ссылка на аватар').max(512, 'URL аватара слишком длинный').optional(),
+  backstory: z.string().max(5000, 'Предыстория не должна превышать 5000 символов').optional(),
+  journal: z.string().max(5000, 'Журнал не должен превышать 5000 символов').optional(),
+  isAlive: z.boolean().optional(),
+  deathDate: z.string().regex(/^\d{2}\.\d{2}\.\d{3}$/, 'Дата смерти должна быть в формате дд.мм.ггг').optional(),
+  notes: z.string().optional(),
+  sheetUrl: z.string().url('Некорректная ссылка на лист персонажа').optional(),
+}).refine(data => {
+  // Если статус меняется на мертвый, дата смерти может быть указана
+  if (data.isAlive === false && !data.deathDate) {
+    return true; // Дата смерти опциональна
+  }
+  return true;
+}, {
+  message: 'Некорректные данные для обновления персонажа',
+});
+
+export const CharacterDto = z.object({
+  id: z.string().uuid(),
+  playerId: z.string().uuid(),
+  name: z.string(),
+  archetype: z.string().nullable(),
+  level: z.number().int(),
+  avatarUrl: z.string().nullable(),
+  backstory: z.string().nullable(),
+  journal: z.string().nullable(),
+  isAlive: z.boolean(),
+  deathDate: z.string().nullable(),
+  notes: z.string().nullable(),
+  sheetUrl: z.string().nullable(),
+  updatedBy: z.string().uuid().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
 
 // Legacy Group DTOs (будут удалены)
 // export const CreateGroupDto - перенесено ниже
@@ -249,6 +300,7 @@ export type CreateMasterProfileDtoType = z.infer<typeof CreateMasterProfileDto>;
 export type UpdateMasterProfileDtoType = z.infer<typeof UpdateMasterProfileDto>;
 export type CreateCharacterDtoType = z.infer<typeof CreateCharacterDto>;
 export type UpdateCharacterDtoType = z.infer<typeof UpdateCharacterDto>;
+export type CharacterDtoType = z.infer<typeof CharacterDto>;
 export type CreateGroupDtoType = z.infer<typeof CreateGroupDto>;
 export type UpdateGroupDtoType = z.infer<typeof UpdateGroupDto>;
 export type CreateSessionDtoType = z.infer<typeof CreateSessionDto>;

@@ -27,11 +27,12 @@ if (process.env.NODE_ENV !== 'production') {
 // Алиас для удобства миграции с Prisma
 export const prisma = drizzleDb;
 
-export { and, or, eq, ilike, asc, desc, sql, inArray } from 'drizzle-orm';
+export { and, or, eq, ilike, asc, desc, sql, inArray, count } from 'drizzle-orm';
 
 // Export repositories
 export { UsersRepo } from './repositories/usersRepo';
 export { RolesRepo } from './repositories/rolesRepo';
 export { GroupsRepo, type GroupWithDetails, type GroupMember } from './repositories/groupsRepo';
 export { ProfilesRepo } from './repositories/profilesRepo';
+export { CharactersRepo } from './repositories/charactersRepo';
 

@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react';
 import { JoinGroupForm } from './JoinGroupForm';
 import { JoinGroupSuccess } from './JoinGroupSuccess';
 import { PlayerGroupDetailsModal } from './PlayerGroupDetailsModal';
+import { CharacterCard } from './CharacterCard';
+import { CharacterForm } from './CharacterForm';
+import { CharacterDetails } from './CharacterDetails';
+import { CharacterDtoType, CreateCharacterDtoType, UpdateCharacterDtoType } from '@zv/contracts';
 
 interface Group {
   id: string;
@@ -26,6 +30,14 @@ export function PlayerDashboardContent() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  
+  // Characters state
+  const [characters, setCharacters] = useState<CharacterDtoType[]>([]);
+  const [charactersLoading, setCharactersLoading] = useState(true);
+  const [showCharacterForm, setShowCharacterForm] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterDtoType | null>(null);
+  const [editingCharacter, setEditingCharacter] = useState<CharacterDtoType | null>(null);
+  const [characterFormLoading, setCharacterFormLoading] = useState(false);
 
   // Загрузка групп с сервера
   const fetchGroups = async () => {
@@ -42,8 +54,117 @@ export function PlayerDashboardContent() {
     }
   };
 
+  // Загрузка персонажей с сервера
+  const fetchCharacters = async () => {
+    try {
+      setCharactersLoading(true);
+      const response = await fetch('/api/v1/characters');
+      if (response.ok) {
+        const data = await response.json();
+        setCharacters(data.characters || []);
+      } else {
+        console.error('Failed to fetch characters:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки персонажей:', error);
+    } finally {
+      setCharactersLoading(false);
+    }
+  };
+
+  // Создание персонажа
+  const handleCreateCharacter = async (data: CreateCharacterDtoType) => {
+    try {
+      setCharacterFormLoading(true);
+      const response = await fetch('/api/v1/characters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setCharacters(prev => [...prev, result.character]);
+        setShowCharacterForm(false);
+        // Показываем toast-уведомление (если есть)
+        console.log('Персонаж успешно создан');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка создания персонажа');
+      }
+    } catch (error: any) {
+      console.error('Ошибка создания персонажа:', error);
+      alert(error.message || 'Ошибка создания персонажа');
+    } finally {
+      setCharacterFormLoading(false);
+    }
+  };
+
+  // Обновление персонажа
+  const handleUpdateCharacter = async (data: UpdateCharacterDtoType) => {
+    if (!editingCharacter) return;
+
+    try {
+      setCharacterFormLoading(true);
+      const response = await fetch(`/api/v1/characters/${editingCharacter.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setCharacters(prev => prev.map(char => 
+          char.id === editingCharacter.id ? result.character : char
+        ));
+        setEditingCharacter(null);
+        setShowCharacterForm(false);
+        if (selectedCharacter?.id === editingCharacter.id) {
+          setSelectedCharacter(result.character);
+        }
+        console.log('Персонаж успешно обновлен');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка обновления персонажа');
+      }
+    } catch (error: any) {
+      console.error('Ошибка обновления персонажа:', error);
+      alert(error.message || 'Ошибка обновления персонажа');
+    } finally {
+      setCharacterFormLoading(false);
+    }
+  };
+
+  // Удаление персонажа
+  const handleDeleteCharacter = async (character: CharacterDtoType) => {
+    try {
+      const response = await fetch(`/api/v1/characters/${character.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCharacters(prev => prev.filter(char => char.id !== character.id));
+        if (selectedCharacter?.id === character.id) {
+          setSelectedCharacter(null);
+        }
+        console.log('Персонаж успешно удален');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка удаления персонажа');
+      }
+    } catch (error: any) {
+      console.error('Ошибка удаления персонажа:', error);
+      alert(error.message || 'Ошибка удаления персонажа');
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchCharacters();
   }, []);
 
   const handleJoinSuccess = (data: any) => {
@@ -78,7 +199,7 @@ export function PlayerDashboardContent() {
             <div className="ml-5 w-0 flex-1">
               <dl>
                 <dt className="text-sm font-medium text-muted-foreground truncate">Мои персонажи</dt>
-                <dd className="text-lg font-medium text-foreground">0</dd>
+                <dd className="text-lg font-medium text-foreground">{characters.length}</dd>
               </dl>
             </div>
           </div>
@@ -200,13 +321,40 @@ export function PlayerDashboardContent() {
           <div className="card p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-foreground">Мои персонажи</h3>
-              <button className="btn-primary" disabled>
-                Создать персонажа
+              <button 
+                className="btn-primary"
+                onClick={() => setShowCharacterForm(true)}
+                disabled={characters.length >= 5}
+              >
+                {characters.length >= 5 ? 'Лимит достигнут' : 'Создать персонажа'}
               </button>
             </div>
-            <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
-              У вас пока нет персонажей.
-            </div>
+            
+            {charactersLoading ? (
+              <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                Загрузка персонажей...
+              </div>
+            ) : characters.length === 0 ? (
+              <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                У вас пока нет персонажей. Создайте первого персонажа, чтобы начать играть!
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {characters.map((character) => (
+                  <CharacterCard
+                    key={character.id}
+                    character={character}
+                    onEdit={(char) => {
+                      setEditingCharacter(char);
+                      setShowCharacterForm(true);
+                    }}
+                    onDelete={handleDeleteCharacter}
+                    onView={setSelectedCharacter}
+                    showActions={true}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Battlepass Section */}
@@ -235,10 +383,15 @@ export function PlayerDashboardContent() {
                 Присоединиться к группе
               </button>
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-muted-foreground cursor-not-allowed rounded-md"
-                disabled
+                className={`w-full text-left px-3 py-2 text-sm rounded-md ${
+                  characters.length >= 5 
+                    ? 'text-muted-foreground cursor-not-allowed' 
+                    : 'text-foreground hover:bg-accent'
+                }`}
+                onClick={() => setShowCharacterForm(true)}
+                disabled={characters.length >= 5}
               >
-                Создать персонажа
+                {characters.length >= 5 ? 'Лимит персонажей' : 'Создать персонажа'}
               </button>
               <a 
                 href="/player/battlepass"
@@ -262,7 +415,7 @@ export function PlayerDashboardContent() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Персонажей:</span>
-                <span className="font-medium">0</span>
+                <span className="font-medium">{characters.length}/5</span>
               </div>
             </div>
           </div>
@@ -289,6 +442,50 @@ export function PlayerDashboardContent() {
             fetchGroups(); // Reload groups after leaving
           }}
         />
+      )}
+
+      {/* Character Form Modal */}
+      {showCharacterForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <CharacterForm
+                character={editingCharacter || undefined}
+                onSubmit={editingCharacter ? handleUpdateCharacter : handleCreateCharacter}
+                onCancel={() => {
+                  setShowCharacterForm(false);
+                  setEditingCharacter(null);
+                }}
+                isLoading={characterFormLoading}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Character Details Modal */}
+      {selectedCharacter && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <CharacterDetails
+                character={selectedCharacter}
+                onEdit={(char) => {
+                  setEditingCharacter(char);
+                  setSelectedCharacter(null);
+                  setShowCharacterForm(true);
+                }}
+                onDelete={(char) => {
+                  handleDeleteCharacter(char);
+                  setSelectedCharacter(null);
+                }}
+                onClose={() => setSelectedCharacter(null)}
+                showActions={true}
+                isOwner={true}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
