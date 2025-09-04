@@ -3,7 +3,7 @@
 // Принудительно делаем страницу динамической
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UpdateProfileDto } from '@zv/contracts';
@@ -38,7 +38,7 @@ interface ProfileData {
   updatedAt: string;
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -370,7 +370,8 @@ export default function ProfilePage() {
                 {saving ? 'Сохранение...' : redirecting ? 'Перенаправляем...' : 'Сохранить'}
               </Button>
               {!isWelcome && (
-                <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
+                <Button type="button" 
+                onClick={handleCancel} className="flex-1 bg-gray-200 text-gray-700 hover:bg-gray-300">
                   Отменить
                 </Button>
               )}
@@ -407,5 +408,13 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка профиля...</div>}>
+      <ProfilePageContent />
+    </Suspense>
   );
 }

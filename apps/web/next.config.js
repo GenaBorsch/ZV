@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   serverExternalPackages: ['@zv/db'],
   transpilePackages: ['@zv/contracts', '@zv/utils'],
   eslint: {

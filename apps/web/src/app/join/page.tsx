@@ -3,14 +3,14 @@
 // Принудительно делаем страницу динамической
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { JoinGroupSuccess } from '@/components/JoinGroupSuccess';
 
-export default function JoinPage() {
+function JoinPageContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -217,5 +217,13 @@ export default function JoinPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка...</div>}>
+      <JoinPageContent />
+    </Suspense>
   );
 }

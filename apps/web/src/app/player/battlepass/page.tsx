@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { db, products } from '@zv/db';
 import { ProductImage } from '@/components/ProductImage';
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 export default async function PlayerBattlepassPage() {
   const all = await db.select().from(products);
   const items = (all as any[])

@@ -1,0 +1,83 @@
+# Упрощенный Dockerfile только для приложения (без standalone)
+FROM node:18-alpine
+
+# Устанавливаем pnpm глобально
+RUN npm install -g pnpm
+
+# Создаем рабочую директорию
+WORKDIR /app
+
+# Копируем все файлы
+COPY . .
+
+# Устанавливаем зависимости
+RUN pnpm install
+
+# Генерируем схему базы данных
+RUN pnpm db:generate
+
+# Собираем приложение с фиктивными переменными
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    NEXTAUTH_SECRET="build-secret-32-chars-minimum" \
+    NEXTAUTH_URL="http://localhost:3000" \
+    PUBLIC_BASE_URL="http://localhost:3000" \
+    S3_ENDPOINT="http://localhost:9000" \
+    S3_ACCESS_KEY="build" \
+    S3_SECRET_KEY="build" \
+    SKIP_ENV_VALIDATION=true \
+    pnpm build
+
+# Создаем пользователя без root прав
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Меняем владельца файлов
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV NODE_ENV=production
+
+# Создаем скрипт для запуска с миграциями
+COPY --chown=nextjs:nodejs <<'EOF' /app/start.sh
+#!/bin/sh
+echo "🚀 Запуск приложения Звёздное Веретено..."
+
+# Проверяем обязательные переменные окружения
+if [ -z "$DATABASE_URL" ]; then
+  echo "❌ Ошибка: DATABASE_URL не установлен"
+  exit 1
+fi
+
+if [ -z "$NEXTAUTH_SECRET" ]; then
+  echo "❌ Ошибка: NEXTAUTH_SECRET не установлен"
+  exit 1
+fi
+
+echo "📊 Проверка подключения к базе данных..."
+# Проверка подключения к БД с таймаутом
+timeout 30 sh -c 'until nc -z $(echo $DATABASE_URL | sed "s/.*@\([^:]*\):.*/\1/") $(echo $DATABASE_URL | sed "s/.*:\([0-9]*\)\/.*/\1/"); do sleep 1; done' || {
+  echo "❌ Не удалось подключиться к базе данных"
+  exit 1
+}
+echo "✅ База данных доступна"
+
+echo "🔄 Применение миграций базы данных..."
+if ! pnpm --filter db migrate; then
+  echo "⚠️ Предупреждение: Не удалось применить миграции, продолжаем..."
+fi
+
+echo "🌟 Запуск Next.js приложения в продакшен режиме..."
+exec pnpm start
+EOF
+
+RUN chmod +x /app/start.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+CMD ["/app/start.sh"]

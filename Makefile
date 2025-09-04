@@ -44,11 +44,18 @@ help:
 	@echo "  make format          - авто-исправление линтом (web)"
 	@echo "  make test            - запустить тесты (если настроены)"
 	@echo "  make docker-access   - настроить доступ к Docker без sudo (требует sudo)"
-	@echo "  -- Продакшен --"
+	@echo "  -- Продакшен (полный стек) --"
 	@echo "  make prod-build      - собрать Docker образ для продакшена"
 	@echo "  make prod-up         - запустить продакшен стек"
 	@echo "  make prod-down       - остановить продакшен стек"
 	@echo "  make prod-logs       - показать логи продакшен приложения"
+	@echo "  -- Приложение (внешние БД/MinIO) --"
+	@echo "  make app-build       - собрать Docker образ только приложения"
+	@echo "  make app-up          - запустить только приложение"
+	@echo "  make app-up-nginx    - запустить приложение с Nginx"
+	@echo "  make app-down        - остановить приложение"
+	@echo "  make app-logs        - показать логи приложения"
+	@echo "  make app-status      - показать статус приложения"
 
 STUDIO_PORT ?= 4983
 NEXT_PORT ?= 3000
@@ -196,5 +203,44 @@ prod-down:
 
 prod-logs:
 	$(COMPOSE_CMD) -f $(COMPOSE_PROD) logs -f web
+
+# === КОМАНДЫ ДЛЯ ПРИЛОЖЕНИЯ (БЕЗ ИНФРАСТРУКТУРЫ) ===
+app-build:
+	@echo "Собираю Docker образ приложения..."
+	docker build -f Dockerfile.app.simple -t zvezdnoe-vereteno:app .
+	@echo "Образ приложения собран: zvezdnoe-vereteno:app"
+
+app-up:
+	@echo "Запускаю только приложение..."
+	@if [ ! -f .env.server ]; then \
+		echo "Создайте .env.server файл на основе env.server.example"; \
+		echo "cp env.server.example .env.server"; \
+		echo "Затем отредактируйте .env.server с настройками внешних сервисов"; \
+		exit 1; \
+	fi
+	$(COMPOSE_CMD) -f docker-compose.app.yml --env-file .env.server up -d web
+	@echo "Приложение запущено"
+
+app-up-nginx:
+	@echo "Запускаю приложение с Nginx..."
+	@if [ ! -f .env.server ]; then \
+		echo "Создайте .env.server файл на основе env.server.example"; \
+		echo "cp env.server.example .env.server"; \
+		echo "Затем отредактируйте .env.server с настройками внешних сервисов"; \
+		exit 1; \
+	fi
+	$(COMPOSE_CMD) -f docker-compose.app.yml --env-file .env.server --profile nginx up -d
+	@echo "Приложение с Nginx запущено"
+
+app-down:
+	@echo "Останавливаю приложение..."
+	$(COMPOSE_CMD) -f docker-compose.app.yml down --remove-orphans
+	@echo "Приложение остановлено"
+
+app-logs:
+	$(COMPOSE_CMD) -f docker-compose.app.yml logs -f web
+
+app-status:
+	$(COMPOSE_CMD) -f docker-compose.app.yml ps
 
 

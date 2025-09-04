@@ -3,7 +3,7 @@
 // Принудительно делаем страницу динамической
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,7 @@ const ROLE_COLORS = {
   SUPERADMIN: 'bg-red-100 text-red-800'
 };
 
-export default function AdminUsersPage() {
+function AdminUsersPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -397,5 +397,13 @@ export default function AdminUsersPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка пользователей...</div>}>
+      <AdminUsersPageContent />
+    </Suspense>
   );
 }

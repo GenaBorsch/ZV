@@ -3,7 +3,7 @@
 // Принудительно делаем страницу динамической
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { signIn, getSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getRedirectUrlByRoles, needsProfileCompletion } from '@/lib/redirectUtils';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +123,14 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
 
