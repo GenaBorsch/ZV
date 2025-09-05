@@ -3,9 +3,9 @@ SHELL := /usr/bin/bash
 .DEFAULT_GOAL := help
 
 ROOT := $(CURDIR)
-COMPOSE_SIMPLE := $(ROOT)/docker-compose.simple.yml
-COMPOSE_FULL := $(ROOT)/docker-compose.yml
-COMPOSE_PROD := $(ROOT)/docker-compose.prod.yml
+COMPOSE_SIMPLE := $(ROOT)/docker/docker-compose.simple.yml
+COMPOSE_FULL := $(ROOT)/docker/docker-compose.yml
+COMPOSE_PROD := $(ROOT)/docker/docker-compose.prod.yml
 # Авто-детект: сначала пробуем docker compose, иначе docker-compose
 COMPOSE_CMD := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
 PNPM := pnpm
@@ -218,7 +218,7 @@ app-up:
 		echo "Затем отредактируйте .env.server с настройками внешних сервисов"; \
 		exit 1; \
 	fi
-	$(COMPOSE_CMD) -f docker-compose.app.yml --env-file .env.server up -d web
+	$(COMPOSE_CMD) -f docker/docker-compose.app.yml --env-file .env.server up -d web
 	@echo "Приложение запущено"
 
 app-up-nginx:
@@ -229,18 +229,18 @@ app-up-nginx:
 		echo "Затем отредактируйте .env.server с настройками внешних сервисов"; \
 		exit 1; \
 	fi
-	$(COMPOSE_CMD) -f docker-compose.app.yml --env-file .env.server --profile nginx up -d
+	$(COMPOSE_CMD) -f docker/docker-compose.app.yml --env-file .env.server --profile nginx up -d
 	@echo "Приложение с Nginx запущено"
 
 app-down:
 	@echo "Останавливаю приложение..."
-	$(COMPOSE_CMD) -f docker-compose.app.yml down --remove-orphans
+	$(COMPOSE_CMD) -f docker/docker-compose.app.yml down --remove-orphans
 	@echo "Приложение остановлено"
 
 app-logs:
-	$(COMPOSE_CMD) -f docker-compose.app.yml logs -f web
+	$(COMPOSE_CMD) -f docker/docker-compose.app.yml logs -f web
 
 app-status:
-	$(COMPOSE_CMD) -f docker-compose.app.yml ps
+	$(COMPOSE_CMD) -f docker/docker-compose.app.yml ps
 
 
