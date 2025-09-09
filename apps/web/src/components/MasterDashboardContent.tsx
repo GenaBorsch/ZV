@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { CreateGroupForm } from './CreateGroupForm';
 import { GroupCreatedSuccess } from './GroupCreatedSuccess';
 import { GroupDetailsModal } from './GroupDetailsModal';
+import { GroupApplicationsList } from './GroupApplicationsList';
 
 interface Group {
   id: string;
@@ -15,6 +16,7 @@ interface Group {
   format: 'ONLINE' | 'OFFLINE' | 'MIXED';
   place: string | null;
   referralCode: string | null;
+  pendingApplicationsCount?: number;
   createdAt: string;
 }
 
@@ -24,6 +26,7 @@ export function MasterDashboardContent() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [viewingApplicationsGroupId, setViewingApplicationsGroupId] = useState<string | null>(null);
 
   // Загрузка групп с сервера
   const fetchGroups = async () => {
@@ -63,7 +66,7 @@ export function MasterDashboardContent() {
       </h2>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-4 mb-8">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-5 mb-8">
         <div className="card p-5">
           <div className="text-sm text-muted-foreground">Мои группы</div>
           <div className="text-lg font-medium">{groups.length}</div>
@@ -72,6 +75,12 @@ export function MasterDashboardContent() {
           <div className="text-sm text-muted-foreground">Всего игроков</div>
           <div className="text-lg font-medium">
             {groups.reduce((total, group) => total + group.currentMembers, 0)}
+          </div>
+        </div>
+        <div className="card p-5">
+          <div className="text-sm text-muted-foreground">Новые заявки</div>
+          <div className="text-lg font-medium text-red-600">
+            {groups.reduce((total, group) => total + (group.pendingApplicationsCount || 0), 0)}
           </div>
         </div>
         <div className="card p-5">
@@ -98,6 +107,28 @@ export function MasterDashboardContent() {
             />
           ) : showCreateForm ? (
             <CreateGroupForm onSuccess={handleCreateSuccess} />
+          ) : viewingApplicationsGroupId ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => {
+                    setViewingApplicationsGroupId(null);
+                    fetchGroups(); // Обновляем данные при возврате к списку групп
+                  }}
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                >
+                  ← Назад к группам
+                </button>
+                <h2 className="text-xl font-semibold text-foreground">
+                  Заявки в группу "{groups.find(g => g.id === viewingApplicationsGroupId)?.name}"
+                </h2>
+              </div>
+              <GroupApplicationsList 
+                groupId={viewingApplicationsGroupId}
+                groupName={groups.find(g => g.id === viewingApplicationsGroupId)?.name || 'Неизвестная группа'}
+                onApplicationUpdate={fetchGroups}
+              />
+            </div>
           ) : (
             /* Groups Section */
             <div className="card p-6">
@@ -147,6 +178,17 @@ export function MasterDashboardContent() {
                         </div>
                         
                         <div className="flex items-center gap-2">
+                          <button 
+                            className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                            onClick={() => setViewingApplicationsGroupId(group.id)}
+                          >
+                            📝 Заявки
+                            {group.pendingApplicationsCount && group.pendingApplicationsCount > 0 && (
+                              <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                                {group.pendingApplicationsCount}
+                              </span>
+                            )}
+                          </button>
                           <button 
                             className="text-primary hover:text-primary/80 text-sm font-medium"
                             onClick={() => setSelectedGroupId(group.id)}

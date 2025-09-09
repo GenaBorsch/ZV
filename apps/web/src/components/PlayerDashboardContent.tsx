@@ -8,6 +8,7 @@ import { PlayerGroupDetailsModal } from './PlayerGroupDetailsModal';
 import { CharacterCard } from './CharacterCard';
 import { CharacterForm } from './CharacterForm';
 import { CharacterDetails } from './CharacterDetails';
+import { PlayerApplicationsList } from './PlayerApplicationsList';
 import { CharacterDtoType, CreateCharacterDtoType, UpdateCharacterDtoType } from '@zv/contracts';
 
 interface Group {
@@ -260,12 +261,20 @@ export function PlayerDashboardContent() {
             <div className="card p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-foreground">Мои группы</h3>
-                <button 
-                  className="btn-primary"
-                  onClick={() => setShowJoinForm(true)}
-                >
-                  Присоединиться к группе
-                </button>
+                <div className="flex gap-2">
+                  <a 
+                    href="/player/search"
+                    className="btn-primary"
+                  >
+                    🔍 Найти группу
+                  </a>
+                  <button 
+                    className="btn-outline"
+                    onClick={() => setShowJoinForm(true)}
+                  >
+                    По коду
+                  </button>
+                </div>
               </div>
               
               {isLoading ? (
@@ -357,6 +366,9 @@ export function PlayerDashboardContent() {
             )}
           </div>
 
+          {/* Applications Section */}
+          <PlayerApplicationsList />
+
           {/* Battlepass Section */}
           <div className="card p-6">
             <div className="flex justify-between items-center mb-4">
@@ -376,11 +388,17 @@ export function PlayerDashboardContent() {
           <div className="card p-6">
             <h3 className="text-lg font-medium text-foreground mb-4">Быстрые действия</h3>
             <div className="space-y-2">
+              <a 
+                href="/player/search"
+                className="block w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+              >
+                🔍 Найти группу
+              </a>
               <button 
                 className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
                 onClick={() => setShowJoinForm(true)}
               >
-                Присоединиться к группе
+                Присоединиться по коду
               </button>
               <button 
                 className={`w-full text-left px-3 py-2 text-sm rounded-md ${

@@ -24,6 +24,7 @@ export const paymentProviderEnum = pgEnum('payment_provider', ['YOOKASSA', 'MANU
 export const battlepassKindEnum = pgEnum('battlepass_kind', ['SEASON', 'FOUR', 'SINGLE']);
 export const battlepassStatusEnum = pgEnum('battlepass_status', ['ACTIVE', 'EXPIRED', 'USED_UP']);
 export const rpgExperienceEnum = pgEnum('rpg_experience', ['NOVICE', 'INTERMEDIATE', 'VETERAN']);
+export const applicationStatusEnum = pgEnum('application_status', ['PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN']);
 
 // Таблицы
 export const users = pgTable('users', {
@@ -128,6 +129,22 @@ export const groupMembers = pgTable('group_members', {
   characterId: uuid('character_id').references(() => characters.id, { onDelete: 'set null' }),
   status: memberStatusEnum('status').default('ACTIVE').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const groupApplications = pgTable('group_applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  groupId: uuid('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
+  playerId: uuid('player_id').notNull().references(() => playerProfiles.id, { onDelete: 'cascade' }),
+  status: applicationStatusEnum('status').default('PENDING').notNull(),
+  message: text('message'), // Сообщение от игрока к мастеру
+  masterResponse: text('master_response'), // Ответ мастера
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    // Один игрок может подать только одну активную заявку на группу
+    playerGroupUnique: unique().on(table.groupId, table.playerId),
+  };
 });
 
 export const sessions = pgTable('sessions', {
@@ -265,6 +282,7 @@ export const playerProfilesRelations = relations(playerProfiles, ({ one, many })
   }),
   characters: many(characters),
   groupMemberships: many(groupMembers),
+  groupApplications: many(groupApplications),
 }));
 
 export const masterProfilesRelations = relations(masterProfiles, ({ one, many }) => ({
@@ -315,6 +333,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
     references: [clubs.id],
   }),
   members: many(groupMembers),
+  applications: many(groupApplications),
   sessions: many(sessions),
 }));
 
@@ -330,6 +349,17 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   character: one(characters, {
     fields: [groupMembers.characterId],
     references: [characters.id],
+  }),
+}));
+
+export const groupApplicationsRelations = relations(groupApplications, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupApplications.groupId],
+    references: [groups.id],
+  }),
+  player: one(playerProfiles, {
+    fields: [groupApplications.playerId],
+    references: [playerProfiles.id],
   }),
 }));
 
@@ -417,6 +447,8 @@ export type Group = typeof groups.$inferSelect;
 export type NewGroup = typeof groups.$inferInsert;
 export type GroupMember = typeof groupMembers.$inferSelect;
 export type NewGroupMember = typeof groupMembers.$inferInsert;
+export type GroupApplication = typeof groupApplications.$inferSelect;
+export type NewGroupApplication = typeof groupApplications.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -447,3 +479,4 @@ export type PaymentProvider = typeof paymentProviderEnum.enumValues[number];
 export type BattlepassKind = typeof battlepassKindEnum.enumValues[number];
 export type BattlepassStatus = typeof battlepassStatusEnum.enumValues[number];
 export type RpgExperience = typeof rpgExperienceEnum.enumValues[number];
+export type ApplicationStatus = typeof applicationStatusEnum.enumValues[number];

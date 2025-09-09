@@ -32,7 +32,7 @@ export { and, or, eq, ilike, asc, desc, sql, inArray, count } from 'drizzle-orm'
 // Export repositories
 export { UsersRepo } from './repositories/usersRepo';
 export { RolesRepo } from './repositories/rolesRepo';
-export { GroupsRepo, type GroupWithDetails, type GroupMember } from './repositories/groupsRepo';
+export { GroupsRepo, type GroupWithDetails, type GroupWithNotifications, type GroupMember, type GroupApplicationWithPlayer } from './repositories/groupsRepo';
 export { ProfilesRepo } from './repositories/profilesRepo';
 export { CharactersRepo } from './repositories/charactersRepo';
 

@@ -3,6 +3,15 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { GroupsRepo } from '@zv/db';
 import { JoinGroupDto } from '@zv/contracts';
+import { z } from 'zod';
+
+// Расширенная схема для присоединения к группе
+const JoinGroupExtendedDto = z.object({
+  referralCode: z.string().uuid().optional(),
+  groupId: z.string().uuid().optional(),
+}).refine(data => data.referralCode || data.groupId, {
+  message: 'Необходимо указать либо referralCode, либо groupId',
+});
 
 function isPlayer(roles: string[] | undefined): boolean {
   const r = roles || [];
@@ -21,19 +30,37 @@ export async function POST(req: Request) {
 
     // Валидация входных данных
     const body = await req.json();
-    const validationResult = JoinGroupDto.safeParse(body);
+    
+    // Проверяем старый формат для обратной совместимости
+    let validationResult = JoinGroupDto.safeParse(body);
+    let useReferralCode = true;
     
     if (!validationResult.success) {
-      return NextResponse.json({ 
-        error: 'Некорректные данные',
-        details: validationResult.error.errors 
-      }, { status: 400 });
+      // Пробуем новый расширенный формат
+      const extendedResult = JoinGroupExtendedDto.safeParse(body);
+      if (!extendedResult.success) {
+        return NextResponse.json({ 
+          error: 'Некорректные данные',
+          details: extendedResult.error.errors 
+        }, { status: 400 });
+      }
+      validationResult = extendedResult;
+      useReferralCode = false;
     }
 
-    const { referralCode } = validationResult.data;
+    const data = validationResult.data as any;
 
     // Присоединение к группе
-    const group = await GroupsRepo.joinByReferral(referralCode, userId);
+    let group;
+    if (useReferralCode || data.referralCode) {
+      group = await GroupsRepo.joinByReferral(data.referralCode, userId);
+    } else if (data.groupId) {
+      group = await GroupsRepo.joinByGroupId(data.groupId, userId);
+    } else {
+      return NextResponse.json({ 
+        error: 'Необходимо указать либо referralCode, либо groupId' 
+      }, { status: 400 });
+    }
 
     const response = {
       message: 'Успешно присоединились к группе!',
@@ -54,6 +81,14 @@ export async function POST(req: Request) {
     
     if (error.message === 'Invalid referral code') {
       return NextResponse.json({ error: 'Неверный код приглашения' }, { status: 404 });
+    }
+    
+    if (error.message === 'Group not found') {
+      return NextResponse.json({ error: 'Группа не найдена' }, { status: 404 });
+    }
+    
+    if (error.message === 'Group is not recruiting') {
+      return NextResponse.json({ error: 'Группа не ведет набор участников' }, { status: 409 });
     }
     
     if (error.message === 'Player already in group') {

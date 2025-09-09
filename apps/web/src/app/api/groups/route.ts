@@ -110,8 +110,8 @@ export async function GET(req: Request) {
     let groups: any[] = [];
 
     if (isMaster(userRoles)) {
-      // Для мастеров - получить их группы
-      groups = await GroupsRepo.getByMasterId(userId);
+      // Для мастеров - получить их группы с уведомлениями
+      groups = await GroupsRepo.getByMasterIdWithNotifications(userId);
     } else if (isPlayer(userRoles)) {
       // Для игроков - получить группы, в которых они состоят
       groups = await GroupsRepo.getPlayerGroups(userId);
@@ -129,6 +129,7 @@ export async function GET(req: Request) {
       format: group.format,
       place: group.place,
       referralCode: isMaster(userRoles) ? group.referralCode : null, // Скрываем код для игроков
+      pendingApplicationsCount: isMaster(userRoles) ? group.pendingApplicationsCount : undefined, // Только для мастеров
       createdAt: group.createdAt.toISOString(),
     }));
 
