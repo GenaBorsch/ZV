@@ -140,7 +140,7 @@ export function PlayerGroupDetailsModal({ groupId, onClose, onLeave }: PlayerGro
           {group.description && (
             <div>
               <h3 className="font-medium text-foreground mb-2">Описание</h3>
-              <p className="text-muted-foreground">{group.description}</p>
+              <p className="text-muted-foreground break-words overflow-wrap-anywhere">{group.description}</p>
             </div>
           )}
 
@@ -156,7 +156,7 @@ export function PlayerGroupDetailsModal({ groupId, onClose, onLeave }: PlayerGro
             {group.place && (
               <div className="col-span-2">
                 <span className="text-muted-foreground">Место:</span>
-                <span className="ml-2 font-medium">{group.place}</span>
+                <span className="ml-2 font-medium break-words overflow-wrap-anywhere">{group.place}</span>
               </div>
             )}
             <div className="col-span-2">

@@ -229,7 +229,7 @@ export function GroupDetailsModal({ groupId, onClose, onUpdate }: GroupDetailsMo
                       rows={3}
                     />
                   ) : (
-                    <div className="mt-1 text-muted-foreground">
+                    <div className="mt-1 text-muted-foreground break-words overflow-wrap-anywhere">
                       {group.description || 'Описание не указано'}
                     </div>
                   )}

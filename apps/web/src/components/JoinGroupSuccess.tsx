@@ -36,7 +36,7 @@ export function JoinGroupSuccess({
       <div className="bg-muted/50 p-4 rounded-md mb-6">
         <h4 className="font-medium text-foreground mb-2">{group.name}</h4>
         {group.description && (
-          <p className="text-sm text-muted-foreground mb-2">{group.description}</p>
+          <p className="text-sm text-muted-foreground mb-2 break-words overflow-wrap-anywhere">{group.description}</p>
         )}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -53,7 +53,7 @@ export function JoinGroupSuccess({
           {group.place && (
             <div className="col-span-2">
               <span className="text-muted-foreground">Место:</span>
-              <span className="ml-2 font-medium">{group.place}</span>
+              <span className="ml-2 font-medium break-words overflow-wrap-anywhere">{group.place}</span>
             </div>
           )}
         </div>

@@ -131,3 +131,13 @@
   }
 }
 
+@layer utilities {
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
+  
+  .word-break-all {
+    word-break: break-all;
+  }
+}
+

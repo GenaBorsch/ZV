@@ -150,11 +150,11 @@ export function CharacterDetails({
             </TabsList>
             
             <TabsContent value="backstory" className="p-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">Предыстория персонажа</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Предыстория персонажа</h3>
                 {character.backstory ? (
                   <div className="prose prose-sm max-w-none">
-                    <p className="whitespace-pre-wrap text-muted-foreground">
+                    <p className="whitespace-pre-wrap text-foreground leading-relaxed break-words overflow-wrap-anywhere">
                       {character.backstory}
                     </p>
                   </div>
@@ -165,11 +165,11 @@ export function CharacterDetails({
             </TabsContent>
             
             <TabsContent value="journal" className="p-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">Журнал приключений</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Журнал приключений</h3>
                 {character.journal ? (
                   <div className="prose prose-sm max-w-none">
-                    <p className="whitespace-pre-wrap text-muted-foreground">
+                    <p className="whitespace-pre-wrap text-foreground leading-relaxed break-words overflow-wrap-anywhere">
                       {character.journal}
                     </p>
                   </div>
@@ -180,11 +180,11 @@ export function CharacterDetails({
             </TabsContent>
             
             <TabsContent value="notes" className="p-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">Заметки</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Заметки</h3>
                 {character.notes ? (
                   <div className="prose prose-sm max-w-none">
-                    <p className="whitespace-pre-wrap text-muted-foreground">
+                    <p className="whitespace-pre-wrap text-foreground leading-relaxed break-words overflow-wrap-anywhere">
                       {character.notes}
                     </p>
                   </div>
@@ -205,7 +205,7 @@ export function CharacterDetails({
                         href={character.sheetUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm break-all"
+                        className="text-primary hover:underline text-sm break-all overflow-wrap-anywhere"
                       >
                         {character.sheetUrl}
                       </a>
@@ -218,7 +218,7 @@ export function CharacterDetails({
                         href={character.avatarUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm break-all"
+                        className="text-primary hover:underline text-sm break-all overflow-wrap-anywhere"
                       >
                         {character.avatarUrl}
                       </a>
@@ -258,11 +258,10 @@ export function CharacterDetails({
                 )}
                 {onDelete && isOwner && (
                   <Button 
-                    variant="outline" 
+                    variant="destructive" 
                     onClick={handleDelete}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
-                    Удалить
+                    Удалить персонажа
                   </Button>
                 )}
               </div>

@@ -205,23 +205,54 @@ export default function StylePage() {
             <CardHeader>
               <CardTitle>Вкладки</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <Tabs defaultValue="tab1" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="tab1">Вкладка 1</TabsTrigger>
-                  <TabsTrigger value="tab2">Вкладка 2</TabsTrigger>
-                  <TabsTrigger value="tab3">Вкладка 3</TabsTrigger>
-                </TabsList>
-                <TabsContent value="tab1" className="p-6">
-                  <p className="text-muted-foreground">Содержимое первой вкладки</p>
-                </TabsContent>
-                <TabsContent value="tab2" className="p-6">
-                  <p className="text-muted-foreground">Содержимое второй вкладки</p>
-                </TabsContent>
-                <TabsContent value="tab3" className="p-6">
-                  <p className="text-muted-foreground">Содержимое третьей вкладки</p>
-                </TabsContent>
-              </Tabs>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Красные кнопки-вкладки с белым текстом</h4>
+                  <Tabs defaultValue="tab1" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="tab1">Предыстория</TabsTrigger>
+                      <TabsTrigger value="tab2">Журнал</TabsTrigger>
+                      <TabsTrigger value="tab3">Заметки</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="tab1" className="p-6 border border-border rounded-md mt-4">
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-foreground">Предыстория персонажа</h5>
+                        <p className="text-muted-foreground">
+                          Наследник престола Гондора, скрывающийся под именем Бродяжника. 
+                          Долгие годы защищал границы от тьмы, ожидая своего часа.
+                        </p>
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="tab2" className="p-6 border border-border rounded-md mt-4">
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-foreground">Журнал приключений</h5>
+                        <p className="text-muted-foreground">
+                          День 1: Встретил хоббитов в Пригожине. Странная компания...
+                          <br />
+                          День 15: Битва при Хельмовой Пади. Мы победили, но какой ценой.
+                        </p>
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="tab3" className="p-6 border border-border rounded-md mt-4">
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-foreground">Заметки</h5>
+                        <p className="text-muted-foreground">
+                          Владеет мечом Андурил. Имеет особую связь с эльфами.
+                        </p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Пример использования в карточке персонажа</h4>
+                  <div className="text-sm text-muted-foreground">
+                    Такие же вкладки используются в модальном окне деталей персонажа для навигации 
+                    между разделами: предыстория, журнал, заметки и ссылки.
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -231,24 +262,36 @@ export default function StylePage() {
               <CardTitle>Карточки персонажей</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 <CharacterCard
                   character={exampleCharacter}
                   onEdit={() => console.log('Edit character')}
-                  onDelete={() => console.log('Delete character')}
                   onView={setSelectedCharacter}
                   showActions={true}
                 />
                 <CharacterCard
                   character={deadCharacter}
+                  onEdit={() => console.log('Edit character')}
                   onView={setSelectedCharacter}
-                  showActions={false}
+                  showActions={true}
                 />
                 <CharacterCard
                   character={{ ...exampleCharacter, id: 'compact-example', name: 'Компактная карточка' }}
                   onView={setSelectedCharacter}
                   compact={true}
                   showActions={false}
+                />
+                <CharacterCard
+                  character={{ 
+                    ...exampleCharacter, 
+                    id: 'long-name-example', 
+                    name: 'Персонаж с очень длинным именем который должен поместиться',
+                    archetype: 'Архетип с длинным названием для тестирования',
+                    backstory: 'Очень длинная предыстория персонажа, которая должна корректно обрезаться и не ломать верстку карточки. Здесь много текста, чтобы проверить, как работает line-clamp.'
+                  }}
+                  onEdit={() => console.log('Edit character')}
+                  onView={setSelectedCharacter}
+                  showActions={true}
                 />
               </div>
             </CardContent>
