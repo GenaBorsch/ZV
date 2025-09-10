@@ -1,6 +1,9 @@
 # Production Dockerfile с оптимизациями для обновлений
 FROM node:18-alpine AS base
 
+# Устанавливаем необходимые пакеты
+RUN apk add --no-cache curl
+
 # Устанавливаем конкретную версию pnpm для совместимости
 RUN npm install -g pnpm@8.15.9
 
@@ -66,6 +69,9 @@ RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \
 FROM node:18-alpine AS runner
 WORKDIR /app
 
+# Устанавливаем необходимые пакеты для health check
+RUN apk add --no-cache curl
+
 # Создаем пользователя без root прав
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -127,8 +133,8 @@ EOF
 
 RUN chmod +x /app/start.sh
 
-# Health check
+# Health check - используем переменную PORT или 3000 по умолчанию
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+  CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
 
 CMD ["/app/start.sh"]
