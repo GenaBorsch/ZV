@@ -57,11 +57,12 @@ RUN if [ ! -f "packages/db/dist/index.js" ]; then \
 # Собираем приложение
 RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \
     NEXTAUTH_SECRET="build-secret-32-chars-minimum" \
-    NEXTAUTH_URL="http://localhost:3000" \
-    PUBLIC_BASE_URL="http://localhost:3000" \
+    NEXTAUTH_URL="http://localhost:80" \
+    PUBLIC_BASE_URL="http://localhost:80" \
     S3_ENDPOINT="http://localhost:9000" \
     S3_ACCESS_KEY="build" \
     S3_SECRET_KEY="build" \
+    PORT="80" \
     SKIP_ENV_VALIDATION=true \
     pnpm build
 
@@ -93,9 +94,10 @@ COPY --from=base --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 
-EXPOSE 3000
+# Динамический EXPOSE на основе переменной PORT (по умолчанию 80 для EasyPanel)
+ENV PORT=80
+EXPOSE $PORT
 
-ENV PORT=3000
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
 
@@ -133,8 +135,8 @@ EOF
 
 RUN chmod +x /app/start.sh
 
-# Health check - используем переменную PORT или 3000 по умолчанию
+# Health check - используем переменную PORT или 80 по умолчанию
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
+  CMD curl -f http://localhost:${PORT:-80}/api/health || exit 1
 
 CMD ["/app/start.sh"]

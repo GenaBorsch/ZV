@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     const group = await GroupsRepo.create(data, masterId);
 
     // Формирование реферальной ссылки
-    const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
     const referralLink = `${baseUrl}/join?code=${group.referralCode}`;
 
     const response = {
