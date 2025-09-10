@@ -1,17 +1,29 @@
 import { NextResponse } from 'next/server';
 import { db, battlepasses, writeoffs, sessions, and, asc, eq, sql } from '@zv/db';
 
-type RedeemBody = { userId: string; sessionId: string; reportId?: string };
+type RedeemBody = { userId: string; sessionId?: string; reportId?: string };
 
 export async function POST(req: Request) {
   try {
     const { userId, sessionId, reportId } = (await req.json()) as RedeemBody;
-    if (!userId || !sessionId) {
-      return NextResponse.json({ error: 'userId and sessionId required' }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    }
+
+    if (!sessionId && !reportId) {
+      return NextResponse.json({ error: 'Either sessionId or reportId is required' }, { status: 400 });
     }
 
     // idempotency: check existing writeoff
-    const existing = await db.select().from(writeoffs).where(and(eq(writeoffs.userId, userId), eq(writeoffs.sessionId, sessionId))).limit(1);
+    let existing;
+    if (reportId) {
+      // Для отчётов проверяем по reportId
+      existing = await db.select().from(writeoffs).where(and(eq(writeoffs.userId, userId), eq(writeoffs.reportId, reportId))).limit(1);
+    } else {
+      // Для сессий проверяем по sessionId
+      existing = await db.select().from(writeoffs).where(and(eq(writeoffs.userId, userId), eq(writeoffs.sessionId, sessionId!))).limit(1);
+    }
+    
     if (existing[0]) {
       return NextResponse.json({ ok: true, alreadyRedeemed: true });
     }
@@ -32,7 +44,12 @@ export async function POST(req: Request) {
     // transaction: decrement usesLeft and insert writeoff
     // drizzle-orm/postgres-js lacks explicit tx in this wrapper; emulate sequentially
     await db.update(battlepasses).set({ usesLeft: bp.usesLeft - 1, status: bp.usesLeft - 1 === 0 ? 'USED_UP' : 'ACTIVE' }).where(eq(battlepasses.id, bp.id));
-    await db.insert(writeoffs).values({ userId, sessionId, reportId: reportId as any, battlepassId: bp.id });
+    await db.insert(writeoffs).values({ 
+      userId, 
+      sessionId: sessionId || null, 
+      reportId: reportId || null, 
+      battlepassId: bp.id 
+    });
 
     return NextResponse.json({ ok: true, battlepassId: bp.id });
   } catch (e: any) {

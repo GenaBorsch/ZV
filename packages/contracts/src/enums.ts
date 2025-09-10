@@ -78,6 +78,30 @@ export enum NotificationType {
   SMS = 'SMS'
 }
 
+// Статусы отчётов мастеров
+export enum ReportStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED'
+}
+
+// Типы уведомлений
+export enum NotificationTypeEnum {
+  INFO = 'INFO',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR'
+}
+
+// Типы связанных объектов в уведомлениях
+export enum NotificationRelatedType {
+  REPORT = 'REPORT',
+  BATTLEPASS = 'BATTLEPASS',
+  GROUP = 'GROUP',
+  SESSION = 'SESSION'
+}
+
 // HTTP статус коды для API
 export enum ApiStatusCode {
   OK = 200,

@@ -24,12 +24,17 @@
 - **`Character (characters)`**: playerId (→ PlayerProfile), name, archetype?, sheetUrl?, notes?
 - **`Session (sessions)`**: groupId, startsAt, durationMin, place?, format, isOpen, slotsTotal, slotsFree
 - **`Enrollment (enrollments)`**: sessionId, playerId (→ User), status (PENDING|CONFIRMED|CANCELLED|WAITLIST), createdAt
-- **`Report (reports)`**: sessionId unique, masterId, summary, highlights?, createdAt
+- **`Report (reports)`**: sessionId (optional), masterId, description, highlights?, status (PENDING|APPROVED|REJECTED|CANCELLED), rejectionReason?, createdAt, updatedAt
+- **`ReportPlayer (report_players)`**: reportId (→ Report), playerId (→ User), createdAt - связь отчётов с игроками
+- **`Writeoff (writeoffs)`**: userId, sessionId?, reportId?, battlepassId, createdAt - логирование списаний игр
 
 #### Система заявок в группы
 - **`GroupApplication (group_applications)`**: groupId (→ Group), playerId (→ PlayerProfile), status (PENDING|APPROVED|REJECTED|WITHDRAWN), message?, masterResponse?, createdAt, updatedAt
   - Уникальный индекс: (groupId, playerId) - один игрок может подать только одну заявку в группу
   - Каскадное удаление при удалении группы или игрока
+
+#### Система уведомлений
+- **`Notification (notifications)`**: userId (→ User), type (REPORT_SUBMITTED|REPORT_APPROVED|REPORT_REJECTED|BATTLEPASS_DEDUCTED|REPORT_CANCELLED), message, link?, status (UNREAD|READ), createdAt
 
 #### Контент и правила
 - **`RuleDoc (rule_docs)`**: title, slug unique, content (markdown), version?, published
@@ -159,6 +164,24 @@
 - **`GET /api/admin/users`** - список пользователей с фильтрацией
 - **`GET/PATCH/DELETE /api/admin/users/[id]`** - управление пользователями
 - **`PATCH /api/admin/users/[id]/roles`** - управление ролями
+
+#### Система отчётов мастеров:
+- **`GET/POST /api/reports`** - список отчётов (роль-зависимый) и создание отчётов (только мастера)
+  - Rate limiting: 10 отчётов/час для мастеров
+  - Валидация: минимум 50 символов описания, обязательный выбор игроков
+- **`GET /api/reports/[id]`** - получение отчёта (доступ по ролям)
+- **`PATCH /api/reports/[id]`** - редактирование отчёта (мастер) или модерация (админ)
+  - Мастера могут редактировать только в статусе PENDING/REJECTED
+  - Админы могут модерировать (APPROVED/REJECTED) с обязательной причиной при отклонении
+- **`DELETE /api/reports/[id]`** - удаление отчёта (только мастер, только PENDING)
+
+#### Система уведомлений:
+- **`GET/POST /api/notifications`** - список уведомлений пользователя и создание
+- **`PATCH /api/notifications/[id]`** - пометка уведомления как прочитанное
+
+#### Вспомогательные эндпоинты для отчётов:
+- **`GET /api/players`** - поиск игроков по имени/email для добавления в отчёт
+- **`POST /api/players/check-battlepasses`** - проверка доступных игр у списка игроков
 
 #### Утилиты:
 - **`GET /api/users/[id]`** - информация о пользователе (для отображения мастера)

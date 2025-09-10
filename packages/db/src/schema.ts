@@ -25,6 +25,7 @@ export const battlepassKindEnum = pgEnum('battlepass_kind', ['SEASON', 'FOUR', '
 export const battlepassStatusEnum = pgEnum('battlepass_status', ['ACTIVE', 'EXPIRED', 'USED_UP']);
 export const rpgExperienceEnum = pgEnum('rpg_experience', ['NOVICE', 'INTERMEDIATE', 'VETERAN']);
 export const applicationStatusEnum = pgEnum('application_status', ['PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN']);
+export const reportStatusEnum = pgEnum('report_status', ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']);
 
 // Таблицы
 export const users = pgTable('users', {
@@ -169,11 +170,16 @@ export const enrollments = pgTable('enrollments', {
 
 export const reports = pgTable('reports', {
   id: uuid('id').primaryKey().defaultRandom(),
-  sessionId: uuid('session_id').unique().notNull().references(() => sessions.id, { onDelete: 'cascade' }),
-  masterId: uuid('master_id').notNull().references(() => masterProfiles.id, { onDelete: 'cascade' }),
-  summary: text('summary').notNull(),
-  highlights: text('highlights'),
+  sessionId: uuid('session_id').references(() => sessions.id, { onDelete: 'cascade' }), // optional для независимых отчётов
+  masterId: uuid('master_id').notNull().references(() => users.id, { onDelete: 'cascade' }), // изменено на users для простоты
+  summary: text('summary').notNull(), // старое поле, теперь алиас для description
+  description: text('description').notNull(), // основное описание игры
+  highlights: text('highlights'), // дополнительные моменты
+  status: reportStatusEnum('status').default('PENDING').notNull(),
+  rejectionReason: text('rejection_reason'),
+  attachments: json('attachments'), // массив URL файлов для будущего
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const ruleDocs = pgTable('rule_docs', {
@@ -248,14 +254,40 @@ export const battlepasses = pgTable('battlepasses', {
 export const writeoffs = pgTable('writeoffs', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  sessionId: uuid('session_id').notNull().references(() => sessions.id, { onDelete: 'cascade' }),
+  sessionId: uuid('session_id').references(() => sessions.id, { onDelete: 'cascade' }), // optional для отчётов без сессии
   reportId: uuid('report_id').references(() => reports.id, { onDelete: 'cascade' }),
   battlepassId: uuid('battlepass_id').notNull().references(() => battlepasses.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => {
   return {
-    writeoffUnique: unique().on(table.userId, table.sessionId),
+    // убираем unique constraint для sessionId, так как теперь может быть null
+    writeoffReportUnique: unique().on(table.userId, table.reportId), // уникальность по отчёту
   };
+});
+
+// Связь отчётов с игроками
+export const reportPlayers = pgTable('report_players', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  reportId: uuid('report_id').notNull().references(() => reports.id, { onDelete: 'cascade' }),
+  playerId: uuid('player_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    reportPlayerUnique: unique().on(table.reportId, table.playerId),
+  };
+});
+
+// Система уведомлений
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  type: varchar('type', { length: 50 }).default('INFO').notNull(), // INFO, SUCCESS, WARNING, ERROR
+  relatedType: varchar('related_type', { length: 50 }), // REPORT, BATTLEPASS, etc.
+  relatedId: uuid('related_id'), // ID связанного объекта
+  isRead: boolean('is_read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // Связи (Relations)
@@ -266,6 +298,10 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   enrollments: many(enrollments),
   orders: many(orders),
   battlepasses: many(battlepasses),
+  masterReports: many(reports, { relationName: 'masterReports' }),
+  reportParticipations: many(reportPlayers),
+  notifications: many(notifications),
+  writeoffs: many(writeoffs),
 }));
 
 export const userRolesRelations = relations(userRoles, ({ one }) => ({
@@ -383,14 +419,34 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
   }),
 }));
 
-export const reportsRelations = relations(reports, ({ one }) => ({
+export const reportsRelations = relations(reports, ({ one, many }) => ({
   session: one(sessions, {
     fields: [reports.sessionId],
     references: [sessions.id],
   }),
-  master: one(masterProfiles, {
+  master: one(users, {
     fields: [reports.masterId],
-    references: [masterProfiles.id],
+    references: [users.id],
+  }),
+  players: many(reportPlayers),
+  writeoffs: many(writeoffs),
+}));
+
+export const reportPlayersRelations = relations(reportPlayers, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportPlayers.reportId],
+    references: [reports.id],
+  }),
+  player: one(users, {
+    fields: [reportPlayers.playerId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
   }),
 }));
 
@@ -468,6 +524,12 @@ export type NewBattlepass = typeof battlepasses.$inferInsert;
 export type Writeoff = typeof writeoffs.$inferSelect;
 export type NewWriteoff = typeof writeoffs.$inferInsert;
 
+// Экспорт новых типов
+export type ReportPlayer = typeof reportPlayers.$inferSelect;
+export type NewReportPlayer = typeof reportPlayers.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
 // Типы энумов
 export type Role = typeof roleEnum.enumValues[number];
 export type GameFormat = typeof gameFormatEnum.enumValues[number];
@@ -480,3 +542,4 @@ export type BattlepassKind = typeof battlepassKindEnum.enumValues[number];
 export type BattlepassStatus = typeof battlepassStatusEnum.enumValues[number];
 export type RpgExperience = typeof rpgExperienceEnum.enumValues[number];
 export type ApplicationStatus = typeof applicationStatusEnum.enumValues[number];
+export type ReportStatus = typeof reportStatusEnum.enumValues[number];

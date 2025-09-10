@@ -152,12 +152,72 @@ export const UpdateEnrollmentDto = z.object({
 
 // Report DTOs
 export const CreateReportDto = z.object({
-  sessionId: z.string().cuid('Некорректный ID сессии'),
-  summary: z.string().min(10, 'Краткое описание должно содержать минимум 10 символов'),
+  sessionId: z.string().cuid('Некорректный ID сессии').optional(), // optional для независимых отчётов
+  description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов'),
+  playerIds: z.array(z.string().cuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока'),
   highlights: z.string().optional(),
 });
 
-export const UpdateReportDto = CreateReportDto.partial();
+export const UpdateReportDto = z.object({
+  sessionId: z.string().cuid('Некорректный ID сессии').optional(),
+  description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов').optional(),
+  playerIds: z.array(z.string().cuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока').optional(),
+  highlights: z.string().optional(),
+});
+
+// DTO для модерации отчётов (админ)
+export const ModerateReportDto = z.object({
+  action: z.enum(['approve', 'reject']),
+  rejectionReason: z.string().min(10, 'Причина отклонения должна содержать минимум 10 символов').optional(),
+}).refine((data) => {
+  if (data.action === 'reject' && !data.rejectionReason) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'При отклонении отчёта необходимо указать причину',
+  path: ['rejectionReason'],
+});
+
+// DTO для отображения отчёта
+export const ReportDto = z.object({
+  id: z.string(),
+  sessionId: z.string().nullable(),
+  masterId: z.string(),
+  masterName: z.string(),
+  description: z.string(),
+  highlights: z.string().nullable(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']),
+  rejectionReason: z.string().nullable(),
+  players: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+  })),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+// DTO для уведомлений
+export const NotificationDto = z.object({
+  id: z.string(),
+  title: z.string(),
+  message: z.string(),
+  type: z.enum(['INFO', 'SUCCESS', 'WARNING', 'ERROR']),
+  relatedType: z.enum(['REPORT', 'BATTLEPASS', 'GROUP', 'SESSION']).nullable(),
+  relatedId: z.string().nullable(),
+  isRead: z.boolean(),
+  createdAt: z.string().datetime(),
+});
+
+export const CreateNotificationDto = z.object({
+  userId: z.string().cuid(),
+  title: z.string().min(1, 'Заголовок не может быть пустым'),
+  message: z.string().min(1, 'Сообщение не может быть пустым'),
+  type: z.enum(['INFO', 'SUCCESS', 'WARNING', 'ERROR']).default('INFO'),
+  relatedType: z.enum(['REPORT', 'BATTLEPASS', 'GROUP', 'SESSION']).optional(),
+  relatedId: z.string().optional(),
+});
 
 // Rule DTOs
 export const CreateRuleDto = z.object({
@@ -309,6 +369,10 @@ export type CreateEnrollmentDtoType = z.infer<typeof CreateEnrollmentDto>;
 export type UpdateEnrollmentDtoType = z.infer<typeof UpdateEnrollmentDto>;
 export type CreateReportDtoType = z.infer<typeof CreateReportDto>;
 export type UpdateReportDtoType = z.infer<typeof UpdateReportDto>;
+export type ModerateReportDtoType = z.infer<typeof ModerateReportDto>;
+export type ReportDtoType = z.infer<typeof ReportDto>;
+export type NotificationDtoType = z.infer<typeof NotificationDto>;
+export type CreateNotificationDtoType = z.infer<typeof CreateNotificationDto>;
 export type CreateRuleDtoType = z.infer<typeof CreateRuleDto>;
 export type UpdateRuleDtoType = z.infer<typeof UpdateRuleDto>;
 export type CreateProductDtoType = z.infer<typeof CreateProductDto>;

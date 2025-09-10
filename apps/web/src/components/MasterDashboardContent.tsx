@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { CreateGroupForm } from './CreateGroupForm';
 import { GroupCreatedSuccess } from './GroupCreatedSuccess';
 import { GroupDetailsModal } from './GroupDetailsModal';
@@ -21,12 +22,14 @@ interface Group {
 }
 
 export function MasterDashboardContent() {
+  const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createdGroup, setCreatedGroup] = useState<any>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [viewingApplicationsGroupId, setViewingApplicationsGroupId] = useState<string | null>(null);
+  const [reportsCount, setReportsCount] = useState(0);
 
   // Загрузка групп с сервера
   const fetchGroups = async () => {
@@ -43,8 +46,22 @@ export function MasterDashboardContent() {
     }
   };
 
+  // Загрузка количества отчётов
+  const fetchReportsCount = async () => {
+    try {
+      const response = await fetch('/api/reports');
+      if (response.ok) {
+        const data = await response.json();
+        setReportsCount(data.reports?.length || 0);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки отчётов:', error);
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchReportsCount();
   }, []);
 
   const handleCreateSuccess = (data: any) => {
@@ -87,9 +104,9 @@ export function MasterDashboardContent() {
           <div className="text-sm text-muted-foreground">Ближайшие игры</div>
           <div className="text-lg font-medium">0</div>
         </div>
-        <div className="card p-5">
+        <div className="card p-5 cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => router.push('/master/reports')}>
           <div className="text-sm text-muted-foreground">Отчёты</div>
-          <div className="text-lg font-medium">0</div>
+          <div className="text-lg font-medium">{reportsCount}</div>
         </div>
       </div>
 
@@ -261,8 +278,8 @@ export function MasterDashboardContent() {
                 Запланировать игру
               </button>
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-muted-foreground cursor-not-allowed rounded-md"
-                disabled
+                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                onClick={() => router.push('/master/reports')}
               >
                 Создать отчёт
               </button>

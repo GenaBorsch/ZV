@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
 import { PlayerDashboardContent } from '@/components/PlayerDashboardContent';
+import { NotificationBell } from '@/components/NotificationBell';
 import { usePlayerCheck } from '@/lib/hooks/useRoleCheck';
 import { useSession } from 'next-auth/react';
 
@@ -52,7 +53,11 @@ export default function PlayerDashboard() {
                 {session?.user?.name || 'Игрок'}
               </Link>
             </div>
-            <nav className="flex space-x-4">
+            <nav className="flex items-center space-x-4">
+              <NotificationBell className="text-muted-foreground hover:text-foreground" />
+              <Link href="/player/reports" className="text-muted-foreground hover:text-foreground">
+                История игр
+              </Link>
               <Link href="/" className="text-muted-foreground hover:text-foreground">
                 На главную
               </Link>

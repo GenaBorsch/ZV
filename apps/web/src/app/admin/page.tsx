@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
+import { NotificationBell } from '@/components/NotificationBell';
 
 export default function AdminDashboard() {
   return (
@@ -16,7 +17,8 @@ export default function AdminDashboard() {
                 Модератор
               </span>
             </div>
-            <nav className="flex space-x-4">
+            <nav className="flex items-center space-x-4">
+              <NotificationBell className="text-muted-foreground hover:text-foreground" />
               <Link href="/" className="text-muted-foreground hover:text-foreground">
                 На главную
               </Link>
