@@ -4,7 +4,7 @@ import { notifications } from '@zv/db';
 import { CreateNotificationDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, count, and } from 'drizzle-orm';
 
 // GET /api/notifications - получить уведомления пользователя
 export async function GET(req: NextRequest) {
@@ -35,10 +35,12 @@ export async function GET(req: NextRequest) {
 
     // Получаем количество непрочитанных уведомлений
     const [{ count: unreadCount }] = await db
-      .select({ count: notifications.id })
+      .select({ count: count() })
       .from(notifications)
-      .where(eq(notifications.userId, session.user.id))
-      .where(eq(notifications.isRead, false));
+      .where(and(
+        eq(notifications.userId, session.user.id),
+        eq(notifications.isRead, false)
+      ));
 
     return NextResponse.json({
       notifications: userNotifications,
