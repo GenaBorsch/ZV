@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { reports, reportPlayers, users, userRoles, battlepasses } from '@zv/db/schema';
+import { reports, reportPlayers, users, userRoles, battlepasses } from '@zv/db';
 import { CreateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
       .leftJoin(users, eq(reports.masterId, users.id))
       .where(eq(reports.id, newReport.id));
 
-    const playersData = await db
+    const reportPlayersData = await db
       .select({
         id: users.id,
         name: users.name,
@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
 
     const result = {
       ...reportWithData,
-      players: playersData,
+      players: reportPlayersData,
     };
 
     return NextResponse.json({ report: result }, { status: 201 });

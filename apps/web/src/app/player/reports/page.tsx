@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@zv/db';
-import { userRoles } from '@zv/db/schema';
+import { userRoles } from '@zv/db';
 import { eq } from 'drizzle-orm';
 import { PlayerReportsContent } from '@/components/PlayerReportsContent';
 

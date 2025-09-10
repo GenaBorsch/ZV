@@ -8,4 +8,4 @@ export { formatDate, formatDateTime, isTodayDate, isTomorrowDate, isYesterdayDat
 export { validateEmail, validatePhone } from './validation';
 
 // Role utilities
-export { hasRole, hasAnyRole, isPlayer, isMaster, isModerator, isScenarist, isSuperAdmin } from './roles';
+export { hasRole, hasAnyRole, isPlayer, isMaster, isModerator, isSuperAdmin, isAdmin } from './roles';

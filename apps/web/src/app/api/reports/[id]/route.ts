@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { reports, reportPlayers, users, userRoles, notifications } from '@zv/db/schema';
+import { reports, reportPlayers, users, userRoles, notifications } from '@zv/db';
 import { UpdateReportDto, ModerateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';

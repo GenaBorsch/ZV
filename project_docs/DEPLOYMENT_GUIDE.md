@@ -442,21 +442,132 @@ URL: http://localhost:3000/admin/users
 
 ## 🚀 Продакшен развертывание
 
-### Эскиз деплоя
-- **Варианты**: Docker контейнер Next.js (standalone), внешние сервисы Postgres/MinIO
-- **Секреты и ENV** в CI/CD хранятся в Secret Store
-- **Миграции** выполняются до старта приложения
+### 📦 Развертывание через EasyPanel (рекомендуется)
 
-### Домены
+#### Подготовка Docker образа
+
+**1. Сборка образа локально:**
+```bash
+# В корне проекта
+docker build -f docker/Dockerfile.app -t zv-app:latest .
+```
+
+**2. Проверка образа:**
+```bash
+# Тест с локальной БД
+docker run --rm --env-file .env --network host zv-app:latest
+```
+
+#### Настройка в EasyPanel
+
+**1. Создание приложения:**
+- Тип: Docker Image
+- Image: `zv-app:latest` (или ваш registry)
+- Port: `3000`
+
+**2. Обязательные переменные окружения:**
+```env
+# База данных (внешняя PostgreSQL)
+DATABASE_URL=postgresql://user:pass@db-host:5432/zvezdnoe_vereteno
+
+# Аутентификация
+NEXTAUTH_SECRET=your-super-secret-key-32-chars-minimum
+NEXTAUTH_URL=https://your-domain.com
+
+# Публичные URL
+PUBLIC_BASE_URL=https://your-domain.com
+
+# MinIO/S3 (внешний сервис)
+S3_ENDPOINT=https://your-minio-host
+S3_ACCESS_KEY=your-access-key
+S3_SECRET_KEY=your-secret-key
+S3_BUCKET_AVATARS=avatars
+S3_BUCKET_DOCUMENTS=documents
+S3_BUCKET_UPLOADS=uploads
+
+# Email (опционально)
+EMAIL_FROM=noreply@your-domain.com
+SMTP_URL=smtp://user:pass@smtp-host:587
+
+# Feature flags
+FEATURE_PAYMENTS=false
+FEATURE_TELEGRAM=false
+
+# Production
+NODE_ENV=production
+```
+
+**3. Настройка внешних сервисов:**
+
+**PostgreSQL** (обязательно):
+- Создайте БД: `zvezdnoe_vereteno`
+- Примените миграции: `pnpm db:migrate`
+- Добавьте демо-данные: `pnpm db:seed`
+
+**MinIO/S3** (опционально для файлов):
+- Создайте buckets: `avatars`, `documents`, `uploads`
+- Настройте публичный доступ для аватаров
+
+#### Применение миграций
+
+**Локально перед деплоем:**
+```bash
+# Установите DATABASE_URL для продакшен БД
+DATABASE_URL="postgresql://user:pass@prod-host:5432/db" pnpm db:migrate
+DATABASE_URL="postgresql://user:pass@prod-host:5432/db" pnpm db:seed
+```
+
+#### Health Check
+
+Приложение предоставляет health endpoint:
+- URL: `https://your-domain.com/api/health`
+- Ответ: `{"status":"ok","timestamp":"...","uptime":123}`
+
+### 🐳 Альтернативные варианты деплоя
+
+#### Docker Compose (для VPS)
+```bash
+# Используйте готовые compose файлы
+docker compose -f docker/docker-compose.prod.yml up -d
+```
+
+#### Обычный VPS
+```bash
+# Установка зависимостей
+pnpm install
+pnpm build
+
+# Запуск
+pnpm start
+```
+
+### 🔧 Домены и SSL
+
+#### Рекомендуемая структура:
 - **Основной сайт**: `zvezdnoe-vereteno.ru` (Tilda)
 - **Личные кабинеты**: `app.zvezdnoe-vereteno.ru` (Next.js)
 
-### Переменные продакшена
-```env
-NODE_ENV=production
-NEXTAUTH_URL=https://app.zvezdnoe-vereteno.ru
-DATABASE_URL=postgresql://user:pass@prod-host:5432/zvezdnoe_vereteno
-# ... остальные переменные с продакшен значениями
+#### SSL сертификаты:
+- EasyPanel автоматически настроит Let's Encrypt
+- Для других платформ используйте Cloudflare или Certbot
+
+### 🚨 Важные замечания
+
+1. **База данных**: Обязательно используйте внешнюю PostgreSQL
+2. **Секреты**: Никогда не коммитьте `.env` файлы
+3. **Миграции**: Применяйте до деплоя новых версий
+4. **Мониторинг**: Настройте алерты на health endpoint
+5. **Бэкапы**: Регулярно бэкапьте PostgreSQL
+
+### 📊 Мониторинг и логи
+
+**Health endpoint:**
+```bash
+curl https://your-domain.com/api/health
 ```
 
-**Последнее обновление**: Декабрь 2024
+**Проверка логов в EasyPanel:**
+- Logs → Application Logs
+- Ошибки БД будут в логах при старте
+
+**Последнее обновление**: Сентябрь 2025
