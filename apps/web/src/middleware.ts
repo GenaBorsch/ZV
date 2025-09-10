@@ -6,8 +6,46 @@ const PROTECTED_PREFIXES = ['/player', '/master', '/admin'];
 const ADMIN_ONLY_PATHS = ['/admin/users'];
 const PROFILE_REQUIRED_PATHS = ['/player', '/master'];
 
+// Функция для проверки базовой HTTP аутентификации
+function checkBasicAuth(req: NextRequest): boolean {
+  // Если переменные не установлены, пропускаем базовую аутентификацию
+  const basicUser = process.env.BASIC_AUTH_USER;
+  const basicPass = process.env.BASIC_AUTH_PASSWORD;
+  
+  if (!basicUser || !basicPass) {
+    return true; // Пропускаем, если аутентификация не настроена
+  }
+
+  const authHeader = req.headers.get('authorization');
+  
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    return false;
+  }
+
+  try {
+    const base64Credentials = authHeader.slice(6);
+    const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+    const [username, password] = credentials.split(':');
+    
+    return username === basicUser && password === basicPass;
+  } catch {
+    return false;
+  }
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  
+  // Проверяем базовую HTTP аутентификацию для всего сайта
+  if (!checkBasicAuth(req)) {
+    return new NextResponse('Authentication required', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="Secure Area"',
+      },
+    });
+  }
+  
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
@@ -84,7 +122,16 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/player/:path*', '/master/:path*', '/admin/:path*', '/profile'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
 
 

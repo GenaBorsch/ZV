@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/Providers';
+import { BasicAuthInfo } from '@/components/BasicAuthInfo';
 
 export const metadata: Metadata = {
   title: 'Звёздное Веретено - Личные кабинеты',
@@ -16,6 +17,7 @@ export default function RootLayout({ children, }: { children: React.ReactNode; }
           <div className="min-h-screen">
             {children}
           </div>
+          <BasicAuthInfo />
         </Providers>
       </body>
     </html>
