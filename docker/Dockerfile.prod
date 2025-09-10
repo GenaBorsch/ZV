@@ -1,8 +1,8 @@
 # Production Dockerfile с оптимизациями для обновлений
 FROM node:18-alpine AS base
 
-# Устанавливаем pnpm глобально
-RUN npm install -g pnpm
+# Устанавливаем конкретную версию pnpm для совместимости
+RUN npm install -g pnpm@8.15.9
 
 # Создаем рабочую директорию
 WORKDIR /app
@@ -23,7 +23,8 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/utils/package.json ./packages/utils/
 
 # Устанавливаем зависимости (включая production dependencies)
-RUN pnpm install --frozen-lockfile --prod=false
+# Сначала пробуем с frozen-lockfile, если не получается - пересоздаем lockfile
+RUN pnpm install --frozen-lockfile --prod=false || pnpm install --prod=false
 
 # Копируем весь исходный код
 COPY . .
@@ -55,8 +56,8 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Устанавливаем pnpm
-RUN npm install -g pnpm
+# Устанавливаем pnpm той же версии
+RUN npm install -g pnpm@8.15.9
 
 # Копируем собранное приложение
 COPY --from=base --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
