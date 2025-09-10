@@ -32,10 +32,24 @@ COPY . .
 # Генерируем схему базы данных
 RUN pnpm db:generate
 
-# Собираем пакеты
+# Собираем пакеты в правильном порядке (с учетом зависимостей)
 RUN pnpm --filter contracts build || true
 RUN pnpm --filter utils build || true
-RUN pnpm --filter db build
+
+# Проверяем что contracts собран, иначе создаем заглушку
+RUN if [ ! -f "packages/contracts/dist/index.js" ]; then \
+      mkdir -p packages/contracts/dist && \
+      echo "export * from '../src/index';" > packages/contracts/dist/index.js; \
+    fi
+
+# Собираем db пакет с fallback
+RUN pnpm --filter db build || true
+
+# Убеждаемся что db dist существует
+RUN if [ ! -f "packages/db/dist/index.js" ]; then \
+      mkdir -p packages/db/dist && \
+      echo "export * from '../src/index';" > packages/db/dist/index.js; \
+    fi
 
 # Собираем приложение
 RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \

@@ -710,7 +710,7 @@ export class GroupsRepo {
         eq(groupMembers.groupId, groupId)
       ));
 
-    return result.rowCount > 0;
+    return Array.isArray(result) ? result.length > 0 : (result as any).rowCount > 0;
   }
 
   /**
@@ -836,7 +836,7 @@ export class GroupsRepo {
       .delete(groupMembers)
       .where(eq(groupMembers.id, membership[0].id));
 
-    return result.rowCount > 0;
+    return Array.isArray(result) ? result.length > 0 : (result as any).rowCount > 0;
   }
 
   /**
