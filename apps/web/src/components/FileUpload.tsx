@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Image, AlertCircle, CheckCircle, FileText, FileSpreadsheet, Presentation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,22 @@ export function FileUpload({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openFileDialog = () => {
+    if (inputRef.current) {
+      inputRef.current.click();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      onDrop(Array.from(files));
+    }
+    // Сброс значения input для возможности выбора того же файла повторно
+    e.target.value = '';
+  };
 
   const uploadFile = async (file: File): Promise<UploadedFile> => {
     const formData = new FormData();
@@ -124,12 +140,13 @@ export function FileUpload({
     }
   };
 
+  // Единый dropzone со стандартным поведением
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     disabled: disabled || isUploading,
     accept: accept ? { [accept]: [] } : undefined,
     maxSize: maxSizeMB * 1024 * 1024,
-    multiple: false, // Пока поддерживаем только одиночную загрузку
+    multiple: false,
     onDropRejected: (rejectedFiles) => {
       const file = rejectedFiles[0];
       if (file.errors[0]?.code === 'file-too-large') {
@@ -227,7 +244,6 @@ export function FileUpload({
           )}
         >
           <input {...getInputProps()} />
-          
           <div className="flex flex-col items-center space-y-2">
             <Upload className="h-8 w-8 text-gray-400" />
             <div className="text-sm text-gray-600">
@@ -264,45 +280,67 @@ export function FileUpload({
 
       {/* Загруженный файл */}
       {value && !isUploading && (
-        <div className="border rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div 
-              className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 rounded p-2 -m-2 transition-colors"
-              onClick={handleFileClick}
-            >
-              {isImage(value) ? (
-                <div className="relative">
-                  <img
-                    src={value}
-                    alt="Uploaded file"
-                    className="h-12 w-12 object-cover rounded"
-                  />
+        <div className="space-y-3">
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div 
+                className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 rounded p-2 -m-2 transition-colors"
+                onClick={handleFileClick}
+              >
+                {isImage(value) ? (
+                  <div className="relative">
+                    <img
+                      src={value}
+                      alt="Uploaded file"
+                      className="h-12 w-12 object-cover rounded"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-12 w-12 bg-gray-100 rounded flex items-center justify-center">
+                    {getFileIcon(value)}
+                  </div>
+                )}
+                
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {fileName || 'Файл загружен'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Нажмите для скачивания
+                  </p>
                 </div>
-              ) : (
-                <div className="h-12 w-12 bg-gray-100 rounded flex items-center justify-center">
-                  {getFileIcon(value)}
-                </div>
-              )}
-              
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {fileName || 'Файл загружен'}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Нажмите для скачивания
-                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={removeFile}
+                  disabled={disabled}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={removeFile}
-              disabled={disabled}
-              className="ml-2"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          </div>
+          
+          {/* Кнопка для замены файла */}
+          <div
+            {...getRootProps()}
+            className={cn(
+              'border border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors',
+              isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400',
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+          >
+            <input {...getInputProps()} />
+            <div className="flex items-center justify-center space-x-2">
+              <Upload className="h-4 w-4 text-gray-400" />
+              <span className="text-sm text-gray-600">
+                {isDragActive ? 'Отпустите для замены файла' : 'Заменить файл'}
+              </span>
+            </div>
           </div>
         </div>
       )}
