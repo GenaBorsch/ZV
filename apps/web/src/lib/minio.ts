@@ -52,6 +52,33 @@ export const ALLOWED_TYPES = {
   IMAGES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
   DOCUMENTS: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   SHEETS: ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+  OFFICE_DOCUMENTS: [
+    // PDF
+    'application/pdf',
+    // Microsoft Word
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    // Microsoft Excel
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    // Microsoft PowerPoint
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // OpenDocument
+    'application/vnd.oasis.opendocument.text',
+    'application/vnd.oasis.opendocument.spreadsheet',
+    'application/vnd.oasis.opendocument.presentation',
+    // Другие форматы
+    'application/rtf',
+    'text/csv',
+    'text/plain',
+    // Изображения для листов персонажей
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif'
+  ],
 } as const;
 
 // Разрешенные расширения файлов (дополнительная проверка)
@@ -59,6 +86,22 @@ export const ALLOWED_EXTENSIONS = {
   IMAGES: ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
   DOCUMENTS: ['.pdf', '.doc', '.docx'],
   SHEETS: ['.pdf', '.jpg', '.jpeg', '.png', '.webp'],
+  OFFICE_DOCUMENTS: [
+    // PDF
+    '.pdf',
+    // Microsoft Word
+    '.doc', '.docx',
+    // Microsoft Excel
+    '.xls', '.xlsx',
+    // Microsoft PowerPoint
+    '.ppt', '.pptx',
+    // OpenDocument
+    '.odt', '.ods', '.odp',
+    // Другие форматы
+    '.rtf', '.csv', '.txt',
+    // Изображения
+    '.jpg', '.jpeg', '.png', '.webp', '.gif'
+  ],
 } as const;
 
 // Магические байты для проверки типа файла
@@ -69,6 +112,12 @@ export const MAGIC_BYTES = {
   GIF_87A: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
   GIF_89A: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
   PDF: [0x25, 0x50, 0x44, 0x46],
+  // Office документы (OLE2 Compound Document)
+  OLE2: [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1],
+  // ZIP-based форматы (docx, xlsx, pptx, odt, ods, odp)
+  ZIP: [0x50, 0x4B],
+  // RTF документы
+  RTF: [0x7B, 0x5C, 0x72, 0x74, 0x66], // {\rtf
 } as const;
 
 // Максимальные размеры файлов (в МБ)
@@ -139,6 +188,34 @@ async function validateMagicBytes(file: File): Promise<boolean> {
     return riffCheck && webpCheck;
   };
 
+  // Проверка ZIP-based форматов (более детальная проверка)
+  const isZipBased = () => {
+    if (!checkBytes(MAGIC_BYTES.ZIP)) return false;
+    // Для ZIP-based файлов проверяем расширение, так как все они начинаются с PK
+    const extension = '.' + file.name.split('.').pop()?.toLowerCase();
+    return ['.docx', '.xlsx', '.pptx', '.odt', '.ods', '.odp'].includes(extension);
+  };
+
+  // Проверка RTF файлов
+  const isRTF = () => {
+    return checkBytes(MAGIC_BYTES.RTF);
+  };
+
+  // Проверка текстовых файлов (CSV, TXT)
+  const isTextFile = () => {
+    const extension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!['.csv', '.txt'].includes(extension)) return false;
+    
+    // Проверяем, что файл содержит только печатные символы ASCII/UTF-8
+    try {
+      const text = new TextDecoder('utf-8').decode(bytes.slice(0, Math.min(1024, bytes.length)));
+      // Проверяем наличие непечатных символов (кроме переводов строк и табов)
+      return !/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/.test(text);
+    } catch {
+      return false;
+    }
+  };
+
   // Проверяем все известные форматы
   return (
     checkBytes(MAGIC_BYTES.PNG) ||
@@ -146,7 +223,11 @@ async function validateMagicBytes(file: File): Promise<boolean> {
     isWebP() ||
     checkBytes(MAGIC_BYTES.GIF_87A) ||
     checkBytes(MAGIC_BYTES.GIF_89A) ||
-    checkBytes(MAGIC_BYTES.PDF)
+    checkBytes(MAGIC_BYTES.PDF) ||
+    checkBytes(MAGIC_BYTES.OLE2) ||
+    isZipBased() ||
+    isRTF() ||
+    isTextFile()
   );
 }
 
@@ -167,10 +248,16 @@ export async function validateFile(file: File, options: FileUploadOptions): Prom
   const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
   let allowedExtensions: readonly string[] = [];
   
-  if (options.allowedTypes?.includes('image/jpeg') || options.allowedTypes?.includes('image/png')) {
-    allowedExtensions = ALLOWED_EXTENSIONS.IMAGES;
-  } else if (options.allowedTypes?.includes('application/pdf')) {
+  // Определяем разрешенные расширения на основе типов файлов
+  // Проверяем самые специфичные типы первыми
+  if (options.allowedTypes?.some(type => ALLOWED_TYPES.OFFICE_DOCUMENTS.includes(type as any))) {
+    allowedExtensions = ALLOWED_EXTENSIONS.OFFICE_DOCUMENTS;
+  } else if (options.allowedTypes?.some(type => ALLOWED_TYPES.DOCUMENTS.includes(type as any))) {
     allowedExtensions = [...ALLOWED_EXTENSIONS.DOCUMENTS, ...ALLOWED_EXTENSIONS.IMAGES];
+  } else if (options.allowedTypes?.some(type => ALLOWED_TYPES.SHEETS.includes(type as any))) {
+    allowedExtensions = ALLOWED_EXTENSIONS.SHEETS;
+  } else if (options.allowedTypes?.some(type => ALLOWED_TYPES.IMAGES.includes(type as any))) {
+    allowedExtensions = ALLOWED_EXTENSIONS.IMAGES;
   }
   
   if (allowedExtensions.length > 0 && !allowedExtensions.includes(fileExtension)) {

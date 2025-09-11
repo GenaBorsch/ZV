@@ -28,7 +28,7 @@ const UPLOAD_CONFIGS: Record<string, FileUploadOptions> = {
     bucket: BUCKETS.DOCUMENTS,
     folder: 'character-sheets',
     maxSizeMB: MAX_FILE_SIZES.SHEET,
-    allowedTypes: ALLOWED_TYPES.SHEETS,
+    allowedTypes: ALLOWED_TYPES.OFFICE_DOCUMENTS,
   },
   'product-image': {
     bucket: BUCKETS.UPLOADS,

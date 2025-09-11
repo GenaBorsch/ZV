@@ -235,6 +235,9 @@ export function CharacterForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="sheetUrl">Лист персонажа</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Загрузите лист персонажа в любом удобном формате: PDF, Word, Excel, изображение и др.
+              </p>
               <FileUpload
                 type="character-sheet"
                 value={formData.sheetUrl}

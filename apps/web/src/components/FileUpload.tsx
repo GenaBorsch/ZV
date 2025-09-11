@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, File, Image, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, X, File, Image, AlertCircle, CheckCircle, FileText, FileSpreadsheet, Presentation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -143,6 +143,34 @@ export function FileUpload({
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   };
 
+  const getFileIcon = (url: string) => {
+    const extension = url.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'pdf':
+        return <FileText className="h-6 w-6 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <FileText className="h-6 w-6 text-blue-500" />;
+      case 'xls':
+      case 'xlsx':
+      case 'csv':
+        return <FileSpreadsheet className="h-6 w-6 text-green-500" />;
+      case 'ppt':
+      case 'pptx':
+        return <Presentation className="h-6 w-6 text-orange-500" />;
+      case 'odt':
+      case 'ods':
+      case 'odp':
+        return <FileText className="h-6 w-6 text-purple-500" />;
+      case 'rtf':
+      case 'txt':
+        return <FileText className="h-6 w-6 text-gray-500" />;
+      default:
+        return <File className="h-6 w-6 text-gray-500" />;
+    }
+  };
+
   return (
     <div className={cn('space-y-4', className)}>
       {/* Область загрузки */}
@@ -169,6 +197,11 @@ export function FileUpload({
                   <p className="text-xs text-gray-500 mt-1">
                     Максимальный размер: {maxSizeMB}МБ
                   </p>
+                  {type === 'character-sheet' && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Поддерживаемые форматы: PDF, Word, Excel, PowerPoint, OpenDocument, RTF, CSV, TXT, изображения
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -202,7 +235,7 @@ export function FileUpload({
                 </div>
               ) : (
                 <div className="h-12 w-12 bg-gray-100 rounded flex items-center justify-center">
-                  <File className="h-6 w-6 text-gray-500" />
+                  {getFileIcon(value)}
                 </div>
               )}
               
