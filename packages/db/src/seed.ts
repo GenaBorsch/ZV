@@ -1,3 +1,9 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Загружаем .env из корня проекта
+config({ path: resolve(__dirname, '../../../.env') });
+
 import { db, seasons, users, masterProfiles, playerProfiles, eq } from './index';
 
 async function main() {
@@ -33,7 +39,10 @@ async function main() {
     console.log('✅ Активный сезон уже существует:', existingActiveSeason[0].title);
   }
 
-  // Создаем профили для демо-пользователей
+  // Создаем полный набор тестовых данных
+  console.log('🚀 Запускаю создание полного набора тестовых данных...');
+  console.log('💡 Для создания только профилей используйте отдельный скрипт create_demo_data.ts');
+  
   await createDemoProfiles();
 }
 

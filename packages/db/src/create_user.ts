@@ -1,4 +1,8 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Загружаем .env из корня проекта
+config({ path: resolve(__dirname, '../../../.env') });
 import { db, users, userRoles } from './index';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';

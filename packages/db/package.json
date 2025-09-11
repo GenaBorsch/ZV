@@ -11,6 +11,7 @@
     "migrate": "drizzle-kit migrate",
     "seed": "tsx src/seed.ts",
     "create-user": "tsx src/create_user.ts",
+    "create-demo-data": "tsx src/create_demo_data.ts",
     "cleanup-demo": "tsx src/cleanup_demo.ts",
     "studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push"

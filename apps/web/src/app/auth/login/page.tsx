@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getRedirectUrlByRoles, needsProfileCompletion } from '@/lib/redirectUtils';
+import { TestAccountsInfo } from '@/components/TestAccountsInfo';
 
 function LoginPageContent() {
   const [email, setEmail] = useState('');
@@ -121,6 +122,11 @@ function LoginPageContent() {
             </p>
           </div>
         </form>
+
+        {/* Информация о тестовых аккаунтах */}
+        <div className="mt-6">
+          <TestAccountsInfo />
+        </div>
       </div>
     </div>
   );
