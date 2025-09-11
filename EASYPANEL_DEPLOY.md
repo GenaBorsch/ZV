@@ -34,18 +34,31 @@ S3_BUCKET_AVATARS=avatars
 S3_BUCKET_DOCUMENTS=documents
 S3_BUCKET_UPLOADS=uploads
 
+# 🧪 Тестовые данные (опционально)
+CREATE_DEMO_ACCOUNTS=true  # Создать тестовые аккаунты для демонстрации
+
 # 🔧 Дополнительные
 NODE_ENV=production
 FEATURE_PAYMENTS=false
 FEATURE_TELEGRAM=false
 ```
 
-### 4. Настройка БД
+### 4. Автоматическая настройка БД
 
-**Перед деплоем выполните миграции:**
+**Миграции и инициализация выполняются автоматически при деплое!**
+
+Docker-контейнер автоматически:
+1. ✅ Применяет миграции БД (`pnpm db:migrate`)
+2. ✅ Создает активный сезон
+3. ✅ Создает тестовые аккаунты (если `CREATE_DEMO_ACCOUNTS=true`)
+
+**Ручная настройка (если нужно):**
 ```bash
+# Только миграции
 DATABASE_URL="postgresql://user:pass@prod-host:5432/db" pnpm db:migrate
-DATABASE_URL="postgresql://user:pass@prod-host:5432/db" pnpm db:seed
+
+# Создание тестовых данных
+DATABASE_URL="postgresql://user:pass@prod-host:5432/db" CREATE_DEMO_ACCOUNTS=true pnpm db:seed-production
 ```
 
 ### 5. Проверка
@@ -54,6 +67,17 @@ DATABASE_URL="postgresql://user:pass@prod-host:5432/db" pnpm db:seed
 - `https://your-domain.com/api/health` - должен вернуть `{"status":"ok"}`
 - `https://your-domain.com/` - главная страница
 - `https://your-domain.com/auth/login` - страница входа
+
+### 6. 🧪 Тестовые аккаунты
+
+Если установлена переменная `CREATE_DEMO_ACCOUNTS=true`, будут созданы тестовые аккаунты:
+
+- **👑 Администратор**: `demoadmin@zvezdnoe-vereteno.ru` / `demo1234`
+- **🛡️ Модератор**: `demomoderator@zvezdnoe-vereteno.ru` / `demo1234`  
+- **🎯 Мастер**: `demomaster@zvezdnoe-vereteno.ru` / `demo1234`
+- **🎮 Игрок**: `demoplayer@zvezdnoe-vereteno.ru` / `demo1234`
+
+**⚠️ ВАЖНО**: Удалите эти аккаунты после тестирования в продакшне!
 
 ## 🚨 Важно
 

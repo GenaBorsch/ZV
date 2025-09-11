@@ -74,6 +74,27 @@ pnpm dev
 **Страница входа**: `/auth/login`  
 **Автоматический редирект**: MASTER → `/master`, ADMIN/MODERATOR → `/admin`, остальные → `/player`
 
+## 🚀 Деплой в продакшн
+
+### EasyPanel (рекомендуется)
+
+```bash
+# Соберите образ
+docker build -f docker/Dockerfile.prod -t zv-app:latest .
+
+# Настройте переменные окружения в EasyPanel:
+# - DATABASE_URL=postgresql://...
+# - NEXTAUTH_SECRET=32-chars-minimum
+# - CREATE_DEMO_ACCOUNTS=true (опционально)
+```
+
+**📖 Подробная инструкция**: [DEPLOY_QUICKSTART.md](./DEPLOY_QUICKSTART.md)
+
+### Другие способы деплоя
+
+- **Docker**: [EASYPANEL_DEPLOY.md](./EASYPANEL_DEPLOY.md)
+- **Подробное руководство**: [DEPLOYMENT_GUIDE.md](./project_docs/DEPLOYMENT_GUIDE.md)
+
 ## 📁 Структура монорепозитория
 
 ```
