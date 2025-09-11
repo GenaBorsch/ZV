@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, products, eq } from '@zv/db';
+import { deleteOldFileIfExists } from '@/lib/minio';
 
 function isAdmin(roles: string[] | undefined): boolean {
   const r = roles || [];
@@ -37,8 +38,20 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
       }
     }
 
+    // Если обновляется изображение, получаем старое для удаления
+    let currentProduct = null;
+    if (update.imageUrl) {
+      const [current] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+      currentProduct = current;
+    }
+
     update.updatedAt = new Date();
     const [saved] = await db.update(products).set(update).where(eq(products.id, id)).returning();
+    
+    // Удаляем старое изображение после успешного обновления
+    if (update.imageUrl && currentProduct?.imageUrl && update.imageUrl !== currentProduct.imageUrl) {
+      await deleteOldFileIfExists(currentProduct.imageUrl);
+    }
     if (!saved) return NextResponse.json({ error: 'not_found' }, { status: 404 });
     return NextResponse.json({ item: saved });
   } catch (e: any) {

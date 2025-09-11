@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FileUpload } from '@/components/FileUpload';
 
 export default function AdminNewProductPage() {
   const router = useRouter();
@@ -57,8 +58,16 @@ export default function AdminNewProductPage() {
           <textarea className="input w-full" value={form.description} onChange={(e) => update('description', e.target.value)} />
         </div>
         <div>
-          <label className="block text-sm mb-1">URL изображения</label>
-          <input type="url" className="input w-full" value={form.imageUrl} onChange={(e) => update('imageUrl', e.target.value)} placeholder="https://example.com/image.jpg" />
+          <label className="block text-sm mb-1">Изображение товара</label>
+          <FileUpload
+            type="product-image"
+            value={form.imageUrl || null}
+            onChange={(url) => update('imageUrl', url || '')}
+            accept="image/*"
+            maxSizeMB={10}
+            disabled={loading}
+            className="mt-2"
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>

@@ -7,7 +7,7 @@
 Источник: `packages/db/src/schema.ts`
 
 #### Пользователи и роли
-- **`User (users)`**: email (unique), tel?, tgId?, name?, avatarUrl?, **rpgExperience?** (NOVICE|INTERMEDIATE|VETERAN), **contacts?**, timestamps
+- **`User (users)`**: email (unique), tel?, tgId?, name?, **avatarUrl?** (MinIO URL), **rpgExperience?** (NOVICE|INTERMEDIATE|VETERAN), **contacts?**, timestamps
 - **`UserRole (user_roles)`**: (userId, role) unique; enum `Role`: PLAYER, MASTER, MODERATOR, SUPERADMIN
 
 **Профили (1–1 от `User`):**
@@ -21,10 +21,10 @@
 - **`GroupMember (group_members)`**: groupId, playerId (→ PlayerProfile), characterId?, status (ACTIVE|INACTIVE|BANNED), createdAt
 
 #### Игровой процесс
-- **`Character (characters)`**: playerId (→ PlayerProfile), name, archetype?, sheetUrl?, notes?
+- **`Character (characters)`**: playerId (→ PlayerProfile), name, **avatarUrl?** (MinIO URL), archetype?, **sheetUrl?** (MinIO URL), notes?
 - **`Session (sessions)`**: groupId, startsAt, durationMin, place?, format, isOpen, slotsTotal, slotsFree
 - **`Enrollment (enrollments)`**: sessionId, playerId (→ User), status (PENDING|CONFIRMED|CANCELLED|WAITLIST), createdAt
-- **`Report (reports)`**: sessionId (optional), masterId, description, highlights?, status (PENDING|APPROVED|REJECTED|CANCELLED), rejectionReason?, createdAt, updatedAt
+- **`Report (reports)`**: sessionId (optional), masterId, description, highlights?, **attachments?** (JSON array of MinIO URLs), status (PENDING|APPROVED|REJECTED|CANCELLED), rejectionReason?, createdAt, updatedAt
 - **`ReportPlayer (report_players)`**: reportId (→ Report), playerId (→ User), createdAt - связь отчётов с игроками
 - **`Writeoff (writeoffs)`**: userId, sessionId?, reportId?, battlepassId, createdAt - логирование списаний игр
 
@@ -40,7 +40,7 @@
 - **`RuleDoc (rule_docs)`**: title, slug unique, content (markdown), version?, published
 
 #### Коммерция
-- **`Product (products)`**: sku unique, title, type (BATTLEPASS|MERCH|ADDON), priceRub, meta?, active
+- **`Product (products)`**: sku unique, title, **imageUrl?** (MinIO URL), type (BATTLEPASS|MERCH|ADDON), priceRub, meta?, active
 - **`Order (orders)`**: userId, status (PENDING|PAID|CANCELLED|REFUNDED), totalRub, provider (YOOKASSA), providerId?, createdAt
 - **`OrderItem (order_items)`**: orderId, productId, qty (default 1), priceRub
 - **`Battlepass (battlepasses)`**: userId, kind (SEASON|FOUR|SINGLE), seasonId, usesTotal, usesLeft, status (ACTIVE|EXPIRED|USED_UP)
@@ -451,4 +451,164 @@ pnpm --filter db run create-user \
 - **Сессии** хранятся в JWT токенах
 - **CSRF защита** встроена в NextAuth
 
-**Последнее обновление**: Январь 2025 - добавлена система заявок в группы с уведомлениями
+## 📁 Система управления файлами (MinIO)
+
+### Архитектура файлового хранилища
+
+**MinIO** используется как S3-совместимое объектное хранилище для всех файлов пользователей:
+
+#### Структура бакетов:
+- **`avatars`** - аватары пользователей и персонажей
+  - `users/` - аватары пользователей  
+  - `characters/` - аватары персонажей
+- **`documents`** - документы и листы персонажей
+  - `character-sheets/` - листы персонажей
+  - `reports/` - вложения к отчетам
+- **`uploads`** - загрузки администраторов
+  - `products/` - изображения товаров
+
+#### Политики доступа:
+- **`avatars`** - публичное чтение (для отображения в интерфейсе)
+- **`documents`** - приватный доступ (через presigned URLs)
+- **`uploads`** - публичное чтение (для изображений товаров)
+
+### API загрузки файлов
+
+#### Основные endpoints:
+- **`POST /api/upload`** - загрузка файла
+- **`DELETE /api/upload/delete`** - удаление файла
+
+#### Поддерживаемые типы загрузки:
+```typescript
+const UPLOAD_CONFIGS = {
+  'avatar': {
+    bucket: 'avatars',
+    folder: 'users',
+    maxSizeMB: 5,
+    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  },
+  'character-avatar': {
+    bucket: 'avatars', 
+    folder: 'characters',
+    maxSizeMB: 5,
+    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  },
+  'character-sheet': {
+    bucket: 'documents',
+    folder: 'character-sheets', 
+    maxSizeMB: 10,
+    allowedTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
+  },
+  'product-image': {
+    bucket: 'uploads',
+    folder: 'products',
+    maxSizeMB: 10,
+    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  },
+  'report-attachment': {
+    bucket: 'documents',
+    folder: 'reports',
+    maxSizeMB: 10,
+    allowedTypes: ['image/*', 'application/pdf', 'application/msword']
+  }
+}
+```
+
+### Безопасность файлов
+
+#### Многоуровневая валидация:
+1. **Проверка MIME-типа** - валидация заголовка Content-Type
+2. **Проверка расширения** - блокировка опасных расширений (.exe, .bat, .cmd, .scr)
+3. **Магические байты** - определение реального типа файла по содержимому
+4. **Ограничение размера** - индивидуальные лимиты для каждого типа
+
+#### Магические байты для определения типов:
+```typescript
+const MAGIC_BYTES = {
+  PNG: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
+  JPEG: [0xFF, 0xD8, 0xFF],
+  WEBP: [0x52, 0x49, 0x46, 0x46], // + WEBP на позиции 8
+  GIF_87A: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
+  GIF_89A: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+  PDF: [0x25, 0x50, 0x44, 0x46]
+}
+```
+
+#### Контроль доступа:
+- **PLAYER** - может загружать аватары и листы персонажей
+- **MASTER** - дополнительно может загружать вложения к отчетам
+- **MODERATOR/SUPERADMIN** - дополнительно может загружать изображения товаров
+
+### Автоматическое управление файлами
+
+#### Генерация имен файлов:
+```typescript
+// Формат: timestamp_uuid.extension
+const fileName = `${Date.now()}_${uuidv4()}.${extension}`;
+```
+
+#### Автоудаление старых файлов:
+При обновлении файлов (аватар, изображение товара) старые файлы автоматически удаляются:
+
+```typescript
+// В API профиля и товаров
+if (newFileUrl && oldFileUrl && newFileUrl !== oldFileUrl) {
+  await deleteOldFileIfExists(oldFileUrl);
+}
+```
+
+#### Функции для работы с файлами:
+- **`uploadFile(file, options)`** - загрузка с валидацией
+- **`deleteFile(bucket, key)`** - удаление файла
+- **`deleteOldFileIfExists(url)`** - безопасное удаление старого файла
+- **`parseMinioUrl(url)`** - извлечение bucket и key из URL
+- **`getPresignedUrl(bucket, key)`** - генерация временных ссылок
+
+### UI компоненты
+
+#### FileUpload компонент:
+- **Drag & Drop** интерфейс загрузки
+- **Предварительный просмотр** изображений
+- **Прогресс-бар** загрузки
+- **Обработка ошибок** с детальными сообщениями
+- **Автоматическая интеграция** с формами
+
+#### Интеграция в формы:
+- **Профиль пользователя** - загрузка аватара
+- **Создание товара** - загрузка изображения
+- **Редактирование товара** - замена изображения с удалением старого
+
+### Конфигурация MinIO
+
+#### Переменные окружения:
+```env
+S3_ENDPOINT="http://localhost:9000"
+S3_ACCESS_KEY="zv_admin"
+S3_SECRET_KEY="zv_admin_password"
+S3_BUCKET_AVATARS="avatars"
+S3_BUCKET_DOCUMENTS="documents"
+S3_BUCKET_UPLOADS="uploads"
+```
+
+#### Автоматическая инициализация:
+При первом запуске автоматически:
+1. Создаются необходимые бакеты
+2. Настраиваются политики доступа
+3. Проверяется подключение к MinIO
+
+### Тестирование файловой системы
+
+#### Страница тестирования безопасности:
+**`/test-security`** - специальная страница для проверки системы безопасности:
+- Автоматические тесты попыток загрузки вредоносных файлов
+- Ручное тестирование различных типов файлов
+- Отображение результатов валидации в реальном времени
+
+#### Тестовые сценарии:
+1. **Подделка MIME-типа** - .exe файл с Content-Type: image/png
+2. **Подделка расширения** - malware.png с содержимым .exe файла  
+3. **Batch файлы** - .bat файлы с подделкой MIME-типа
+4. **Превышение размера** - файлы больше установленных лимитов
+5. **Валидные файлы** - корректные изображения и документы
+
+**Последнее обновление**: Сентябрь 2025 - добавлена безопасная система управления файлами с MinIO

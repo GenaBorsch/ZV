@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { FileUpload } from '@/components/FileUpload';
 import { useSession, getSession, signOut, signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getRedirectUrlByRoles } from '@/lib/redirectUtils';
@@ -397,12 +398,15 @@ function ProfilePageContent() {
             </div>
 
             <div>
-              <Label htmlFor="avatarUrl">Аватар (URL)</Label>
-              <Input
-                id="avatarUrl"
-                {...mainForm.register('avatarUrl')}
-                placeholder="https://example.com/avatar.jpg"
-                type="url"
+              <Label htmlFor="avatarUrl">Аватар</Label>
+              <FileUpload
+                type="avatar"
+                value={mainForm.watch('avatarUrl') || null}
+                onChange={(url) => mainForm.setValue('avatarUrl', url || '')}
+                accept="image/*"
+                maxSizeMB={5}
+                disabled={saving}
+                className="mt-2"
               />
               {mainForm.formState.errors.avatarUrl && (
                 <p className="text-sm text-red-600 mt-1">

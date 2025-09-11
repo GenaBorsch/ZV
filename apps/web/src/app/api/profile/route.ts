@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { ProfilesRepo } from '@zv/db';
 import { UpdateProfileDto } from '@zv/contracts';
 import { authOptions } from '@/lib/auth';
+import { deleteOldFileIfExists } from '@/lib/minio';
 
 export async function GET() {
   try {
@@ -40,10 +41,18 @@ export async function PATCH(request: Request) {
 
     const profilesRepo = new ProfilesRepo();
     
+    // Получаем текущий профиль для проверки старого аватара
+    const currentProfile = await profilesRepo.getProfile(session.user.id);
+    
     console.log('API Profile update:', {
       userId: session.user.id,
       inputData: parsed.data
     });
+    
+    // Если обновляется аватар, удаляем старый файл
+    if (parsed.data.avatarUrl && currentProfile?.avatarUrl && parsed.data.avatarUrl !== currentProfile.avatarUrl) {
+      await deleteOldFileIfExists(currentProfile.avatarUrl);
+    }
     
     const profile = await profilesRepo.updateProfile(session.user.id, parsed.data);
     
