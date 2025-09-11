@@ -8,6 +8,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { FileUpload } from './FileUpload';
 
 interface CharacterFormProps {
   character?: CharacterDtoType;
@@ -59,9 +60,7 @@ export function CharacterForm({
       newErrors.level = 'Уровень должен быть не менее 1';
     }
 
-    if (formData.avatarUrl && !/^https?:\/\/.+/.test(formData.avatarUrl)) {
-      newErrors.avatarUrl = 'Некорректная ссылка на аватар';
-    }
+    // Валидация avatarUrl убрана - теперь файл загружается через FileUpload
 
     if (formData.backstory && formData.backstory.length > 5000) {
       newErrors.backstory = 'Предыстория не должна превышать 5000 символов';
@@ -75,9 +74,7 @@ export function CharacterForm({
       newErrors.deathDate = 'Дата смерти должна быть в формате дд.мм.ггг';
     }
 
-    if (formData.sheetUrl && !/^https?:\/\/.+/.test(formData.sheetUrl)) {
-      newErrors.sheetUrl = 'Некорректная ссылка на лист персонажа';
-    }
+    // Валидация sheetUrl убрана - теперь файл загружается через FileUpload
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -164,13 +161,11 @@ export function CharacterForm({
             </div>
 
             <div>
-              <Label htmlFor="avatarUrl">URL аватара</Label>
-              <Input
-                id="avatarUrl"
+              <Label htmlFor="avatarUrl">Аватар персонажа</Label>
+              <FileUpload
+                type="character-avatar"
                 value={formData.avatarUrl}
-                onChange={(e) => handleInputChange('avatarUrl', e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-                className={errors.avatarUrl ? 'border-red-500' : ''}
+                onChange={(url) => handleInputChange('avatarUrl', url || '')}
               />
               {errors.avatarUrl && <p className="text-sm text-red-500 mt-1">{errors.avatarUrl}</p>}
             </div>
@@ -239,13 +234,11 @@ export function CharacterForm({
           {/* Дополнительные поля */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="sheetUrl">Ссылка на лист персонажа</Label>
-              <Input
-                id="sheetUrl"
+              <Label htmlFor="sheetUrl">Лист персонажа</Label>
+              <FileUpload
+                type="character-sheet"
                 value={formData.sheetUrl}
-                onChange={(e) => handleInputChange('sheetUrl', e.target.value)}
-                placeholder="https://example.com/character-sheet"
-                className={errors.sheetUrl ? 'border-red-500' : ''}
+                onChange={(url) => handleInputChange('sheetUrl', url || '')}
               />
               {errors.sheetUrl && <p className="text-sm text-red-500 mt-1">{errors.sheetUrl}</p>}
             </div>
