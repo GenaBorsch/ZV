@@ -42,6 +42,7 @@ export function FileUpload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const uploadFile = async (file: File): Promise<UploadedFile> => {
     const formData = new FormData();
@@ -91,6 +92,7 @@ export function FileUpload({
       
       // Обновляем значение
       onChange(result.url);
+      setFileName(result.originalName);
       setSuccess(`Файл "${result.originalName}" успешно загружен`);
       
       // Очищаем сообщения через 3 секунды
@@ -114,6 +116,7 @@ export function FileUpload({
       // Если есть информация о файле, удаляем его из MinIO
       // Пока просто очищаем значение
       onChange(null);
+      setFileName(null);
       setSuccess('Файл удален');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -171,6 +174,45 @@ export function FileUpload({
     }
   };
 
+  const handleFileClick = async () => {
+    if (value) {
+      try {
+        // Для изображений просто открываем в новой вкладке
+        if (isImage(value)) {
+          window.open(value, '_blank');
+          return;
+        }
+        
+        // Для других файлов используем наш API для получения безопасной ссылки
+        const response = await fetch(`/api/download?url=${encodeURIComponent(value)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.downloadUrl) {
+            // Используем presigned URL для скачивания
+            const link = document.createElement('a');
+            link.href = data.downloadUrl;
+            link.download = fileName || data.fileName || 'download';
+            link.target = '_blank';
+            
+            // Добавляем ссылку в DOM, кликаем и удаляем
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else {
+            throw new Error(data.error || 'Не удалось получить ссылку для скачивания');
+          }
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Ошибка при получении файла');
+        }
+      } catch (error) {
+        console.error('Ошибка при скачивании файла:', error);
+        alert(`Ошибка при скачивании файла: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
+      }
+    }
+  };
+
   return (
     <div className={cn('space-y-4', className)}>
       {/* Область загрузки */}
@@ -224,7 +266,10 @@ export function FileUpload({
       {value && !isUploading && (
         <div className="border rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div 
+              className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 rounded p-2 -m-2 transition-colors"
+              onClick={handleFileClick}
+            >
               {isImage(value) ? (
                 <div className="relative">
                   <img
@@ -241,10 +286,10 @@ export function FileUpload({
               
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  Файл загружен
+                  {fileName || 'Файл загружен'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Нажмите для просмотра
+                  Нажмите для скачивания
                 </p>
               </div>
             </div>
