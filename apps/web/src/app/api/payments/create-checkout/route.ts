@@ -174,6 +174,8 @@ export async function POST(req: Request) {
     
     if (paymentUrl) {
       console.log('🔄 Redirecting to ЮKassa:', paymentUrl);
+      // Небольшая задержка, чтобы YooKassa успел инициализировать платежную страницу
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 секунды
       return NextResponse.redirect(paymentUrl);
     } else {
       console.log('❌ No confirmation_url in YooKassa response!');
