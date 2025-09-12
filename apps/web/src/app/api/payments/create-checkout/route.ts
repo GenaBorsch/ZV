@@ -169,9 +169,14 @@ export async function POST(req: Request) {
 
     const paymentUrl = payment.confirmation?.confirmation_url;
     
+    console.log('🔍 Payment URL from YooKassa:', paymentUrl);
+    console.log('🔍 Payment ID from YooKassa:', payment.id);
+    
     if (paymentUrl) {
       console.log('🔄 Redirecting to ЮKassa:', paymentUrl);
       return NextResponse.redirect(paymentUrl);
+    } else {
+      console.log('❌ No confirmation_url in YooKassa response!');
     }
 
     return NextResponse.json({ 
