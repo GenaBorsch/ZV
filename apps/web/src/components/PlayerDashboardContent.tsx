@@ -373,9 +373,9 @@ export function PlayerDashboardContent() {
           <div className="card p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-foreground">Баттлпасс</h3>
-              <button className="btn-primary">
+              <a href="/player/battlepass" className="btn-primary">
                 Купить баттлпасс
-              </button>
+              </a>
             </div>
             <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
               У вас нет активного баттлпасса.

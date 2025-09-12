@@ -104,20 +104,36 @@ export async function POST(req: Request) {
       productTitleSnapshot: product.title,
     });
 
+    // Создаем платеж через ЮKassa API
     const shopId = env('YKS_SHOP_ID');
     const secretKey = env('YKS_SECRET');
-    const baseUrl = env('PUBLIC_BASE_URL');
+    const baseUrl = process.env.YOOKASSA_RETURN_URL || `${env('PUBLIC_BASE_URL')}/player/battlepass/success`;
 
     const idempotenceKey = crypto.randomUUID();
     const auth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');
-    const description = `Battlepass ${product.sku} order ${newOrder.id}`;
-    const body = {
-      amount: { value: (product.priceRub / 1).toFixed(2), currency: 'RUB' },
+    const description = `Баттлпасс ${product.sku} заказ ${newOrder.id}`;
+    
+    const paymentBody = {
+      amount: { value: (product.priceRub).toFixed(2), currency: 'RUB' },
       capture: true,
       description,
-      confirmation: { type: 'redirect', return_url: `${baseUrl}/player/battlepass/success?orderId=${newOrder.id}` },
-      metadata: { orderId: newOrder.id, forUserId: targetUserId, productSku: product.sku },
-    } as any;
+      confirmation: { 
+        type: 'redirect', 
+        return_url: `${baseUrl}?orderId=${newOrder.id}` 
+      },
+      metadata: { 
+        orderId: newOrder.id, 
+        forUserId: targetUserId, 
+        productSku: product.sku 
+      },
+    };
+
+    console.log('🎯 Creating ЮKassa payment:', {
+      shopId,
+      secretKey: secretKey.substring(0, 10) + '...',
+      amount: paymentBody.amount,
+      returnUrl: paymentBody.confirmation.return_url
+    });
 
     const resp = await fetch('https://api.yookassa.ru/v3/payments', {
       method: 'POST',
@@ -126,27 +142,50 @@ export async function POST(req: Request) {
         'Idempotence-Key': idempotenceKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(paymentBody),
+    });
+
+    console.log('📤 YooKassa request details:', {
+      url: 'https://api.yookassa.ru/v3/payments',
+      idempotenceKey,
+      paymentBody: JSON.stringify(paymentBody, null, 2)
     });
 
     if (!resp.ok) {
       const errText = await resp.text();
-      return NextResponse.json({ error: 'Failed to create payment', details: errText }, { status: 502 });
+      console.error('ЮKassa API error:', errText);
+      return NextResponse.json({ 
+        error: 'Failed to create payment', 
+        details: errText 
+      }, { status: 502 });
     }
 
     const payment = await resp.json();
-    const paymentId: string = payment.id;
-    const paymentUrl: string | undefined = payment.confirmation?.confirmation_url;
+    console.log('✅ ЮKassa payment created:', payment.id);
+    console.log('📥 YooKassa response:', JSON.stringify(payment, null, 2));
 
-    await db.update(orders).set({ providerId: paymentId }).where(eq(orders.id, newOrder.id));
+    // Обновляем заказ с ID платежа
+    await db.update(orders).set({ providerId: payment.id }).where(eq(orders.id, newOrder.id));
 
+    const paymentUrl = payment.confirmation?.confirmation_url;
+    
     if (paymentUrl) {
+      console.log('🔄 Redirecting to ЮKassa:', paymentUrl);
       return NextResponse.redirect(paymentUrl);
     }
 
-    return NextResponse.json({ paymentId, paymentUrl: null, orderId: newOrder.id });
+    return NextResponse.json({ 
+      paymentId: payment.id, 
+      paymentUrl: null, 
+      orderId: newOrder.id 
+    });
+
   } catch (e: any) {
-    return NextResponse.json({ error: 'Unexpected error', message: e?.message || String(e) }, { status: 500 });
+    console.error('Payment creation error:', e);
+    return NextResponse.json({ 
+      error: 'Unexpected error', 
+      message: e?.message || String(e) 
+    }, { status: 500 });
   }
 }
 
