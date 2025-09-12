@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
-import { isPaymentsEnabled } from '@zv/utils/yookassa';
-import { PaymentsRepo } from '@zv/db/repositories/paymentsRepo';
+import { db, orders, battlepasses, eq } from '@zv/db';
+
+function env(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Environment variable ${key} is not set`);
+  }
+  return value;
+}
 
 export async function POST(req: Request) {
   try {
-    if (!isPaymentsEnabled()) {
+    // Проверяем включены ли платежи
+    const paymentsEnabled = process.env.FEATURE_PAYMENTS === 'true';
+    if (!paymentsEnabled) {
       return NextResponse.json({ ok: true });
     }
 
@@ -17,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, reason: 'bad payload' }, { status: 400 });
     }
 
-    console.log('Webhook received:', { event, paymentId: paymentObject.id });
+    console.log('🎣 Webhook received:', { event, paymentId: paymentObject.id });
 
     if (event === 'payment.succeeded') {
       const providerPaymentId = paymentObject.id as string | undefined;
@@ -28,24 +37,40 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: false, reason: 'no payment id' }, { status: 400 });
       }
 
-      // Обработка успешного платежа через репозиторий
+      console.log('💰 Processing successful payment:', { orderId, providerPaymentId });
+
+      // Обработка успешного платежа
       if (orderId) {
-        // Сначала обновляем providerId если нужно
-        await PaymentsRepo.updateOrder(orderId, { providerId: providerPaymentId });
-        // Затем отмечаем как оплаченный и выдаем баттлпассы
-        await PaymentsRepo.markPaidAndIssueBattlepasses(orderId);
-      } else {
-        // Ищем заказ по providerId
-        const order = await PaymentsRepo.getOrderByPaymentId(providerPaymentId);
-        if (order) {
-          await PaymentsRepo.markPaidAndIssueBattlepasses(order.id);
+        // Обновляем заказ как оплаченный
+        await db.update(orders)
+          .set({ 
+            status: 'PAID',
+            paidAt: new Date(),
+            providerId: providerPaymentId
+          })
+          .where(eq(orders.id, orderId));
+
+        // Находим заказ для выдачи баттлпасса
+        const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+        
+        if (order && order.forUserId) {
+          // Выдаем баттлпасс пользователю
+          await db.insert(battlepasses).values({
+            userId: order.forUserId,
+            orderId: order.id,
+            usesLeft: 1, // Базовое значение, можно улучшить
+            totalUses: 1,
+            isActive: true,
+          });
+          
+          console.log('🎮 Battlepass issued to user:', order.forUserId);
         }
       }
     }
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error('Webhook processing error:', e);
+    console.error('❌ Webhook processing error:', e);
     return NextResponse.json({ ok: false, error: e?.message || String(e) }, { status: 500 });
   }
 }
