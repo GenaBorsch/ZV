@@ -26,20 +26,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, reason: 'bad payload' }, { status: 400 });
     }
 
-    console.log('🎣 Webhook received:', { event, paymentId: paymentObject.id });
+    const providerPaymentId = paymentObject.id as string | undefined;
+    const metadata = paymentObject.metadata || {};
+    const orderId: string | undefined = metadata.orderId;
 
+    console.log('🎣 Webhook received:', { event, paymentId: providerPaymentId, orderId });
+
+    if (!providerPaymentId) {
+      return NextResponse.json({ ok: false, reason: 'no payment id' }, { status: 400 });
+    }
+
+    // Обработка успешного платежа
     if (event === 'payment.succeeded') {
-      const providerPaymentId = paymentObject.id as string | undefined;
-      const metadata = paymentObject.metadata || {};
-      const orderId: string | undefined = metadata.orderId;
-
-      if (!providerPaymentId) {
-        return NextResponse.json({ ok: false, reason: 'no payment id' }, { status: 400 });
-      }
-
       console.log('💰 Processing successful payment:', { orderId, providerPaymentId });
 
-      // Обработка успешного платежа
       if (orderId) {
         // Обновляем заказ как оплаченный
         await db.update(orders)
@@ -54,18 +54,56 @@ export async function POST(req: Request) {
         const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
         
         if (order && order.forUserId) {
-          // Выдаем баттлпасс пользователю
+          // Выдаем баттлпасс пользователю с правильным количеством использований
+          const product = order.productData as any;
+          const totalUses = product?.bpUsesTotal || 1;
+          
           await db.insert(battlepasses).values({
             userId: order.forUserId,
             orderId: order.id,
-            usesLeft: 1, // Базовое значение, можно улучшить
-            totalUses: 1,
+            usesLeft: totalUses,
+            totalUses: totalUses,
             isActive: true,
           });
           
-          console.log('🎮 Battlepass issued to user:', order.forUserId);
+          console.log('🎮 Battlepass issued to user:', order.forUserId, 'with', totalUses, 'uses');
         }
       }
+    }
+
+    // Обработка отмененного/неуспешного платежа
+    else if (event === 'payment.canceled') {
+      console.log('❌ Processing canceled payment:', { orderId, providerPaymentId });
+
+      if (orderId) {
+        // Обновляем заказ как отмененный
+        await db.update(orders)
+          .set({ 
+            status: 'CANCELLED',
+            providerId: providerPaymentId
+          })
+          .where(eq(orders.id, orderId));
+
+        console.log('🚫 Order marked as cancelled:', orderId);
+      }
+    }
+
+    // Обработка других событий (waiting_for_capture, pending, etc.)
+    else if (event === 'payment.waiting_for_capture') {
+      console.log('⏳ Payment waiting for capture:', { orderId, providerPaymentId });
+      
+      if (orderId) {
+        await db.update(orders)
+          .set({ 
+            status: 'PENDING',
+            providerId: providerPaymentId
+          })
+          .where(eq(orders.id, orderId));
+      }
+    }
+    
+    else {
+      console.log('ℹ️ Unhandled webhook event:', event);
     }
 
     return NextResponse.json({ ok: true });

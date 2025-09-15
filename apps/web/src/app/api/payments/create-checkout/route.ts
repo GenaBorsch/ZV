@@ -173,19 +173,20 @@ export async function POST(req: Request) {
     console.log('🔍 Payment ID from YooKassa:', payment.id);
     
     if (paymentUrl) {
-      console.log('🔄 Redirecting to ЮKassa:', paymentUrl);
-      // Небольшая задержка, чтобы YooKassa успел инициализировать платежную страницу
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 секунды
-      return NextResponse.redirect(paymentUrl);
+      console.log('🔄 Returning payment URL to frontend:', paymentUrl);
+      return NextResponse.json({ 
+        success: true,
+        paymentId: payment.id, 
+        confirmationUrl: paymentUrl,
+        orderId: newOrder.id
+      });
     } else {
       console.log('❌ No confirmation_url in YooKassa response!');
+      return NextResponse.json({ 
+        success: false,
+        error: 'No confirmation URL received from YooKassa'
+      }, { status: 500 });
     }
-
-    return NextResponse.json({ 
-      paymentId: payment.id, 
-      paymentUrl: null, 
-      orderId: newOrder.id 
-    });
 
   } catch (e: any) {
     console.error('Payment creation error:', e);

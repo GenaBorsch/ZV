@@ -40,6 +40,10 @@ export function PlayerDashboardContent() {
   const [editingCharacter, setEditingCharacter] = useState<CharacterDtoType | null>(null);
   const [characterFormLoading, setCharacterFormLoading] = useState(false);
 
+  // Battlepasses state
+  const [battlepasses, setBattlepasses] = useState<any[]>([]);
+  const [battlepassesLoading, setBattlepassesLoading] = useState(true);
+
   // Загрузка групп с сервера
   const fetchGroups = async () => {
     try {
@@ -70,6 +74,24 @@ export function PlayerDashboardContent() {
       console.error('Ошибка загрузки персонажей:', error);
     } finally {
       setCharactersLoading(false);
+    }
+  };
+
+  // Загрузка баттлпассов с сервера
+  const fetchBattlepasses = async () => {
+    try {
+      setBattlepassesLoading(true);
+      const response = await fetch('/api/player/battlepasses');
+      if (response.ok) {
+        const data = await response.json();
+        setBattlepasses(data.battlepasses || []);
+      } else {
+        console.error('Failed to fetch battlepasses:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки баттлпассов:', error);
+    } finally {
+      setBattlepassesLoading(false);
     }
   };
 
@@ -166,6 +188,7 @@ export function PlayerDashboardContent() {
   useEffect(() => {
     fetchGroups();
     fetchCharacters();
+    fetchBattlepasses();
   }, []);
 
   const handleJoinSuccess = (data: any) => {
@@ -377,9 +400,61 @@ export function PlayerDashboardContent() {
                 Купить баттлпасс
               </a>
             </div>
-            <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
-              У вас нет активного баттлпасса.
-            </div>
+            
+            {battlepassesLoading ? (
+              <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                Загрузка...
+              </div>
+            ) : battlepasses.length > 0 ? (
+              <div className="space-y-3">
+                {battlepasses.map((bp) => (
+                  <div key={bp.id} className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-medium text-foreground">
+                          {bp.kind === 'SEASON' ? 'Сезонный баттлпасс' : 
+                           bp.kind === 'SINGLE' ? 'Разовый баттлпасс' : 
+                           'Баттлпасс'}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Статус: {bp.status === 'ACTIVE' ? 'Активен' : bp.status}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        bp.status === 'ACTIVE' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                      }`}>
+                        {bp.status === 'ACTIVE' ? 'Активен' : bp.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">
+                        Использований: <span className="font-medium text-foreground">{bp.usesLeft} из {bp.usesTotal}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Создан: {new Date(bp.createdAt).toLocaleDateString('ru-RU')}
+                      </span>
+                    </div>
+                    {bp.usesLeft > 0 && (
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(bp.usesLeft / bp.usesTotal) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                У вас нет активного баттлпасса.
+              </div>
+            )}
           </div>
         </div>
 
