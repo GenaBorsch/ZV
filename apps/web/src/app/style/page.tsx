@@ -320,17 +320,55 @@ export default function StylePage() {
               <CardTitle>Типографика</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground">Заголовок H1</h1>
-                  <h2 className="text-3xl font-semibold text-foreground">Заголовок H2</h2>
-                  <h3 className="text-2xl font-medium text-foreground">Заголовок H3</h3>
-                  <h4 className="text-xl font-medium text-foreground">Заголовок H4</h4>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Шрифты системы</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Заголовки:</strong> Balkara Condensed (современная интерпретация средневековых форм)</p>
+                    <p><strong>Основной текст:</strong> Truetypewriter (моноширинный шрифт в стиле пишущей машинки)</p>
+                  </div>
                 </div>
+                
                 <div>
-                  <p className="text-foreground">Обычный текст с нормальным весом.</p>
-                  <p className="text-muted-foreground">Приглушенный текст для второстепенной информации.</p>
-                  <p className="text-sm text-muted-foreground">Мелкий текст для подписей и примечаний.</p>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Заголовки (Balkara Condensed)</h4>
+                  <div className="space-y-2">
+                    <h1 className="text-4xl font-bold text-foreground">ЗАГОЛОВОК H1 - BALKARA CONDENSED</h1>
+                    <h2 className="text-3xl font-semibold text-foreground">ЗАГОЛОВОК H2 - BALKARA CONDENSED</h2>
+                    <h3 className="text-2xl font-medium text-foreground">ЗАГОЛОВОК H3 - BALKARA CONDENSED</h3>
+                    <h4 className="text-xl font-medium text-foreground">ЗАГОЛОВОК H4 - BALKARA CONDENSED</h4>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Основной текст (Truetypewriter)</h4>
+                  <div className="space-y-2">
+                    <p className="text-foreground">
+                      Это обычный текст, набранный шрифтом Truetypewriter. 
+                      Он имитирует текст, напечатанный на пишущей машинке, 
+                      что придает особую атмосферу и стиль тексту.
+                    </p>
+                    <p className="text-muted-foreground">
+                      Приглушенный текст для второстепенной информации. 
+                      Моноширинные шрифты хорошо подходят для создания 
+                      ретро-атмосферы и улучшения читаемости.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Мелкий текст для подписей и примечаний. 
+                      Каждый символ занимает одинаковое пространство.
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Пример комбинации</h4>
+                  <div className="p-4 border border-border rounded-lg">
+                    <h3 className="text-xl font-medium text-foreground mb-2">ЗАГОЛОВОК СТАТЬИ</h3>
+                    <p className="text-foreground leading-relaxed">
+                      В мире настольных ролевых игр каждый персонаж имеет свою уникальную 
+                      историю. Система "Звёздное Веретено" позволяет игрокам создавать 
+                      глубоких и проработанных героев с богатой предысторией.
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -343,17 +381,17 @@ export default function StylePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                <div className="flex flex-wrap gap-3">
+                  <span className="status-badge px-3 py-2 rounded-full font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                     Активный
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  <span className="status-badge px-3 py-2 rounded-full font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                     Ожидание
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  <span className="status-badge px-3 py-2 rounded-full font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                     Неактивный
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                  <span className="status-badge px-3 py-2 rounded-full font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
                     Нейтральный
                   </span>
                 </div>

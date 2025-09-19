@@ -39,7 +39,7 @@ export function CharacterCard({
 
   return (
     <Card 
-      className={`cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full ${compact ? 'p-3' : ''}`}
+      className={`character-card cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full ${compact ? 'p-3' : ''}`}
       onClick={handleView}
     >
       <CardHeader className={compact ? 'pb-2' : 'pb-3'}>
@@ -82,7 +82,7 @@ export function CharacterCard({
           </div>
           
           <div className="flex flex-col items-end space-y-1 flex-shrink-0 ml-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+            <span className={`status-badge px-3 py-2 rounded-full font-medium whitespace-nowrap ${
               character.isAlive 
                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                 : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
@@ -90,7 +90,7 @@ export function CharacterCard({
               {character.isAlive ? 'ЖИВ' : 'МЕРТВ'}
             </span>
             {!character.isAlive && character.deathDate && (
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
                 ⚰️ {character.deathDate}
               </span>
             )}
@@ -100,7 +100,7 @@ export function CharacterCard({
       
       {!compact && (
         <CardContent className="pt-0 flex-1 flex flex-col">
-          <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+          <div className="flex items-center justify-between text-base text-muted-foreground mb-4">
             <div className="flex items-center space-x-4">
               <span className="flex items-center font-medium">
                 📊 Уровень {character.level}
@@ -117,9 +117,8 @@ export function CharacterCard({
             <div className="mt-auto pt-3 border-t border-border">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={handleEdit}
-                className="text-xs w-full"
+                className="w-full"
               >
                 Редактировать
               </Button>
