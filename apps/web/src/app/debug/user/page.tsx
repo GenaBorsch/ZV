@@ -1,6 +1,9 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 export default async function DebugUserPage() {
   let session = null;
   let error = null;
@@ -46,3 +49,5 @@ export default async function DebugUserPage() {
     </div>
   );
 }
+
+

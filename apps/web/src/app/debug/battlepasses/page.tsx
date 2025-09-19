@@ -1,5 +1,8 @@
 import { db, battlepasses, eq } from '@zv/db';
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 export default async function DebugBattlepassesPage() {
   // Получаем все баттлпассы для демо пользователя
   const demoUserId = 'ca323aa6-fe00-4043-ae15-9767d6f8fadf';

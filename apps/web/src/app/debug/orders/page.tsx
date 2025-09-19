@@ -1,5 +1,8 @@
 import { db, orders, battlepasses, orderItems } from '@zv/db';
 
+// Принудительно делаем страницу динамической
+export const dynamic = 'force-dynamic';
+
 export default async function DebugOrdersPage() {
   // Получаем все заказы
   const allOrders = await db.select().from(orders).limit(10);
@@ -114,3 +117,5 @@ export default async function DebugOrdersPage() {
     </div>
   );
 }
+
+
