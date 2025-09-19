@@ -18,6 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { ReportForm } from './ReportForm';
+import { PlayerErrorModal } from './PlayerErrorModal';
 import { CreateReportDtoType, UpdateReportDtoType, ReportDtoType } from '@zv/contracts';
 
 interface ReportWithPlayers {
@@ -45,6 +46,8 @@ export function MasterReportsContent() {
   const [editingReport, setEditingReport] = useState<ReportWithPlayers | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [showPlayerError, setShowPlayerError] = useState(false);
+  const [playersWithoutGames, setPlayersWithoutGames] = useState<string[]>([]);
 
   // Загрузка отчётов
   const loadReports = async () => {
@@ -84,7 +87,14 @@ export function MasterReportsContent() {
       } else {
         const error = await response.json();
         console.error('Failed to create report:', error);
-        alert('Ошибка при создании отчёта: ' + (error.error || 'Неизвестная ошибка'));
+        
+        // Проверяем, если ошибка связана с игроками без баттлпасса
+        if (error.playersWithoutBattlepass && error.playersWithoutBattlepass.length > 0) {
+          setPlayersWithoutGames(error.playersWithoutBattlepass);
+          setShowPlayerError(true);
+        } else {
+          alert('Ошибка при создании отчёта: ' + (error.error || 'Неизвестная ошибка'));
+        }
       }
     } catch (error) {
       console.error('Error creating report:', error);
@@ -172,6 +182,16 @@ export function MasterReportsContent() {
           onSubmit={handleCreateReport}
           onCancel={() => setShowCreateForm(false)}
           isLoading={isSubmitting}
+        />
+        
+        {/* Модальное окно ошибки игроков без баттлпасса */}
+        <PlayerErrorModal
+          isOpen={showPlayerError}
+          onClose={() => {
+            setShowPlayerError(false);
+            setPlayersWithoutGames([]);
+          }}
+          playersWithoutGames={playersWithoutGames}
         />
       </div>
     );
@@ -362,6 +382,16 @@ export function MasterReportsContent() {
           </Tabs>
         )}
       </main>
+
+      {/* Модальное окно ошибки игроков без баттлпасса */}
+      <PlayerErrorModal
+        isOpen={showPlayerError}
+        onClose={() => {
+          setShowPlayerError(false);
+          setPlayersWithoutGames([]);
+        }}
+        playersWithoutGames={playersWithoutGames}
+      />
     </div>
   );
 }
