@@ -85,28 +85,28 @@ export function MasterDashboardContent() {
       {/* Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-5 mb-8">
         <div className="card p-5">
-          <div className="text-sm text-muted-foreground">Мои группы</div>
-          <div className="text-lg font-medium">{groups.length}</div>
+          <div className="text-base text-muted-foreground">Мои группы</div>
+          <div className="text-xl font-medium">{groups.length}</div>
         </div>
         <div className="card p-5">
-          <div className="text-sm text-muted-foreground">Всего игроков</div>
-          <div className="text-lg font-medium">
+          <div className="text-base text-muted-foreground">Всего игроков</div>
+          <div className="text-xl font-medium">
             {groups.reduce((total, group) => total + group.currentMembers, 0)}
           </div>
         </div>
         <div className="card p-5">
-          <div className="text-sm text-muted-foreground">Новые заявки</div>
-          <div className="text-lg font-medium text-red-600">
+          <div className="text-base text-muted-foreground">Новые заявки</div>
+          <div className="text-xl font-medium text-red-600">
             {groups.reduce((total, group) => total + (group.pendingApplicationsCount || 0), 0)}
           </div>
         </div>
         <div className="card p-5">
-          <div className="text-sm text-muted-foreground">Ближайшие игры</div>
-          <div className="text-lg font-medium">0</div>
+          <div className="text-base text-muted-foreground">Ближайшие игры</div>
+          <div className="text-xl font-medium">0</div>
         </div>
         <div className="card p-5 cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => router.push('/master/reports')}>
-          <div className="text-sm text-muted-foreground">Отчёты</div>
-          <div className="text-lg font-medium">{reportsCount}</div>
+          <div className="text-base text-muted-foreground">Отчёты</div>
+          <div className="text-xl font-medium">{reportsCount}</div>
         </div>
       </div>
 
@@ -132,7 +132,7 @@ export function MasterDashboardContent() {
                     setViewingApplicationsGroupId(null);
                     fetchGroups(); // Обновляем данные при возврате к списку групп
                   }}
-                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                  className="text-primary hover:text-primary/80 text-base font-medium"
                 >
                   ← Назад к группам
                 </button>
@@ -175,10 +175,10 @@ export function MasterDashboardContent() {
                         <div>
                           <h4 className="font-medium text-foreground">{group.name}</h4>
                           {group.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                            <p className="text-base text-muted-foreground mt-1">{group.description}</p>
                           )}
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        <span className={`status-badge px-3 py-2 rounded-full font-medium ${
                           group.isRecruiting 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                             : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
@@ -187,7 +187,7 @@ export function MasterDashboardContent() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center justify-between text-base text-muted-foreground">
                         <div className="flex items-center space-x-4">
                           <span>👥 {group.currentMembers}/{group.maxMembers}</span>
                           <span>🎮 {group.format}</span>
@@ -196,18 +196,18 @@ export function MasterDashboardContent() {
                         
                         <div className="flex items-center gap-2">
                           <button 
-                            className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                            className="text-primary hover:text-primary/80 text-base font-medium flex items-center gap-2"
                             onClick={() => setViewingApplicationsGroupId(group.id)}
                           >
                             📝 Заявки
-                            {group.pendingApplicationsCount && group.pendingApplicationsCount > 0 && (
-                              <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                            {(group.pendingApplicationsCount || 0) > 0 && (
+                              <span className="bg-red-500 text-white text-sm rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
                                 {group.pendingApplicationsCount}
                               </span>
                             )}
                           </button>
                           <button 
-                            className="text-primary hover:text-primary/80 text-sm font-medium"
+                            className="text-primary hover:text-primary/80 text-base font-medium"
                             onClick={() => setSelectedGroupId(group.id)}
                           >
                             📋 Подробнее
@@ -215,7 +215,7 @@ export function MasterDashboardContent() {
                           {group.referralCode && (
                             <>
                               <button 
-                                className="text-primary hover:text-primary/80 text-sm font-medium"
+                                className="text-primary hover:text-primary/80 text-base font-medium"
                                 onClick={() => {
                                   navigator.clipboard.writeText(group.referralCode!);
                                   alert('Код приглашения скопирован!');
@@ -225,7 +225,7 @@ export function MasterDashboardContent() {
                                 🔗 Код
                               </button>
                               <button 
-                                className="text-primary hover:text-primary/80 text-sm font-medium"
+                                className="text-primary hover:text-primary/80 text-base font-medium"
                                 onClick={() => {
                                   const link = `${window.location.origin}/join?code=${group.referralCode}`;
                                   navigator.clipboard.writeText(link);
@@ -266,19 +266,19 @@ export function MasterDashboardContent() {
             <h3 className="text-lg font-medium text-foreground mb-4">Быстрые действия</h3>
             <div className="space-y-2">
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
                 onClick={() => setShowCreateForm(true)}
               >
                 Создать группу
               </button>
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-muted-foreground cursor-not-allowed rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-muted-foreground cursor-not-allowed rounded-md"
                 disabled
               >
                 Запланировать игру
               </button>
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
                 onClick={() => router.push('/master/reports')}
               >
                 Создать отчёт
@@ -289,17 +289,17 @@ export function MasterDashboardContent() {
           <div className="card p-6">
             <h3 className="text-lg font-medium text-foreground mb-4">Статистика</h3>
             <div className="space-y-3">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">Проведено игр:</span>
                 <span className="font-medium">0</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">Активных игроков:</span>
                 <span className="font-medium">
                   {groups.reduce((total, group) => total + group.currentMembers, 0)}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">Набор открыт:</span>
                 <span className="font-medium">
                   {groups.filter(group => group.isRecruiting).length}
@@ -311,7 +311,7 @@ export function MasterDashboardContent() {
           {showCreateForm && (
             <div className="card p-6">
               <button 
-                className="w-full text-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md"
+                className="w-full text-center px-3 py-2 text-base text-muted-foreground hover:text-foreground rounded-md"
                 onClick={() => setShowCreateForm(false)}
               >
                 ← Отменить создание группы

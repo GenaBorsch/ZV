@@ -209,62 +209,6 @@ export function PlayerDashboardContent() {
         Добро пожаловать, {session?.user?.name || 'Игрок'}!
       </h2>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-        <div className="card p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-accent/30 rounded-md flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-muted-foreground truncate">Мои персонажи</dt>
-                <dd className="text-lg font-medium text-foreground">{characters.length}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        <div className="card p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-accent/30 rounded-md flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-muted-foreground truncate">Мои группы</dt>
-                <dd className="text-lg font-medium text-foreground">{groups.length}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        <div className="card p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-accent/30 rounded-md flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-muted-foreground truncate">Ближайшие игры</dt>
-                <dd className="text-lg font-medium text-foreground">0</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -316,10 +260,10 @@ export function PlayerDashboardContent() {
                         <div>
                           <h4 className="font-medium text-foreground">{group.name}</h4>
                           {group.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                            <p className="text-base text-muted-foreground mt-1">{group.description}</p>
                           )}
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        <span className={`status-badge px-3 py-2 rounded-full font-medium ${
                           group.isRecruiting 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                             : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
@@ -328,7 +272,7 @@ export function PlayerDashboardContent() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center justify-between text-base text-muted-foreground">
                         <div className="flex items-center space-x-4">
                           <span>👥 {group.currentMembers}/{group.maxMembers}</span>
                           <span>🎮 {group.format}</span>
@@ -336,7 +280,7 @@ export function PlayerDashboardContent() {
                         </div>
                         
                         <button
-                          className="text-primary hover:text-primary/80 text-sm font-medium"
+                          className="text-primary hover:text-primary/80 text-base font-medium"
                           onClick={() => setSelectedGroupId(group.id)}
                         >
                           📋 Подробнее
@@ -389,8 +333,6 @@ export function PlayerDashboardContent() {
             )}
           </div>
 
-          {/* Applications Section */}
-          <PlayerApplicationsList />
 
           {/* Battlepass Section */}
           <div className="card p-6">
@@ -474,18 +416,18 @@ export function PlayerDashboardContent() {
             <div className="space-y-2">
               <a 
                 href="/player/search"
-                className="block w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
               >
                 🔍 Найти группу
               </a>
               <button 
-                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
                 onClick={() => setShowJoinForm(true)}
               >
                 Присоединиться по коду
               </button>
               <button 
-                className={`w-full text-left px-3 py-2 text-sm rounded-md ${
+                className={`w-full text-left px-3 py-3 text-base rounded-md ${
                   characters.length >= 5 
                     ? 'text-muted-foreground cursor-not-allowed' 
                     : 'text-foreground hover:bg-accent'
@@ -497,35 +439,21 @@ export function PlayerDashboardContent() {
               </button>
               <a 
                 href="/player/battlepass"
-                className="block w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
               >
                 Купить баттлпасс
               </a>
             </div>
           </div>
 
-          <div className="card p-6">
-            <h3 className="text-lg font-medium text-foreground mb-4">Статистика</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Сыграно игр:</span>
-                <span className="font-medium">0</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Активных групп:</span>
-                <span className="font-medium">{groups.length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Персонажей:</span>
-                <span className="font-medium">{characters.length}/5</span>
-              </div>
-            </div>
-          </div>
+          {/* Applications Section */}
+          <PlayerApplicationsList />
+
 
           {showJoinForm && (
             <div className="card p-6">
               <button 
-                className="w-full text-center px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md"
+                className="w-full text-center px-3 py-2 text-base text-muted-foreground hover:text-foreground rounded-md"
                 onClick={() => setShowJoinForm(false)}
               >
                 ← Отменить присоединение

@@ -364,10 +364,9 @@ export function GroupDetailsModal({ groupId, onClose, onUpdate }: GroupDetailsMo
                           {member.status === 'ACTIVE' ? 'Активен' : member.status}
                         </span>
                         <Button
-                          variant="outline"
+                          variant="destructive"
                           size="sm"
                           onClick={() => handleRemoveMember(member.id, member.nickname)}
-                          className="text-destructive hover:text-destructive"
                         >
                           Удалить
                         </Button>
@@ -389,9 +388,9 @@ export function GroupDetailsModal({ groupId, onClose, onUpdate }: GroupDetailsMo
                 <div className="space-y-3">
                   {/* Код приглашения */}
                   <div>
-                    <Label className="text-sm text-muted-foreground">Код приглашения:</Label>
+                    <Label className="text-base font-medium">Код приглашения:</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <code className="flex-1 px-2 py-1 bg-muted rounded text-sm font-mono">
+                      <code className="flex-1 px-3 py-2 bg-background border border-border rounded text-base font-mono text-foreground">
                         {group.referralCode}
                       </code>
                       <Button
@@ -409,7 +408,7 @@ export function GroupDetailsModal({ groupId, onClose, onUpdate }: GroupDetailsMo
 
                   {/* Реферальная ссылка */}
                   <div>
-                    <Label className="text-sm text-muted-foreground">Реферальная ссылка:</Label>
+                    <Label className="text-base font-medium">Реферальная ссылка:</Label>
                     <Button
                       variant="outline"
                       className="w-full mt-1"
@@ -417,7 +416,7 @@ export function GroupDetailsModal({ groupId, onClose, onUpdate }: GroupDetailsMo
                     >
                       📋 Скопировать ссылку
                     </Button>
-                    <div className="mt-2 text-xs text-muted-foreground break-all">
+                    <div className="mt-2 text-sm text-foreground break-all p-2 bg-background border border-border rounded">
                       {window.location.origin}/join?code={group.referralCode}
                     </div>
                   </div>

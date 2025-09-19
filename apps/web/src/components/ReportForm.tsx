@@ -388,11 +388,11 @@ export function ReportForm({
           
           {playersWithoutBattlepass.length > 0 && (
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
+              <p className="text-base text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
                 Отчёт можно подать, но у некоторых игроков нет доступных игр в баттлпассе.
               </p>
-              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                 При одобрении игры будут списаны только у тех, у кого есть активные баттлпассы.
               </p>
             </div>

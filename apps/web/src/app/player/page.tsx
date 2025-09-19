@@ -55,9 +55,6 @@ export default function PlayerDashboard() {
             </div>
             <nav className="flex items-center space-x-4">
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
-              <Link href="/player/reports" className="text-muted-foreground hover:text-foreground">
-                История игр
-              </Link>
               <Link href="/" className="text-muted-foreground hover:text-foreground">
                 На главную
               </Link>

@@ -135,7 +135,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
       <Button
         variant="ghost"
         size="sm"
-        className={`relative ${className}`}
+        className={`relative bg-red-600 hover:bg-red-700 text-white ${className}`}
         onClick={() => {
           setIsOpen(!isOpen);
           if (!isOpen) {
@@ -143,11 +143,11 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
           }
         }}
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-4 w-4 text-white" />
         {unreadCount > 0 && (
           <Badge 
             variant="destructive" 
-            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-600 text-white border-red-700"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>
@@ -164,7 +164,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
           />
           
           {/* Dropdown */}
-          <Card className="absolute right-0 top-full mt-2 w-80 max-h-96 z-50 shadow-lg">
+          <Card className="absolute right-0 top-full mt-2 w-96 max-h-[28rem] z-50 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">
@@ -203,7 +203,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
                   Уведомлений пока нет
                 </div>
               ) : (
-                <div className="max-h-64 overflow-y-auto">
+                <div className="max-h-48 overflow-y-auto">
                   {notifications.map((notification) => {
                     const Icon = getNotificationIcon(notification.type);
                     const colorClass = getNotificationColor(notification.type);
@@ -250,13 +250,13 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-xs h-7"
+                    className="w-full text-sm h-8 px-2"
                     onClick={() => {
                       // TODO: Открыть страницу всех уведомлений
                       setIsOpen(false);
                     }}
                   >
-                    Посмотреть все уведомления
+                    Все уведомления
                   </Button>
                 </div>
               )}

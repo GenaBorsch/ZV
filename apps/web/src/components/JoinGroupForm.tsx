@@ -62,12 +62,12 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
         Присоединиться к группе
       </h3>
       
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-base text-muted-foreground mb-4">
         Введите код приглашения, который вам предоставил мастер группы.
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-base">
           {error}
         </div>
       )}
@@ -82,7 +82,7 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
             className="mt-1 font-mono"
           />
           {errors.referralCode && (
-            <p className="text-sm text-destructive mt-1">{errors.referralCode.message}</p>
+            <p className="text-base text-destructive mt-1">{errors.referralCode.message}</p>
           )}
         </div>
 
@@ -91,7 +91,7 @@ export function JoinGroupForm({ onSuccess }: JoinGroupFormProps) {
         </Button>
       </form>
 
-      <div className="mt-4 p-3 bg-muted/50 rounded-md text-sm">
+      <div className="mt-4 p-3 bg-muted/50 rounded-md text-base">
         <p className="font-medium text-foreground mb-1">Как получить код?</p>
         <p className="text-muted-foreground">
           Код приглашения предоставляет мастер группы. Он может поделиться с вами ссылкой или отдельным кодом.
