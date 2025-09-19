@@ -76,7 +76,6 @@ export async function POST(req: NextRequest) {
             await db.insert(battlepasses).values({
               userId: targetUserId,
               kind: 'SINGLE', // Базовое значение
-              seasonId: '00000000-0000-0000-0000-000000000000', // Временный ID
               usesTotal: totalUses,
               usesLeft: totalUses,
               status: 'ACTIVE',

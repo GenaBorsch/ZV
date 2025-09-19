@@ -27,12 +27,12 @@ export async function GET(req: NextRequest) {
         .select()
         .from(seasons)
         .where(eq(seasons.isActive, true))
-        .orderBy(desc(seasons.createdAt));
+        .orderBy(desc(seasons.startsAt));
     } else {
       seasonsList = await db
         .select()
         .from(seasons)
-        .orderBy(desc(seasons.createdAt));
+        .orderBy(desc(seasons.startsAt));
     }
 
     // Формирование ответа

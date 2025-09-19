@@ -152,16 +152,16 @@ export const UpdateEnrollmentDto = z.object({
 
 // Report DTOs
 export const CreateReportDto = z.object({
-  sessionId: z.string().cuid('Некорректный ID сессии').optional(), // optional для независимых отчётов
+  sessionId: z.string().uuid('Некорректный ID сессии').optional(), // optional для независимых отчётов
   description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов'),
-  playerIds: z.array(z.string().cuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока'),
+  playerIds: z.array(z.string().uuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока'),
   highlights: z.string().optional(),
 });
 
 export const UpdateReportDto = z.object({
-  sessionId: z.string().cuid('Некорректный ID сессии').optional(),
+  sessionId: z.string().uuid('Некорректный ID сессии').optional(),
   description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов').optional(),
-  playerIds: z.array(z.string().cuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока').optional(),
+  playerIds: z.array(z.string().uuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока').optional(),
   highlights: z.string().optional(),
 });
 

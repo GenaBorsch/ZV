@@ -244,7 +244,6 @@ export const battlepasses = pgTable('battlepasses', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   kind: battlepassKindEnum('kind').notNull(),
-  seasonId: uuid('season_id').notNull().references(() => seasons.id, { onDelete: 'cascade' }),
   usesTotal: integer('uses_total').notNull(),
   usesLeft: integer('uses_left').notNull(),
   status: battlepassStatusEnum('status').default('ACTIVE').notNull(),
@@ -477,10 +476,6 @@ export const battlepassesRelations = relations(battlepasses, ({ one }) => ({
   user: one(users, {
     fields: [battlepasses.userId],
     references: [users.id],
-  }),
-  season: one(seasons, {
-    fields: [battlepasses.seasonId],
-    references: [seasons.id],
   }),
 }));
 

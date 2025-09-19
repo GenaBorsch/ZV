@@ -5,7 +5,7 @@ import { CreateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkReportCreationLimit } from '@/lib/reportRateLimit';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 
 // GET /api/reports - получить список отчётов
 export async function GET(req: NextRequest) {
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
       query = query.where(and(...conditions));
     }
 
-    const reportsData = await query.orderBy(reports.createdAt);
+    const reportsData = await query.orderBy(desc(reports.createdAt));
 
     // Получаем игроков для каждого отчёта
     const reportsWithPlayers = await Promise.all(

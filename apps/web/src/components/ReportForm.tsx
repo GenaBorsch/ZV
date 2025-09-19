@@ -16,6 +16,15 @@ interface Player {
   email: string;
 }
 
+interface Group {
+  id: string;
+  name: string;
+  description: string;
+  currentMembers: number;
+  maxMembers: number;
+  members: Player[];
+}
+
 interface ReportFormProps {
   onSubmit: (data: CreateReportDtoType | UpdateReportDtoType) => Promise<void>;
   onCancel: () => void;
@@ -40,51 +49,35 @@ export function ReportForm({
   const [description, setDescription] = useState(initialData?.description || '');
   const [highlights, setHighlights] = useState(initialData?.highlights || '');
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>(initialData?.players || []);
-  const [playerSearch, setPlayerSearch] = useState('');
-  const [searchResults, setSearchResults] = useState<Player[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPlayerSearch, setShowPlayerSearch] = useState(false);
   const [playersWithoutBattlepass, setPlayersWithoutBattlepass] = useState<string[]>([]);
   const [isCheckingBattlepasses, setIsCheckingBattlepasses] = useState(false);
 
-  // Поиск игроков
-  const searchPlayers = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsSearching(true);
+  // Загрузка групп мастера
+  const loadGroups = async () => {
+    setIsLoadingGroups(true);
     try {
-      const response = await fetch(`/api/players?search=${encodeURIComponent(query)}&limit=10`);
+      const response = await fetch('/api/master/groups');
       if (response.ok) {
         const data = await response.json();
-        // Фильтруем уже выбранных игроков
-        const filteredResults = data.players.filter(
-          (player: Player) => !selectedPlayers.some(selected => selected.id === player.id)
-        );
-        setSearchResults(filteredResults);
+        setGroups(data.groups);
+      } else {
+        console.error('Failed to load groups');
       }
     } catch (error) {
-      console.error('Error searching players:', error);
+      console.error('Error loading groups:', error);
     } finally {
-      setIsSearching(false);
+      setIsLoadingGroups(false);
     }
   };
 
-  // Debounced поиск
+  // Загрузка групп при монтировании компонента
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (playerSearch) {
-        searchPlayers(playerSearch);
-      } else {
-        setSearchResults([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [playerSearch, selectedPlayers]);
+    loadGroups();
+  }, []);
 
   // Проверка баттлпассов у игроков
   const checkPlayersBattlepasses = async (playerIds: string[]) => {
@@ -103,64 +96,61 @@ export function ReportForm({
 
       if (response.ok) {
         const data = await response.json();
-        const playersWithoutGames = data.playersWithoutGames.map((p: any) => p.name);
-        setPlayersWithoutBattlepass(playersWithoutGames);
-      } else {
-        console.error('Failed to check battlepasses');
-        setPlayersWithoutBattlepass([]);
+        const playersWithoutBp = data.playersWithoutBattlepass || [];
+        setPlayersWithoutBattlepass(playersWithoutBp);
       }
     } catch (error) {
       console.error('Error checking battlepasses:', error);
-      setPlayersWithoutBattlepass([]);
     } finally {
       setIsCheckingBattlepasses(false);
     }
   };
 
-  // Добавить игрока
+  // Проверяем баттлпассы при изменении списка игроков
+  useEffect(() => {
+    const playerIds = selectedPlayers.map(p => p.id);
+    checkPlayersBattlepasses(playerIds);
+  }, [selectedPlayers]);
+
+  // Добавить игрока из группы
   const addPlayer = (player: Player) => {
-    const newPlayers = [...selectedPlayers, player];
-    setSelectedPlayers(newPlayers);
-    setPlayerSearch('');
-    setSearchResults([]);
-    setShowPlayerSearch(false);
-    // Очищаем ошибку если была
-    if (errors.players) {
-      setErrors(prev => ({ ...prev, players: '' }));
+    if (!selectedPlayers.some(p => p.id === player.id)) {
+      setSelectedPlayers(prev => [...prev, player]);
     }
-    // Проверяем баттлпассы
-    checkPlayersBattlepasses(newPlayers.map(p => p.id));
   };
 
   // Удалить игрока
   const removePlayer = (playerId: string) => {
-    const newPlayers = selectedPlayers.filter(player => player.id !== playerId);
-    setSelectedPlayers(newPlayers);
-    // Перепроверяем баттлпассы
-    checkPlayersBattlepasses(newPlayers.map(p => p.id));
+    setSelectedPlayers(prev => prev.filter(p => p.id !== playerId));
+    // Очищаем ошибку если была
+    if (errors.players) {
+      setErrors(prev => ({ ...prev, players: '' }));
+    }
   };
 
   // Валидация формы
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!description.trim()) {
       newErrors.description = 'Описание игры обязательно';
     } else if (description.trim().length < 50) {
       newErrors.description = 'Описание должно содержать минимум 50 символов';
-    } else if (description.trim().length > 5000) {
-      newErrors.description = 'Описание не должно превышать 5000 символов';
     }
 
     if (selectedPlayers.length === 0) {
-      newErrors.players = 'Выберите хотя бы одного игрока';
+      newErrors.players = 'Выберите хотя бы одного участника';
+    }
+
+    if (!selectedGroup) {
+      newErrors.group = 'Выберите группу';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Обработка отправки формы
+  // Отправка формы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -168,27 +158,27 @@ export function ReportForm({
       return;
     }
 
-    const formData = {
+    const formData: CreateReportDtoType | UpdateReportDtoType = {
       description: description.trim(),
       highlights: highlights.trim() || undefined,
-      playerIds: selectedPlayers.map(player => player.id),
-      sessionId: initialData?.sessionId,
+      playerIds: selectedPlayers.map(p => p.id),
     };
 
-    try {
-      await onSubmit(formData);
-    } catch (error) {
-      console.error('Error submitting report:', error);
+    // Добавляем ID для обновления
+    if (initialData?.id) {
+      (formData as UpdateReportDtoType).id = initialData.id;
     }
+
+    await onSubmit(formData);
   };
 
-  const isFormValid = description.trim().length >= 50 && selectedPlayers.length > 0;
+  const isFormValid = description.trim().length >= 50 && selectedPlayers.length > 0 && selectedGroup;
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
+          <Search className="h-5 w-5" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -201,169 +191,212 @@ export function ReportForm({
             </Label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               placeholder="Подробно опишите что происходило в игре, какие события были важными, как развивались персонажи..."
-              rows={6}
-              className={errors.description ? 'border-red-500' : ''}
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                if (errors.description) {
+                  setErrors(prev => ({ ...prev, description: '' }));
+                }
+              }}
+              className={`min-h-[120px] resize-none ${errors.description ? 'border-red-500' : ''}`}
+              maxLength={5000}
             />
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>
-                {description.length < 50 && description.length > 0 && (
-                  <span className="text-orange-600">
-                    Минимум 50 символов (осталось {50 - description.length})
-                  </span>
-                )}
-                {description.length >= 50 && (
-                  <span className="text-green-600 flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4" />
-                    Требование выполнено
-                  </span>
-                )}
-              </span>
-              <span className={description.length > 5000 ? 'text-red-600' : ''}>
+            <div className="flex justify-between items-center">
+              {errors.description ? (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.description}
+                </p>
+              ) : description.trim().length >= 50 ? (
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <CheckCircle className="h-4 w-4" />
+                  Требование выполнено
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Минимум 50 символов
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
                 {description.length}/5000
-              </span>
-            </div>
-            {errors.description && (
-              <p className="text-red-500 text-sm flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.description}
               </p>
-            )}
+            </div>
           </div>
 
           {/* Дополнительные моменты */}
           <div className="space-y-2">
-            <Label htmlFor="highlights">Дополнительные моменты (необязательно)</Label>
+            <Label htmlFor="highlights">
+              Дополнительные моменты (необязательно)
+            </Label>
             <Textarea
               id="highlights"
+              placeholder="Особые достижения игроков, интересные решения, забавные моменты..."
               value={highlights}
               onChange={(e) => setHighlights(e.target.value)}
-              placeholder="Особые достижения игроков, интересные решения, забавные моменты..."
-              rows={3}
+              className="min-h-[80px] resize-none"
+              maxLength={2000}
             />
             <p className="text-sm text-muted-foreground">
               Опишите что-то особенное, что произошло в игре
             </p>
           </div>
 
-          {/* Выбор игроков */}
+          {/* Выбор группы */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>
-                Участники игры <span className="text-red-500">*</span>
-              </Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPlayerSearch(!showPlayerSearch)}
-                className="flex items-center gap-2"
-              >
-                <Search className="h-4 w-4" />
-                Добавить игрока
-              </Button>
-            </div>
-
-            {/* Поиск игроков */}
-            {showPlayerSearch && (
-              <div className="border rounded-lg p-4 space-y-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Поиск игроков по имени или email..."
-                    value={playerSearch}
-                    onChange={(e) => setPlayerSearch(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                
-                {isSearching && (
-                  <p className="text-sm text-muted-foreground">Поиск...</p>
-                )}
-                
-                {searchResults.length > 0 && (
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {searchResults.map((player) => (
-                      <div
-                        key={player.id}
-                        className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-muted"
-                        onClick={() => addPlayer(player)}
-                      >
-                        <div>
-                          <p className="font-medium">{player.name || 'Без имени'}</p>
-                          <p className="text-sm text-muted-foreground">{player.email}</p>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          Добавить
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {playerSearch && !isSearching && searchResults.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Игроки не найдены</p>
-                )}
-              </div>
-            )}
-
-            {/* Выбранные игроки */}
-            {selectedPlayers.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Выбранные игроки ({selectedPlayers.length}):</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedPlayers.map((player) => (
-                    <Badge
-                      key={player.id}
-                      variant="secondary"
-                      className="flex items-center gap-2 pr-1"
-                    >
-                      <span>{player.name || player.email}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => removePlayer(player.id)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {errors.players && (
-              <p className="text-red-500 text-sm flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.players}
-              </p>
-            )}
-
-            {/* Предупреждение о игроках без баттлпассов */}
-            {isCheckingBattlepasses && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Проверяем баттлпассы у игроков...
+            <Label>
+              Выберите группу <span className="text-red-500">*</span>
+            </Label>
+            
+            {isLoadingGroups ? (
+              <p className="text-sm text-muted-foreground">Загрузка групп...</p>
+            ) : groups.length === 0 ? (
+              <div className="border rounded-lg p-4 text-center">
+                <p className="text-muted-foreground">У вас пока нет групп</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Создайте группу и пригласите игроков, чтобы создавать отчеты
                 </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {groups.map((group) => (
+                  <div
+                    key={group.id}
+                    className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      selectedGroup?.id === group.id
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setSelectedGroup(group)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{group.name}</p>
+                        <p className="text-sm text-muted-foreground">{group.description}</p>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <Users className="h-4 w-4 inline mr-1" />
+                        {group.currentMembers}/{group.maxMembers}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             
-            {playersWithoutBattlepass.length > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Отчёт можно подать, но у некоторых игроков нет доступных игр в баттлпассе.
-                </p>
-                <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                  При одобрении игры будут списаны только у тех, у кого есть активные баттлпассы.
-                </p>
-              </div>
+            {errors.group && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                {errors.group}
+              </p>
             )}
           </div>
+
+          {/* Выбор игроков из группы */}
+          {selectedGroup && (
+            <div className="space-y-4">
+              <Label>
+                Участники игры <span className="text-red-500">*</span>
+              </Label>
+              
+              {selectedGroup.members.length === 0 ? (
+                <div className="border rounded-lg p-4 text-center">
+                  <p className="text-muted-foreground">В группе пока нет участников</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedGroup.members
+                    .filter(member => member.status === 'ACTIVE')
+                    .map((player) => (
+                    <div
+                      key={player.id}
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        selectedPlayers.some(p => p.id === player.id)
+                          ? 'border-green-500 bg-green-50'
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => {
+                        if (selectedPlayers.some(p => p.id === player.id)) {
+                          removePlayer(player.id);
+                        } else {
+                          addPlayer(player);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{player.name}</p>
+                          <p className="text-sm text-muted-foreground">{player.email}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {playersWithoutBattlepass.includes(player.id) && (
+                            <AlertCircle className="h-4 w-4 text-yellow-500" title="Нет активного баттлпасса" />
+                          )}
+                          {selectedPlayers.some(p => p.id === player.id) ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <div className="w-4 h-4 border border-muted-foreground rounded" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {errors.players && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.players}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Выбранные игроки */}
+          {selectedPlayers.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Выбранные игроки ({selectedPlayers.length}):</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedPlayers.map((player) => (
+                  <Badge
+                    key={player.id}
+                    variant="secondary"
+                    className="flex items-center gap-2 pr-1"
+                  >
+                    <span>{player.name || player.email}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => removePlayer(player.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {isCheckingBattlepasses && (
+            <div className="text-sm text-muted-foreground">
+              Проверка баттлпассов игроков...
+            </div>
+          )}
+          
+          {playersWithoutBattlepass.length > 0 && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Отчёт можно подать, но у некоторых игроков нет доступных игр в баттлпассе.
+              </p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                При одобрении игры будут списаны только у тех, у кого есть активные баттлпассы.
+              </p>
+            </div>
+          )}
 
           {/* Кнопки */}
           <div className="flex justify-end gap-3 pt-4 border-t">

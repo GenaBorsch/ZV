@@ -60,10 +60,10 @@ export async function POST(req: Request) {
           
           await db.insert(battlepasses).values({
             userId: order.forUserId,
-            orderId: order.id,
+            kind: 'SINGLE',
+            usesTotal: totalUses,
             usesLeft: totalUses,
-            totalUses: totalUses,
-            isActive: true,
+            status: 'ACTIVE',
           });
           
           console.log('🎮 Battlepass issued to user:', order.forUserId, 'with', totalUses, 'uses');

@@ -395,7 +395,16 @@ export function PlayerDashboardContent() {
           {/* Battlepass Section */}
           <div className="card p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-foreground">Баттлпасс</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-medium text-foreground">Баттлпасс</h3>
+                {battlepasses.length > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+                    <span className="text-sm font-medium text-primary">
+                      Осталось игр: {battlepasses.reduce((total, bp) => total + (bp.usesLeft || 0), 0)}
+                    </span>
+                  </div>
+                )}
+              </div>
               <a href="/player/battlepass" className="btn-primary">
                 Купить баттлпасс
               </a>

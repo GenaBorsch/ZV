@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, orders, battlepasses, orderItems, seasons, eq } from '@zv/db';
+import { db, orders, battlepasses, orderItems, eq } from '@zv/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,21 +40,10 @@ export async function POST(req: NextRequest) {
 
     const totalUses = orderItem?.bpUsesTotalAtPurchase || 1;
 
-    // Получаем активный сезон
-    const [activeSeason] = await db.select()
-      .from(seasons)
-      .where(eq(seasons.isActive, true))
-      .limit(1);
-
-    if (!activeSeason) {
-      return NextResponse.json({ error: 'No active season found' }, { status: 400 });
-    }
-
     // Выдаем баттлпасс
     const [newBattlepass] = await db.insert(battlepasses).values({
       userId: targetUserId,
       kind: 'SINGLE',
-      seasonId: activeSeason.id,
       usesTotal: totalUses,
       usesLeft: totalUses,
       status: 'ACTIVE',
