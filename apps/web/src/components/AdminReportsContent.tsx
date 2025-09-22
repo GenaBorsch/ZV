@@ -215,8 +215,8 @@ export function AdminReportsContent() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Badge variant="outline" className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
                 Ожидают: {reports.filter(r => r.status === 'PENDING').length}
               </Badge>
             </div>
@@ -279,27 +279,27 @@ export function AdminReportsContent() {
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
                                 <Badge className={`${statusInfo.color} flex items-center gap-1`}>
-                                  <StatusIcon className="h-3 w-3" />
+                                  <StatusIcon className="h-4 w-4" />
                                   {statusInfo.text}
                                 </Badge>
-                                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
+                                <span className="text-base text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
                                   {formatDate(report.createdAt)}
                                 </span>
                               </div>
                               
                               {/* Информация о мастере */}
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-4 text-base text-muted-foreground">
                                 <div className="flex items-center gap-1">
-                                  <User className="h-3 w-3" />
+                                  <User className="h-4 w-4" />
                                   {report.masterName || 'Без имени'}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Mail className="h-3 w-3" />
+                                  <Mail className="h-4 w-4" />
                                   {report.masterEmail}
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
+                                  <Users className="h-4 w-4" />
                                   {report.players.length} игрок{report.players.length === 1 ? '' : report.players.length < 5 ? 'а' : 'ов'}
                                 </div>
                               </div>
@@ -316,7 +316,7 @@ export function AdminReportsContent() {
                                     className="flex items-center gap-1"
                                     disabled={isSubmitting}
                                   >
-                                    <CheckCircle className="h-3 w-3" />
+                                    <CheckCircle className="h-4 w-4" />
                                     Одобрить
                                   </Button>
                                   <Button
@@ -326,7 +326,7 @@ export function AdminReportsContent() {
                                     className="flex items-center gap-1"
                                     disabled={isSubmitting}
                                   >
-                                    <XCircle className="h-3 w-3" />
+                                    <XCircle className="h-4 w-4" />
                                     Отклонить
                                   </Button>
                                 </>
@@ -339,7 +339,7 @@ export function AdminReportsContent() {
                                   className="flex items-center gap-1"
                                   disabled={isSubmitting}
                                 >
-                                  <RotateCcw className="h-3 w-3" />
+                                  <RotateCcw className="h-4 w-4" />
                                   Отменить
                                 </Button>
                               )}
@@ -351,8 +351,8 @@ export function AdminReportsContent() {
                           <div className="space-y-4">
                             {/* Описание */}
                             <div>
-                              <h4 className="text-sm font-medium mb-2">Описание игры:</h4>
-                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                              <h4 className="text-base font-medium mb-2">Описание игры:</h4>
+                              <p className="text-base text-foreground whitespace-pre-wrap">
                                 {report.description}
                               </p>
                             </div>
@@ -360,8 +360,8 @@ export function AdminReportsContent() {
                             {/* Дополнительные моменты */}
                             {report.highlights && (
                               <div className="border-l-2 border-muted pl-4">
-                                <h4 className="text-sm font-medium mb-2">Дополнительные моменты:</h4>
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                <h4 className="text-base font-medium mb-2">Дополнительные моменты:</h4>
+                                <p className="text-base text-foreground whitespace-pre-wrap">
                                   {report.highlights}
                                 </p>
                               </div>
@@ -369,14 +369,14 @@ export function AdminReportsContent() {
 
                             {/* Игроки */}
                             <div>
-                              <h4 className="text-sm font-medium mb-2">Участники ({report.players.length}):</h4>
+                              <h4 className="text-base font-medium mb-2">Участники ({report.players.length}):</h4>
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {report.players.map((player) => (
-                                  <div key={player.id} className="flex items-center gap-2 p-2 bg-muted rounded text-sm">
-                                    <User className="h-3 w-3 text-muted-foreground" />
+                                  <div key={player.id} className="flex items-center gap-2 p-3 bg-card border border-border rounded text-base">
+                                    <User className="h-4 w-4 text-foreground" />
                                     <div>
-                                      <p className="font-medium">{player.name || 'Без имени'}</p>
-                                      <p className="text-xs text-muted-foreground">{player.email}</p>
+                                      <p className="font-medium text-foreground">{player.name || 'Без имени'}</p>
+                                      <p className="text-sm text-muted-foreground">{player.email}</p>
                                     </div>
                                   </div>
                                 ))}
@@ -386,10 +386,10 @@ export function AdminReportsContent() {
                             {/* Причина отклонения */}
                             {report.status === 'REJECTED' && report.rejectionReason && (
                               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                                <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
+                                <h4 className="text-base font-medium text-red-800 dark:text-red-200 mb-1">
                                   Причина отклонения:
                                 </h4>
-                                <p className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap">
+                                <p className="text-base text-red-700 dark:text-red-300 whitespace-pre-wrap">
                                   {report.rejectionReason}
                                 </p>
                               </div>

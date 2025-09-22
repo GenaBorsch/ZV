@@ -4,7 +4,7 @@ import { NotificationBell } from '@/components/NotificationBell';
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
           {/* Quick Actions */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="card p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Управление данными</h3>
+              <h3 className="text-lg font-medium text-foreground mb-4">Управление данными</h3>
               <div className="space-y-3">
                 <Link href="/admin/groups" className="btn-outline w-full text-left">Группы и составы</Link>
                 <Link href="/admin/reports" className="btn-outline w-full text-left">Отчёты по играм</Link>
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="card p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Контент и правила</h3>
+              <h3 className="text-lg font-medium text-foreground mb-4">Контент и правила</h3>
               <div className="space-y-3">
                 <Link href="/admin/rules" className="btn-outline w-full text-left">Правила и регламенты</Link>
                 <Link href="/admin/schedule" className="btn-outline w-full text-left">Расписание игр</Link>
