@@ -4,9 +4,14 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, agreeToTerms } = await req.json();
     if (!email || !password) {
       return NextResponse.json({ error: 'email и password обязательны' }, { status: 400 });
+    }
+
+    // Проверяем согласие с условиями
+    if (!agreeToTerms) {
+      return NextResponse.json({ error: 'Необходимо согласиться с условиями использования и политикой конфиденциальности' }, { status: 400 });
     }
 
     const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);

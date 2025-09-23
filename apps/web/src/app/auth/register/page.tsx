@@ -6,12 +6,14 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    agreeToTerms: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,12 +24,24 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     setSuccess(null);
+
+    // Проверяем согласие с документами
+    if (!formData.agreeToTerms) {
+      setError('Необходимо согласиться с условиями использования и политикой конфиденциальности');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Регистрируем пользователя
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
+        body: JSON.stringify({ 
+          email: formData.email, 
+          password: formData.password,
+          agreeToTerms: formData.agreeToTerms
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Ошибка регистрации');
@@ -59,7 +73,11 @@ export default function RegisterPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
 
   return (
@@ -115,6 +133,22 @@ export default function RegisterPage() {
 
             {error && <p className="text-sm text-red-600">{error}</p>}
             {success && <p className="text-sm text-green-600">{success}</p>}
+          </div>
+
+          <div className="space-y-4">
+            <Checkbox
+              name="agreeToTerms"
+              checked={formData.agreeToTerms}
+              onChange={handleChange}
+              label={
+                <>
+                  Я соглашаюсь с{' '}
+                  <Link href="/legal" className="text-primary hover:opacity-85" target="_blank">
+                    условиями использования и политикой конфиденциальности
+                  </Link>
+                </>
+              }
+            />
           </div>
 
           <div>
