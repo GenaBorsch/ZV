@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, battlepasses, seasons, and, eq } from '@zv/db';
+import { getBattlepassStatusLabel, getBattlepassStatusClasses } from '@/lib/utils';
 
 export default async function PlayerBattlepassesListPage() {
   const session = await getServerSession(authOptions as any);
@@ -24,7 +25,7 @@ export default async function PlayerBattlepassesListPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-semibold text-foreground mb-4">Мои баттлпассы</h1>
+      <h1 className="text-2xl font-semibold text-foreground mb-4">Мои путёвки</h1>
       <div className="flex justify-between items-center mb-4">
         <div />
         <Link href="/player/battlepass" className="btn-primary">Купить 1/4/12 игр</Link>
@@ -32,7 +33,7 @@ export default async function PlayerBattlepassesListPage() {
       <div className="space-y-3">
         {my.length === 0 && (
           <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
-            Нет купленных баттлпассов.
+            Нет купленных путёвок.
           </div>
         )}
         {my.map((bp: any) => (
@@ -46,7 +47,9 @@ export default async function PlayerBattlepassesListPage() {
                 Осталось: {bp.usesLeft} / {bp.usesTotal}
               </div>
               <div>
-                <span className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">{bp.status}</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getBattlepassStatusClasses(bp.status)}`}>
+                  {getBattlepassStatusLabel(bp.status)}
+                </span>
               </div>
             </div>
           </div>

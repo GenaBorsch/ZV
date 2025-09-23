@@ -10,6 +10,7 @@ import { CharacterForm } from './CharacterForm';
 import { CharacterDetails } from './CharacterDetails';
 import { PlayerApplicationsList } from './PlayerApplicationsList';
 import { CharacterDtoType, CreateCharacterDtoType, UpdateCharacterDtoType } from '@zv/contracts';
+import { getBattlepassStatusLabel, getBattlepassStatusClasses } from '@/lib/utils';
 
 interface Group {
   id: string;
@@ -338,7 +339,7 @@ export function PlayerDashboardContent() {
           <div className="card p-6">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
-                <h3 className="text-lg font-medium text-foreground">Баттлпасс</h3>
+                <h3 className="text-lg font-medium text-foreground">Путёвки</h3>
                 {battlepasses.length > 0 && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
                     <span className="text-sm font-medium text-primary">
@@ -348,7 +349,7 @@ export function PlayerDashboardContent() {
                 )}
               </div>
               <a href="/player/battlepass" className="btn-primary">
-                Купить баттлпасс
+                Купить путёвки
               </a>
             </div>
             
@@ -364,20 +365,16 @@ export function PlayerDashboardContent() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h4 className="font-medium text-foreground">
-                          {bp.kind === 'SEASON' ? 'Сезонный баттлпасс' : 
-                           bp.kind === 'SINGLE' ? 'Разовый баттлпасс' : 
-                           'Баттлпасс'}
+                          {bp.kind === 'SEASON' ? 'Сезонная путёвка' : 
+                           bp.kind === 'SINGLE' ? 'Разовая путёвка' : 
+                           'Путёвка'}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          Статус: {bp.status === 'ACTIVE' ? 'Активен' : bp.status}
+                          Статус: {getBattlepassStatusLabel(bp.status)}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        bp.status === 'ACTIVE' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                      }`}>
-                        {bp.status === 'ACTIVE' ? 'Активен' : bp.status}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBattlepassStatusClasses(bp.status)}`}>
+                        {getBattlepassStatusLabel(bp.status)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -403,7 +400,7 @@ export function PlayerDashboardContent() {
               </div>
             ) : (
               <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
-                У вас нет активного баттлпасса.
+                У вас нет активных путёвок.
               </div>
             )}
           </div>
@@ -441,7 +438,7 @@ export function PlayerDashboardContent() {
                 href="/player/battlepass"
                 className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
               >
-                Купить баттлпасс
+                Купить путёвки
               </a>
             </div>
           </div>

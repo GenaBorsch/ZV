@@ -50,8 +50,8 @@ export default function AdminDashboard() {
               <div className="space-y-3">
                 <Link href="/admin/groups" className="btn-outline w-full text-left">Группы и составы</Link>
                 <Link href="/admin/reports" className="btn-outline w-full text-left">Отчёты по играм</Link>
-                <Link href="/admin/payments" className="btn-outline w-full text-left">Платежи и баттлпассы</Link>
-                <Link href="/admin/products" className="btn-outline w-full text-left">Офферы баттлпассов</Link>
+                <Link href="/admin/payments" className="btn-outline w-full text-left">Платежи и путёвки</Link>
+                <Link href="/admin/products" className="btn-outline w-full text-left">Офферы путёвок</Link>
               </div>
             </div>
 

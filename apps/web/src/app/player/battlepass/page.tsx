@@ -13,7 +13,7 @@ export default async function PlayerBattlepassPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-semibold text-foreground mb-4">Покупка баттлпасса</h1>
+      <h1 className="text-2xl font-semibold text-foreground mb-4">Покупка путёвок</h1>
       {items.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
           Нет доступных офферов для покупки.

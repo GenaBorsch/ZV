@@ -108,7 +108,7 @@ export function AdminReportsContent() {
 
   // Отмена одобренного отчёта (только SUPERADMIN)
   const handleCancelReport = async (reportId: string) => {
-    if (!confirm('Вы уверены, что хотите отменить одобрение отчёта? Это вернёт игры в баттлпассы игроков.')) {
+    if (!confirm('Вы уверены, что хотите отменить одобрение отчёта? Это вернёт игры в путёвки игроков.')) {
       return;
     }
 
@@ -439,7 +439,7 @@ export function AdminReportsContent() {
               {moderationAction === 'approve' ? (
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                   <p className="text-sm text-green-800 dark:text-green-200">
-                    При одобрении отчёта у каждого участника будет списана 1 игра из активного баттлпасса.
+                    При одобрении отчёта у каждого участника будет списана 1 игра из активной путёвки.
                     Если у игрока нет доступных игр, списание не произойдёт, но отчёт всё равно будет одобрен.
                   </p>
                 </div>

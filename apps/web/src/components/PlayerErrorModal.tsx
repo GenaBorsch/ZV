@@ -61,10 +61,10 @@ export function PlayerErrorModal({
           {/* Описание проблемы */}
           <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <h3 className="font-medium text-red-900 dark:text-red-100 mb-2">
-              Проблема с баттлпассом
+              Проблема с путёвками
             </h3>
             <p className="text-sm text-red-800 dark:text-red-200">
-              Следующие игроки не имеют активных игр в своём баттлпассе. 
+              Следующие игроки не имеют активных игр в своих путёвках. 
               Для создания отчёта все участники должны иметь доступные игры.
             </p>
           </div>
@@ -86,7 +86,7 @@ export function PlayerErrorModal({
                   <div>
                     <p className="font-medium text-foreground">{playerName}</p>
                     <p className="text-sm text-muted-foreground">
-                      Нет активных игр в баттлпассе
+                      Нет активных игр в путёвках
                     </p>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export function PlayerErrorModal({
               Что делать дальше?
             </h4>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-              <li>• <strong>Свяжитесь с игроком</strong> и попросите пополнить баттлпасс</li>
+              <li>• <strong>Свяжитесь с игроком</strong> и попросите пополнить путёвки</li>
               <li>• <strong>Отложите создание отчёта</strong> до решения проблемы</li>
             </ul>
           </div>

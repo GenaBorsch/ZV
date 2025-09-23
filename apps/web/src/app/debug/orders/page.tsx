@@ -1,4 +1,5 @@
 import { db, orders, battlepasses, orderItems } from '@zv/db';
+import { getBattlepassStatusLabel } from '@/lib/utils';
 
 // Принудительно делаем страницу динамической
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,7 @@ export default async function DebugOrdersPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Отладка заказов и баттлпассов</h1>
+      <h1 className="text-2xl font-bold mb-6">Отладка заказов и путёвок</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Заказы */}
@@ -55,15 +56,15 @@ export default async function DebugOrdersPage() {
           </div>
         </div>
 
-        {/* Баттлпассы */}
+        {/* Путёвки */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
-          <h2 className="text-lg font-semibold mb-4">Баттлпассы ({allBattlepasses.length})</h2>
+          <h2 className="text-lg font-semibold mb-4">Путёвки ({allBattlepasses.length})</h2>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {allBattlepasses.map((bp) => (
               <div key={bp.id} className="border rounded p-3 text-sm">
                 <div><strong>Пользователь ID:</strong> {bp.userId}</div>
                 <div><strong>Тип:</strong> {bp.kind}</div>
-                <div><strong>Статус:</strong> {bp.status}</div>
+                <div><strong>Статус:</strong> {getBattlepassStatusLabel(bp.status)}</div>
                 <div><strong>Использований:</strong> {bp.usesLeft}/{bp.usesTotal}</div>
                 <div><strong>Создан:</strong> {bp.createdAt.toLocaleString('ru-RU')}</div>
               </div>
@@ -103,7 +104,7 @@ export default async function DebugOrdersPage() {
                 )}
               </div>
               <div>
-                <strong>Баттлпасс найден:</strong> {targetBattlepass ? '✅ Да' : '❌ Нет'}
+                <strong>Путёвка найдена:</strong> {targetBattlepass ? '✅ Да' : '❌ Нет'}
                 {targetBattlepass && (
                   <span className="ml-2 text-sm">
                     (Статус: {targetBattlepass.status}, Использований: {targetBattlepass.usesLeft}/{targetBattlepass.usesTotal})

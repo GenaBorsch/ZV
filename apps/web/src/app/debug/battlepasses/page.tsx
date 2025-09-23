@@ -13,7 +13,7 @@ export default async function DebugBattlepassesPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Баттлпассы демо игрока</h1>
+      <h1 className="text-2xl font-bold mb-6">Путёвки демо игрока</h1>
       
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
         <h3 className="font-semibold mb-2">Информация:</h3>
@@ -21,7 +21,7 @@ export default async function DebugBattlepassesPage() {
           <strong>User ID:</strong> {demoUserId}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <strong>Найдено баттлпассов:</strong> {userBattlepasses.length}
+          <strong>Найдено путёвок:</strong> {userBattlepasses.length}
         </p>
       </div>
 
@@ -32,10 +32,10 @@ export default async function DebugBattlepassesPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">
-                    {bp.kind === 'SEASON' ? 'Сезонный баттлпасс' : 
-                     bp.kind === 'SINGLE' ? 'Разовый баттлпасс' : 
-                     bp.kind === 'FOUR' ? 'Баттлпасс на 4 игры' :
-                     'Баттлпасс'}
+                    {bp.kind === 'SEASON' ? 'Сезонная путёвка' : 
+                     bp.kind === 'SINGLE' ? 'Разовая путёвка' : 
+                     bp.kind === 'FOUR' ? 'Путёвка на 4 игры' :
+                     'Путёвка'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     ID: {bp.id}
@@ -97,10 +97,10 @@ export default async function DebugBattlepassesPage() {
       ) : (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 text-center">
           <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-            Баттлпассы не найдены
+            Путёвки не найдены
           </h3>
           <p className="text-yellow-700 dark:text-yellow-300">
-            У демо игрока пока нет активных баттлпассов.
+            У демо игрока пока нет активных путёвок.
           </p>
         </div>
       )}

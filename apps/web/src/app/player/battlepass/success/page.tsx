@@ -66,8 +66,8 @@ export default async function BattlepassSuccessPage({ searchParams }: Props) {
           icon: '✅',
           title: 'Оплата успешна!',
           message: battlepass 
-            ? `Баттлпасс успешно выдан! У вас есть ${battlepass.usesLeft} из ${battlepass.usesTotal} использований.`
-            : 'Баттлпасс скоро будет выдан. Если он не появился в течение 5 минут, обратитесь в поддержку.',
+            ? `Путёвки успешно выданы! У вас есть ${battlepass.usesLeft} из ${battlepass.usesTotal} использований.`
+            : 'Путёвки скоро будут выданы. Если они не появились в течение 5 минут, обратитесь в поддержку.',
           color: 'text-green-600',
           bgColor: 'bg-green-50 dark:bg-green-900/20',
           borderColor: 'border-green-200 dark:border-green-800'

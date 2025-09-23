@@ -330,7 +330,7 @@ export function ReportForm({
                         </div>
                         <div className="flex items-center gap-2">
                           {playersWithoutBattlepass.includes(player.id) && (
-                            <AlertCircle className="h-4 w-4 text-yellow-500" title="Нет активного баттлпасса" />
+                            <AlertCircle className="h-4 w-4 text-yellow-500" title="Нет активных путёвок" />
                           )}
                           {selectedPlayers.some(p => p.id === player.id) ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -382,7 +382,7 @@ export function ReportForm({
           
           {isCheckingBattlepasses && (
             <div className="text-sm text-muted-foreground">
-              Проверка баттлпассов игроков...
+              Проверка путёвок игроков...
             </div>
           )}
           
@@ -390,10 +390,10 @@ export function ReportForm({
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
               <p className="text-base text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
                 <AlertCircle className="h-5 w-5" />
-                Отчёт можно подать, но у некоторых игроков нет доступных игр в баттлпассе.
+                Отчёт можно подать, но у некоторых игроков нет доступных игр в путёвках.
               </p>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                При одобрении игры будут списаны только у тех, у кого есть активные баттлпассы.
+                При одобрении игры будут списаны только у тех, у кого есть активные путёвки.
               </p>
             </div>
           )}
