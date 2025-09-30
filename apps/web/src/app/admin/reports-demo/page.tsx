@@ -234,19 +234,23 @@ export default function AdminReportsDemoPage() {
                       {canModerate && (
                         <div className="flex gap-2">
                           <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openModeration(report, 'approve')}
-                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            {...{
+                              variant: "outline",
+                              size: "sm",
+                              onClick: () => openModeration(report, 'approve'),
+                              className: "text-green-600 border-green-200 hover:bg-green-50"
+                            } as any}
                           >
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Одобрить
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openModeration(report, 'reject')}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            {...{
+                              variant: "outline",
+                              size: "sm",
+                              onClick: () => openModeration(report, 'reject'),
+                              className: "text-red-600 border-red-200 hover:bg-red-50"
+                            } as any}
                           >
                             <XCircle className="h-3 w-3 mr-1" />
                             Отклонить
@@ -368,20 +372,24 @@ export default function AdminReportsDemoPage() {
 
               <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowModerationModal(false);
-                    setSelectedReport(null);
-                    setRejectionReason('');
-                    setModerationAction(null);
-                  }}
+                  {...{
+                    variant: "outline",
+                    onClick: () => {
+                      setShowModerationModal(false);
+                      setSelectedReport(null);
+                      setRejectionReason('');
+                      setModerationAction(null);
+                    }
+                  } as any}
                 >
                   Отмена
                 </Button>
                 <Button
-                  onClick={confirmModeration}
-                  disabled={moderationAction === 'reject' && !rejectionReason.trim()}
-                  className={moderationAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+                  {...{
+                    onClick: confirmModeration,
+                    disabled: moderationAction === 'reject' && !rejectionReason.trim(),
+                    className: moderationAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                  } as any}
                 >
                   {moderationAction === 'approve' ? 'Одобрить' : 'Отклонить'}
                 </Button>
