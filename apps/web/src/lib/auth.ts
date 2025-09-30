@@ -79,6 +79,6 @@ export const authOptions = {
   pages: {
     signIn: '/auth/login',
   },
-} as const;
+};
 
 
