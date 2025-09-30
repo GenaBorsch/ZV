@@ -6,9 +6,9 @@ import { authOptions } from '@/lib/auth';
 import { eq, and } from 'drizzle-orm';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // PATCH /api/notifications/[id] - пометить уведомление как прочитанное
@@ -26,12 +26,15 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'isRead must be a boolean' }, { status: 400 });
     }
 
+    // Получаем id из params
+    const { id } = await params;
+
     // Обновляем только уведомления пользователя
     const [updatedNotification] = await db
       .update(notifications)
       .set({ isRead })
       .where(and(
-        eq(notifications.id, params.id),
+        eq(notifications.id, id),
         eq(notifications.userId, session.user.id)
       ))
       .returning();

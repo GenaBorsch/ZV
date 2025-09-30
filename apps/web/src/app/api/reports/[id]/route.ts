@@ -8,9 +8,9 @@ import { checkReportModerationLimit } from '@/lib/reportRateLimit';
 import { eq, and } from 'drizzle-orm';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // GET /api/reports/[id] - получить конкретный отчёт
@@ -20,6 +20,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Получаем id из params
+    const { id } = await params;
 
     // Получаем отчёт
     const [report] = await db
@@ -38,7 +41,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       })
       .from(reports)
       .leftJoin(users, eq(reports.masterId, users.id))
-      .where(eq(reports.id, params.id));
+      .where(eq(reports.id, id));
 
     if (!report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
@@ -59,7 +62,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       .select()
       .from(reportPlayers)
       .where(and(
-        eq(reportPlayers.reportId, params.id),
+        eq(reportPlayers.reportId, id),
         eq(reportPlayers.playerId, session.user.id)
       ));
 
@@ -78,7 +81,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       })
       .from(reportPlayers)
       .leftJoin(users, eq(reportPlayers.playerId, users.id))
-      .where(eq(reportPlayers.reportId, params.id));
+      .where(eq(reportPlayers.reportId, id));
 
     const result = {
       ...report,
@@ -104,11 +107,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
 
+    // Получаем id из params
+    const { id } = await params;
+
     // Получаем отчёт
     const [report] = await db
       .select()
       .from(reports)
-      .where(eq(reports.id, params.id));
+      .where(eq(reports.id, id));
 
     if (!report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
@@ -152,14 +158,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
           rejectionReason: validatedData.rejectionReason || null,
           updatedAt: new Date(),
         })
-        .where(eq(reports.id, params.id));
+        .where(eq(reports.id, id));
 
       // Если отчёт одобрен, списываем игры с баттлпассов
       if (validatedData.action === 'approve') {
         const playersData = await db
           .select({ playerId: reportPlayers.playerId })
           .from(reportPlayers)
-          .where(eq(reportPlayers.reportId, params.id));
+          .where(eq(reportPlayers.reportId, id));
 
         // Вызываем API списания для каждого игрока
         const redeemResults = [];
@@ -171,7 +177,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
               body: JSON.stringify({
                 userId: player.playerId,
                 sessionId: report.sessionId,
-                reportId: params.id,
+                reportId: id,
               }),
             });
             
@@ -184,10 +190,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         }
 
         // Создаём уведомления
-        await createNotificationsForReport(params.id, 'approved', redeemResults);
+        await createNotificationsForReport(id, 'approved', redeemResults);
       } else {
         // Создаём уведомления об отклонении
-        await createNotificationsForReport(params.id, 'rejected');
+        await createNotificationsForReport(id, 'rejected');
       }
 
       return NextResponse.json({ success: true, status: newStatus });
@@ -207,9 +213,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
           status: 'CANCELLED',
           updatedAt: new Date(),
         })
-        .where(eq(reports.id, params.id));
+        .where(eq(reports.id, id));
 
-      await createNotificationsForReport(params.id, 'cancelled');
+      await createNotificationsForReport(id, 'cancelled');
 
       return NextResponse.json({ success: true, status: 'CANCELLED' });
 
@@ -250,19 +256,19 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       await db
         .update(reports)
         .set(updateData)
-        .where(eq(reports.id, params.id));
+        .where(eq(reports.id, id));
 
       // Обновляем список игроков, если передан
       if (validatedData.playerIds) {
         // Удаляем старые связи
         await db
           .delete(reportPlayers)
-          .where(eq(reportPlayers.reportId, params.id));
+          .where(eq(reportPlayers.reportId, id));
 
         // Добавляем новые связи
         await db.insert(reportPlayers).values(
           validatedData.playerIds.map(playerId => ({
-            reportId: params.id,
+            reportId: id,
             playerId,
           }))
         );
