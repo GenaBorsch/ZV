@@ -404,13 +404,11 @@ async function createTestGroups() {
           name: groupData.name,
           description: groupData.description,
           format: groupData.format,
-          location: groupData.location,
-          maxPlayers: groupData.maxPlayers,
-          currentPlayers: groupData.currentPlayers,
+          place: groupData.location,
+          maxMembers: groupData.maxPlayers,
           masterId: groupData.masterId,
           seasonId: activeSeason[0].id,
-          isActive: true,
-          isPublic: true,
+          isRecruiting: true,
         })
         .returning();
 
@@ -447,7 +445,6 @@ async function addPlayersToGroup(groupId: string, playerCount: number) {
         groupId,
         playerId: player.playerProfileId,
         status: 'ACTIVE',
-        joinedAt: new Date(),
       });
     }
   }
@@ -688,7 +685,6 @@ async function createTestPurchases() {
           await db.insert(battlepasses).values({
             userId: playersData[0].userId,
             kind: 'SEASON',
-            seasonId: activeSeason[0].id,
             usesTotal: seasonalBattlepass.bpUsesTotal || 1,
             usesLeft: seasonalBattlepass.bpUsesTotal || 1,
             status: 'ACTIVE',

@@ -436,8 +436,19 @@ export class GroupsRepo {
   }): Promise<GroupWithMasterAndSeason[]> {
     const { search, format, seasonId } = params;
 
+    // Применяем фильтры
+    const conditions = [eq(groups.isRecruiting, true), eq(seasons.isActive, true)];
+    
+    if (format) {
+      conditions.push(eq(groups.format, format));
+    }
+    
+    if (seasonId) {
+      conditions.push(eq(groups.seasonId, seasonId));
+    }
+
     // Базовый запрос с JOIN'ами для получения данных мастера и сезона
-    let query = db
+    const groupsList = await db
       .select({
         // Данные группы
         groupId: groups.id,
@@ -475,23 +486,7 @@ export class GroupsRepo {
       .innerJoin(masterProfiles, eq(groups.masterId, masterProfiles.id))
       .innerJoin(users, eq(masterProfiles.userId, users.id))
       .innerJoin(seasons, eq(groups.seasonId, seasons.id))
-      .where(and(
-        eq(groups.isRecruiting, true),
-        eq(seasons.isActive, true)
-      ));
-
-    // Применяем фильтры
-    const conditions = [eq(groups.isRecruiting, true), eq(seasons.isActive, true)];
-    
-    if (format) {
-      conditions.push(eq(groups.format, format));
-    }
-    
-    if (seasonId) {
-      conditions.push(eq(groups.seasonId, seasonId));
-    }
-
-    const groupsList = await query.where(and(...conditions));
+      .where(and(...conditions));
 
     // Получить количество участников для каждой группы и применить поиск
     const result: GroupWithMasterAndSeason[] = [];
