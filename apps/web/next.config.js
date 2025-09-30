@@ -4,12 +4,14 @@ const nextConfig = {
   serverExternalPackages: ['@zv/db'],
   transpilePackages: ['@zv/contracts', '@zv/utils'],
   eslint: {
-    // Отключаем проверку ESLint во время продакшен сборки
-    ignoreDuringBuilds: true,
+    // ИСПРАВЛЕНО: Включены проверки ESLint (было: ignoreDuringBuilds: true)
+    // Теперь сборка остановится при ошибках линтера
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Отключаем проверку TypeScript во время продакшен сборки
-    ignoreBuildErrors: true,
+    // ИСПРАВЛЕНО: Включены проверки TypeScript (было: ignoreBuildErrors: true)
+    // Теперь сборка остановится при ошибках типов
+    ignoreBuildErrors: false,
   },
 
   images: {
@@ -24,12 +26,17 @@ const nextConfig = {
     ],
   },
   async headers() {
+    // ИСПРАВЛЕНО: CORS теперь разрешен только для указанных доменов (не для всех!)
+    const allowedOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:3000';
+    
     return [
       {
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
+          // БЫЛО: value: '*' - ОПАСНО! Разрешал доступ всем
+          // СТАЛО: только разрешенные домены из .env
+          { key: 'Access-Control-Allow-Origin', value: allowedOrigins },
           { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT' },
           { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
         ],

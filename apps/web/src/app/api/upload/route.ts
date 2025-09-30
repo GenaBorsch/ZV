@@ -9,6 +9,7 @@ import {
   FileUploadOptions
 } from '@/lib/minio';
 import { initMinIO } from '@/lib/init-minio';
+import { isRateLimited, getClientIpFromHeaders, RATE_LIMITS } from '@/lib/rateLimiter';
 
 // Типы файлов и их конфигурации
 const UPLOAD_CONFIGS: Record<string, FileUploadOptions> = {
@@ -71,6 +72,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Необходима авторизация' },
         { status: 401 }
+      );
+    }
+
+    // НОВОЕ: Защита от спама загрузок файлов
+    const userId = (session.user as any).id;
+    if (isRateLimited([userId, 'upload'], RATE_LIMITS.UPLOAD)) {
+      return NextResponse.json(
+        { error: 'Слишком много загрузок файлов. Попробуйте через час' },
+        { status: 429 }
       );
     }
 
