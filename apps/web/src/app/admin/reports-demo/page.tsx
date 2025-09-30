@@ -143,7 +143,7 @@ export default function AdminReportsDemoPage() {
     
     setReports(prev => prev.map(report => 
       report.id === selectedReport.id 
-        ? { ...report, status: newStatus as 'APPROVED' | 'REJECTED', rejectionReason: moderationAction === 'reject' ? rejectionReason : undefined }
+        ? { ...report, status: newStatus, rejectionReason: moderationAction === 'reject' ? rejectionReason : undefined } as any
         : report
     ));
 
