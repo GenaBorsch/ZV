@@ -12,14 +12,14 @@ function isAdmin(roles: string[] | undefined): boolean {
 export async function GET(req: Request) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }
 
     // Парсинг параметров запроса
     const url = new URL(req.url);
-    const searchParams = Object.fromEntries(url.searchParams.entries());
+    const searchParams: any = Object.fromEntries(url.searchParams.entries());
     
     // Обработка массива ролей
     const rolesParam = url.searchParams.getAll('roles[]');

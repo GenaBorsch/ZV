@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, users, userRoles } from '@zv/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { eq, ilike, or } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 
 // GET /api/players - получить список игроков для формы отчёта
 export async function GET(req: NextRequest) {

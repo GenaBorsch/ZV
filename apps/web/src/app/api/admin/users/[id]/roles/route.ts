@@ -17,7 +17,7 @@ function isSuperAdmin(roles: string[] | undefined): boolean {
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     const userRoles = (session?.user as any)?.roles || [];
     
     if (!session?.user || !isAdmin(userRoles)) {

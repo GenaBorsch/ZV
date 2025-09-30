@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, masterProfiles, users } from '@zv/db';
-import { eq } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }

@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { isRateLimited, getClientIpFromHeaders, RATE_LIMITS } from '@/lib/rateLimiter';
 
-const nextAuthHandler = NextAuth(authOptions as any);
+const nextAuthHandler = NextAuth(authOptions);
 
 // Wrapper для GET запросов (без rate limiting)
 export async function GET(req: NextRequest, context: any) {

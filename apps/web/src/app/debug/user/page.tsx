@@ -9,7 +9,7 @@ export default async function DebugUserPage() {
   let error = null;
   
   try {
-    session = await getServerSession(authOptions as any);
+    session = await getServerSession(authOptions);
   } catch (e: any) {
     error = e.message;
   }

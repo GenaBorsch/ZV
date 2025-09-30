@@ -17,7 +17,7 @@ function isSuperAdmin(roles: string[] | undefined): boolean {
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }
@@ -60,7 +60,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }
@@ -125,7 +125,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }

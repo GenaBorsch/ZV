@@ -11,8 +11,8 @@ function isAdmin(roles: string[] | undefined): boolean {
 
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions as any);
-    const roles = (session?.user as any)?.roles as string[] | undefined;
+    const session = await getServerSession(authOptions);
+    const roles = session?.user?.roles;
     if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 
     const { id } = await params;
@@ -60,7 +60,7 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions);
   const roles = (session?.user as any)?.roles as string[] | undefined;
   if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   const { id } = await params;

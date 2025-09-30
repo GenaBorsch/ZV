@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@zv/db';
 import { userRoles } from '@zv/db';
-import { eq } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 import { PlayerReportsContent } from '@/components/PlayerReportsContent';
 
 export const metadata: Metadata = {

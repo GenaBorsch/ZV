@@ -21,7 +21,7 @@ export async function GET(
   { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }

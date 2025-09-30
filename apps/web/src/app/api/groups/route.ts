@@ -17,7 +17,7 @@ function isPlayer(roles: string[] | undefined): boolean {
 export async function POST(req: Request) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isMaster((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен. Требуется роль MASTER.' }, { status: 403 });
     }
@@ -100,7 +100,7 @@ export async function GET(req: Request) {
     }
 
     // Получить группы в зависимости от роли пользователя
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }

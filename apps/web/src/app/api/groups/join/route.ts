@@ -21,7 +21,7 @@ function isPlayer(roles: string[] | undefined): boolean {
 export async function POST(req: Request) {
   try {
     // Проверка авторизации
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isPlayer((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен. Требуется роль PLAYER.' }, { status: 403 });
     }
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     // Проверяем старый формат для обратной совместимости
-    let validationResult = JoinGroupDto.safeParse(body);
+    let validationResult: any = JoinGroupDto.safeParse(body);
     let useReferralCode = true;
     
     if (!validationResult.success) {

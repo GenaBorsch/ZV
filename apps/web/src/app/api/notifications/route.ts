@@ -4,7 +4,7 @@ import { notifications } from '@zv/db';
 import { CreateNotificationDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { eq, desc, count, and } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 
 // GET /api/notifications - получить уведомления пользователя
 export async function GET(req: NextRequest) {

@@ -43,7 +43,7 @@ const AdminCreateCharacterDto = z.object({
 // GET /api/v1/admin/characters - Получить всех персонажей (с пагинацией)
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен. Требуется роль MODERATOR или SUPERADMIN.' }, { status: 403 });
     }
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
 // POST /api/v1/admin/characters - Создать персонажа (для админа)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user || !isAdmin((session.user as any).roles)) {
       return NextResponse.json({ error: 'Доступ запрещен. Требуется роль MODERATOR или SUPERADMIN.' }, { status: 403 });
     }

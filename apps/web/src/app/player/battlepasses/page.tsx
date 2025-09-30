@@ -5,7 +5,7 @@ import { db, battlepasses, seasons, and, eq } from '@zv/db';
 import { getBattlepassStatusLabel, getBattlepassStatusClasses } from '@/lib/utils';
 
 export default async function PlayerBattlepassesListPage() {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id as string | undefined;
 
   if (!userId) {

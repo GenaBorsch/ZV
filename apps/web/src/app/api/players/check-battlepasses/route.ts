@@ -3,7 +3,7 @@ import { db } from '@zv/db';
 import { users, userRoles, battlepasses } from '@zv/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { eq, and, or } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 
 // POST /api/players/check-battlepasses - проверить доступные игры у игроков
 export async function POST(req: NextRequest) {

@@ -1,8 +1,9 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db, users, userRoles, eq } from '@zv/db';
 import bcrypt from 'bcryptjs';
+import type { NextAuthOptions } from 'next-auth';
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' as const },
   providers: [
     CredentialsProvider({

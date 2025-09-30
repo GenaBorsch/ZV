@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payments disabled' }, { status: 404 });
     }
 
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     const sessionUser = (session?.user as any) || null;
     if (!sessionUser?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

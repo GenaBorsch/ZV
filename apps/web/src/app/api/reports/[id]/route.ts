@@ -5,7 +5,7 @@ import { UpdateReportDto, ModerateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkReportModerationLimit } from '@/lib/reportRateLimit';
-import { eq, and } from 'drizzle-orm';
+// Imported from @zv/db instead of drizzle-orm directly;
 
 interface RouteParams {
   params: Promise<{

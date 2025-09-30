@@ -9,7 +9,7 @@ function isAdmin(roles: string[] | undefined): boolean {
 }
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions);
   const roles = (session?.user as any)?.roles as string[] | undefined;
   if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     const roles = (session?.user as any)?.roles as string[] | undefined;
     if (!isAdmin(roles)) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 

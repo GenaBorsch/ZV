@@ -17,13 +17,13 @@ export async function GET(req: NextRequest) {
     const orderItemsList = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
     
     // Поиск баттлпассов для пользователя заказа
-    let battlepassList = [];
+    let battlepassList: any[] = [];
     if (order && order.forUserId) {
       battlepassList = await db.select().from(battlepasses).where(eq(battlepasses.userId, order.forUserId));
     }
 
     // Поиск заказов по providerId (если есть)
-    let ordersByProviderId = [];
+    let ordersByProviderId: any[] = [];
     if (orderId.includes('-')) {
       ordersByProviderId = await db.select().from(orders).where(eq(orders.providerId, orderId));
     }

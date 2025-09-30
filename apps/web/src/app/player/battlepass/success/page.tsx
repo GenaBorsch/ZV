@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default async function BattlepassSuccessPage({ searchParams }: Props) {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions);
   
   if (!session?.user?.id) {
     redirect('/auth/login');

@@ -43,7 +43,7 @@ function isAdmin(roles: string[] | undefined): boolean {
 // GET /api/v1/characters - Получить персонажей игрока
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
 // POST /api/v1/characters - Создать нового персонажа
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Доступ запрещен' }, { status: 403 });
     }
