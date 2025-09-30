@@ -2,9 +2,7 @@ import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { db } from '@zv/db';
-import { userRoles } from '@zv/db';
-import { eq } from 'drizzle-orm';
+import { db, userRoles, eq } from '@zv/db';
 import { AdminReportsContent } from '@/components/AdminReportsContent';
 
 export const metadata: Metadata = {

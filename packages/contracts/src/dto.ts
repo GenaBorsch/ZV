@@ -277,6 +277,10 @@ export const JoinGroupDto = z.object({
 
 export const UpdateGroupDto = CreateGroupDto.partial();
 
+// Типы для Group DTOs
+export type CreateGroupDtoType = z.infer<typeof CreateGroupDto>;
+export type UpdateGroupDtoType = z.infer<typeof UpdateGroupDto>;
+
 // Club DTOs
 export const CreateClubDto = z.object({
   name: z.string().min(3, 'Название клуба должно содержать минимум 3 символа'),
@@ -361,8 +365,6 @@ export type UpdateMasterProfileDtoType = z.infer<typeof UpdateMasterProfileDto>;
 export type CreateCharacterDtoType = z.infer<typeof CreateCharacterDto>;
 export type UpdateCharacterDtoType = z.infer<typeof UpdateCharacterDto>;
 export type CharacterDtoType = z.infer<typeof CharacterDto>;
-export type CreateGroupDtoType = z.infer<typeof CreateGroupDto>;
-export type UpdateGroupDtoType = z.infer<typeof UpdateGroupDto>;
 export type CreateSessionDtoType = z.infer<typeof CreateSessionDto>;
 export type UpdateSessionDtoType = z.infer<typeof UpdateSessionDto>;
 export type CreateEnrollmentDtoType = z.infer<typeof CreateEnrollmentDto>;

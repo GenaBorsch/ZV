@@ -1,5 +1,5 @@
 import { db, groups, groupMembers, groupApplications, seasons, masterProfiles, playerProfiles, users, eq, and, sql } from '../index';
-import type { CreateGroupDto, UpdateGroupDto } from '@zv/contracts';
+import type { CreateGroupDtoType, UpdateGroupDtoType } from '@zv/contracts';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface GroupWithDetails {
@@ -78,7 +78,7 @@ export class GroupsRepo {
   /**
    * Создать группу
    */
-  static async create(data: CreateGroupDto, userId: string): Promise<GroupWithDetails> {
+  static async create(data: CreateGroupDtoType, userId: string): Promise<GroupWithDetails> {
     // Получить активный сезон
     const activeSeason = await db
       .select()
@@ -617,7 +617,7 @@ export class GroupsRepo {
   /**
    * Обновить данные группы
    */
-  static async updateGroup(groupId: string, data: UpdateGroupDto, userId: string): Promise<GroupWithDetails | null> {
+  static async updateGroup(groupId: string, data: UpdateGroupDtoType, userId: string): Promise<GroupWithDetails | null> {
     // Проверить, что пользователь является мастером группы
     const master = await db
       .select()
