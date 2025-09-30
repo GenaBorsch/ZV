@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { notifications } from '@zv/db';
+import { notifications, eq, desc, count, and } from '@zv/db';
 import { CreateNotificationDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-// Imported from @zv/db instead of drizzle-orm directly;
 
 // GET /api/notifications - получить уведомления пользователя
 export async function GET(req: NextRequest) {

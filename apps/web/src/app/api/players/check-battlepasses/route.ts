@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { users, userRoles, battlepasses } from '@zv/db';
+import { users, userRoles, battlepasses, eq, and, or } from '@zv/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-// Imported from @zv/db instead of drizzle-orm directly;
 
 // POST /api/players/check-battlepasses - проверить доступные игры у игроков
 export async function POST(req: NextRequest) {

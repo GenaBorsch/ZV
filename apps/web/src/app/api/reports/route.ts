@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { reports, reportPlayers, users, userRoles, battlepasses } from '@zv/db';
+import { reports, reportPlayers, users, userRoles, battlepasses, eq, and, or, desc } from '@zv/db';
 import { CreateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkReportCreationLimit } from '@/lib/reportRateLimit';
-// Imported from @zv/db instead of drizzle-orm directly;
 
 // GET /api/reports - получить список отчётов
 export async function GET(req: NextRequest) {

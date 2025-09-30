@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { db, masterProfiles, users } from '@zv/db';
-// Imported from @zv/db instead of drizzle-orm directly;
+import { db, masterProfiles, users, eq } from '@zv/db';
 
 export async function GET(
   request: Request,

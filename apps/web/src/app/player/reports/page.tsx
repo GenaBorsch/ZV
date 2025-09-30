@@ -3,8 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@zv/db';
-import { userRoles } from '@zv/db';
-// Imported from @zv/db instead of drizzle-orm directly;
+import { userRoles, eq } from '@zv/db';
 import { PlayerReportsContent } from '@/components/PlayerReportsContent';
 
 export const metadata: Metadata = {

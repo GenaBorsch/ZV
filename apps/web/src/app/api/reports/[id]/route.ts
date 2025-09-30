@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { reports, reportPlayers, users, userRoles, notifications } from '@zv/db';
+import { reports, reportPlayers, users, userRoles, notifications, eq, and } from '@zv/db';
 import { UpdateReportDto, ModerateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkReportModerationLimit } from '@/lib/reportRateLimit';
-// Imported from @zv/db instead of drizzle-orm directly;
 
 interface RouteParams {
   params: Promise<{
