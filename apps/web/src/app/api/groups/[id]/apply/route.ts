@@ -13,7 +13,7 @@ function isPlayer(roles: string[] | undefined): boolean {
   return roles?.includes('PLAYER') || false;
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
     const session = await getServerSession(authOptions as any);

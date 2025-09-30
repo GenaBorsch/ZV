@@ -14,7 +14,7 @@ function isMaster(roles: string[] | undefined): boolean {
   return roles?.includes('MASTER') || false;
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Проверка авторизации
     const session = await getServerSession(authOptions as any);
