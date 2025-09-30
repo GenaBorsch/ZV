@@ -73,7 +73,7 @@ export default function AdminEditProductPage() {
           <label className="block text-sm mb-1">Изображение товара</label>
           <FileUpload
             type="product-image"
-            value={form.imageUrl || null}
+            value={form.imageUrl || undefined}
             onChange={(url) => update('imageUrl', url || '')}
             accept="image/*"
             maxSizeMB={10}

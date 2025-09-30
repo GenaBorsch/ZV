@@ -7,7 +7,10 @@ async function getData(searchParams: Record<string, string | string[] | undefine
   const active = searchParams.active as string | undefined;
   const visible = searchParams.visible as string | undefined;
   const where = [eq(products.type, 'BATTLEPASS' as any)];
-  if (q) where.push(or(ilike(products.sku, `%${q}%`), ilike(products.title, `%${q}%`)));
+  if (q) {
+    const searchCondition = or(ilike(products.sku, `%${q}%`), ilike(products.title, `%${q}%`));
+    if (searchCondition) where.push(searchCondition);
+  }
   if (active === 'true' || active === 'false') where.push(eq(products.active, active === 'true'));
   if (visible === 'true' || visible === 'false') where.push(eq(products.visible, visible === 'true'));
   const condition = where.length > 1 ? and(...where as any) : where[0];

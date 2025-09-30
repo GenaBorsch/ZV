@@ -401,7 +401,7 @@ function ProfilePageContent() {
               <Label htmlFor="avatarUrl">Аватар</Label>
               <FileUpload
                 type="avatar"
-                value={mainForm.watch('avatarUrl') || null}
+                value={mainForm.watch('avatarUrl') || undefined}
                 onChange={(url) => mainForm.setValue('avatarUrl', url || '')}
                 accept="image/*"
                 maxSizeMB={5}
