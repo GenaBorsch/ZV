@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 interface Props {
-  searchParams: { orderId?: string };
+  searchParams: Promise<{ orderId?: string }>;
 }
 
 export default async function BattlepassFailedPage({ searchParams }: Props) {
@@ -15,7 +15,7 @@ export default async function BattlepassFailedPage({ searchParams }: Props) {
     redirect('/auth/login');
   }
 
-  const { orderId } = searchParams;
+  const { orderId } = await searchParams;
   let order = null;
 
   if (orderId) {
