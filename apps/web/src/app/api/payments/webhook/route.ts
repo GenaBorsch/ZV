@@ -53,7 +53,10 @@ export async function POST(req: Request) {
         // Находим заказ для выдачи баттлпасса
         const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
         
-        if (order && order.forUserId) {
+        if (order) {
+          // Определяем целевого пользователя: forUserId или userId (если покупает для себя)
+          const targetUserId = order.forUserId || order.userId;
+          
           // Получаем информацию о товаре из order_items
           const [orderItem] = await db.select()
             .from(orderItems)
@@ -64,7 +67,7 @@ export async function POST(req: Request) {
           const productTitle = orderItem?.productTitleSnapshot || 'Путёвка';
           
           await db.insert(battlepasses).values({
-            userId: order.forUserId,
+            userId: targetUserId,
             kind: 'SINGLE',
             title: productTitle,
             usesTotal: totalUses,
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
             status: 'ACTIVE',
           });
           
-          console.log('🎮 Battlepass issued to user:', order.forUserId, 'with', totalUses, 'uses, title:', productTitle);
+          console.log('🎮 Battlepass issued to user:', targetUserId, 'with', totalUses, 'uses, title:', productTitle);
         }
       }
     }
