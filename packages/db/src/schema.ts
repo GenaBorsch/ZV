@@ -244,6 +244,7 @@ export const battlepasses = pgTable('battlepasses', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   kind: battlepassKindEnum('kind').notNull(),
+  title: varchar('title', { length: 255 }),
   usesTotal: integer('uses_total').notNull(),
   usesLeft: integer('uses_left').notNull(),
   status: battlepassStatusEnum('status').default('ACTIVE').notNull(),

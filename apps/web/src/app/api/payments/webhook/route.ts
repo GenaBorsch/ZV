@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db, orders, battlepasses, eq } from '@zv/db';
+import { db, orders, battlepasses, orderItems, eq } from '@zv/db';
 
 function env(key: string): string {
   const value = process.env[key];
@@ -54,19 +54,25 @@ export async function POST(req: Request) {
         const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
         
         if (order && order.forUserId) {
-          // Выдаем баттлпасс пользователю с правильным количеством использований
-          const product = order.productData as any;
-          const totalUses = product?.bpUsesTotal || 1;
+          // Получаем информацию о товаре из order_items
+          const [orderItem] = await db.select()
+            .from(orderItems)
+            .where(eq(orderItems.orderId, orderId))
+            .limit(1);
+
+          const totalUses = orderItem?.bpUsesTotalAtPurchase || 1;
+          const productTitle = orderItem?.productTitleSnapshot || 'Путёвка';
           
           await db.insert(battlepasses).values({
             userId: order.forUserId,
             kind: 'SINGLE',
+            title: productTitle,
             usesTotal: totalUses,
             usesLeft: totalUses,
             status: 'ACTIVE',
           });
           
-          console.log('🎮 Battlepass issued to user:', order.forUserId, 'with', totalUses, 'uses');
+          console.log('🎮 Battlepass issued to user:', order.forUserId, 'with', totalUses, 'uses, title:', productTitle);
         }
       }
     }

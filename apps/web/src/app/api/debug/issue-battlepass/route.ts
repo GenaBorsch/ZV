@@ -39,17 +39,19 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     const totalUses = orderItem?.bpUsesTotalAtPurchase || 1;
+    const productTitle = orderItem?.productTitleSnapshot || 'Путёвка';
 
     // Выдаем баттлпасс
     const [newBattlepass] = await db.insert(battlepasses).values({
       userId: targetUserId,
       kind: 'SINGLE',
+      title: productTitle,
       usesTotal: totalUses,
       usesLeft: totalUses,
       status: 'ACTIVE',
     }).returning();
 
-    console.log('🎮 Battlepass manually issued to user:', targetUserId, 'with', totalUses, 'uses');
+    console.log('🎮 Battlepass manually issued to user:', targetUserId, 'with', totalUses, 'uses, title:', productTitle);
 
     return NextResponse.json({
       success: true,

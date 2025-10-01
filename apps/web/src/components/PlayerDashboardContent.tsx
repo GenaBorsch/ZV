@@ -365,9 +365,9 @@ export function PlayerDashboardContent() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h4 className="font-medium text-foreground">
-                          {bp.kind === 'SEASON' ? 'Сезонная путёвка' : 
+                          {bp.title || (bp.kind === 'SEASON' ? 'Сезонная путёвка' : 
                            bp.kind === 'SINGLE' ? 'Разовая путёвка' : 
-                           'Путёвка'}
+                           'Путёвка')}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           Статус: {getBattlepassStatusLabel(bp.status)}

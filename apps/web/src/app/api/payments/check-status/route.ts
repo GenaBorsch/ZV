@@ -72,16 +72,18 @@ export async function POST(req: NextRequest) {
               .limit(1);
 
             const totalUses = orderItem?.bpUsesTotalAtPurchase || 1;
+            const productTitle = orderItem?.productTitleSnapshot || 'Путёвка';
             
             await db.insert(battlepasses).values({
               userId: targetUserId,
               kind: 'SINGLE', // Базовое значение
+              title: productTitle,
               usesTotal: totalUses,
               usesLeft: totalUses,
               status: 'ACTIVE',
             });
             
-            console.log('🎮 Battlepass issued to user:', targetUserId, 'with', totalUses, 'uses');
+            console.log('🎮 Battlepass issued to user:', targetUserId, 'with', totalUses, 'uses, title:', productTitle);
           }
           
           processResult.processed = true;

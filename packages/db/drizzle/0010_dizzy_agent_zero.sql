@@ -1,0 +1,1 @@
+ALTER TABLE "battlepasses" ADD COLUMN "title" varchar(255);

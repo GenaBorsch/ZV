@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { db, orders, battlepasses, orderItems, eq, and } from '@zv/db';
+import { db, orders, battlepasses, orderItems, eq, and, desc } from '@zv/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { PaymentStatusChecker } from '@/components/PaymentStatusChecker';
 
 interface Props {
   searchParams: Promise<{ orderId?: string }>;
@@ -36,11 +37,15 @@ export default async function BattlepassSuccessPage({ searchParams }: Props) {
       }
     }
 
-    // Если заказ оплачен, ищем выданный баттлпасс
+    // Если заказ оплачен, ищем самый новый активный баттлпасс
     if (order && order.status === 'PAID') {
       const [foundBattlepass] = await db.select()
         .from(battlepasses)
-        .where(eq(battlepasses.userId, session.user.id))
+        .where(and(
+          eq(battlepasses.userId, session.user.id),
+          eq(battlepasses.status, 'ACTIVE')
+        ))
+        .orderBy(desc(battlepasses.createdAt))
         .limit(1);
       
       battlepass = foundBattlepass;
@@ -126,6 +131,15 @@ export default async function BattlepassSuccessPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
+      {/* Автоматическая проверка статуса платежа */}
+      {order && (
+        <PaymentStatusChecker 
+          orderId={order.id}
+          paymentId={order.providerId || undefined}
+          initialStatus={order.status}
+        />
+      )}
+      
       <div className={`${status.bgColor} ${status.borderColor} border rounded-lg p-8 mb-8`}>
         <div className="text-center">
           <div className="text-6xl mb-4">{status.icon}</div>
