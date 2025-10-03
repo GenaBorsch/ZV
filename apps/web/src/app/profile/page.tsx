@@ -16,6 +16,9 @@ import { FileUpload } from '@/components/FileUpload';
 import { useSession, getSession, signOut, signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getRedirectUrlByRoles } from '@/lib/redirectUtils';
+import Link from 'next/link';
+import { LogoutButton } from '@/components/LogoutButton';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface ProfileData {
   id: string;
@@ -295,7 +298,41 @@ function ProfilePageContent() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-card shadow-sm border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-xl font-semibold text-foreground">
+                Профиль
+              </h1>
+              <span className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
+                {session?.user?.name || 'Пользователь'}
+              </span>
+            </div>
+            <nav className="flex items-center space-x-4">
+              <NotificationBell className="text-muted-foreground hover:text-foreground" />
+              {profile?.roles.includes('MASTER') || profile?.roles.includes('SUPERADMIN') || profile?.roles.includes('MODERATOR') ? (
+                <Link href="/master" className="text-muted-foreground hover:text-foreground">
+                  Кабинет мастера
+                </Link>
+              ) : (
+                <Link href="/player" className="text-muted-foreground hover:text-foreground">
+                  Кабинет игрока
+                </Link>
+              )}
+              <Link href="/" className="text-muted-foreground hover:text-foreground">
+                На главную
+              </Link>
+              <LogoutButton className="text-muted-foreground hover:text-foreground" />
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto p-4 max-w-2xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">
           {isWelcome ? 'Добро пожаловать!' : 'Мой профиль'}
@@ -343,17 +380,14 @@ function ProfilePageContent() {
               <Label className="text-sm font-medium text-gray-600">Аватар</Label>
               <div className="mt-1 text-base text-gray-900">
                 {profile.avatarUrl ? (
-                  <div className="flex items-center space-x-3">
-                    <img 
-                      src={profile.avatarUrl} 
-                      alt="Аватар" 
-                      className="w-10 h-10 rounded-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <span className="text-sm text-blue-600 truncate max-w-xs">{profile.avatarUrl}</span>
-                  </div>
+                  <img 
+                    src={profile.avatarUrl} 
+                    alt="Аватар" 
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 ) : (
                   'Не указан'
                 )}
@@ -580,13 +614,9 @@ function ProfilePageContent() {
           <h3 className="text-lg font-medium mb-3">Информация об аккаунте</h3>
           <div className="space-y-2 text-sm text-gray-600">
             <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>Роли:</strong> {profile.roles.join(', ')}</p>
-            {profile.playerProfile && (
+            {profile.playerProfile && profile.playerProfile.notes && (
               <div>
-                <p><strong>Никнейм игрока:</strong> {profile.playerProfile.nickname || 'Не указан'}</p>
-                {profile.playerProfile.notes && (
-                  <p><strong>Заметки игрока:</strong> {profile.playerProfile.notes}</p>
-                )}
+                <p><strong>Заметки игрока:</strong> {profile.playerProfile.notes}</p>
               </div>
             )}
             {profile.masterProfile && (
@@ -603,6 +633,7 @@ function ProfilePageContent() {
           </div>
         </div>
       </div>
+      </main>
     </div>
   );
 }

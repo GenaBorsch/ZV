@@ -90,7 +90,7 @@ export default function RegisterPage() {
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
             Регистрация
           </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <p className="mt-2 text-center text-lg text-muted-foreground">
             Создайте аккаунт для участия в сезоне
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function RegisterPage() {
         <form method="post" className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+              <label htmlFor="email" className="block text-base font-medium text-foreground">
                 Email
               </label>
               <Input
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+              <label htmlFor="password" className="block text-base font-medium text-foreground">
                 Пароль
               </label>
               <Input
@@ -131,8 +131,8 @@ export default function RegisterPage() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            {success && <p className="text-sm text-green-600">{success}</p>}
+            {error && <p className="text-base text-red-600">{error}</p>}
+            {success && <p className="text-base text-green-600">{success}</p>}
           </div>
 
           <div className="space-y-4">
@@ -158,7 +158,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Уже есть аккаунт?{' '}
               <Link href="/auth/login" className="text-primary hover:opacity-85">
                 Войти
