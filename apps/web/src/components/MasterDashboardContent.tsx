@@ -124,7 +124,7 @@ export function MasterDashboardContent() {
       </h2>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-5 mb-8">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-4 mb-8">
         <div className="card p-5">
           <div className="text-base text-muted-foreground">Мои группы</div>
           <div className="text-xl font-medium">{groups.length}</div>
@@ -140,10 +140,6 @@ export function MasterDashboardContent() {
           <div className="text-xl font-medium text-red-600">
             {groups.reduce((total, group) => total + (group.pendingApplicationsCount || 0), 0)}
           </div>
-        </div>
-        <div className="card p-5">
-          <div className="text-base text-muted-foreground">Ближайшие игры</div>
-          <div className="text-xl font-medium">0</div>
         </div>
         <div className="card p-5 cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => router.push('/master/reports')}>
           <div className="text-base text-muted-foreground">Отчёты</div>
@@ -294,18 +290,6 @@ export function MasterDashboardContent() {
             </div>
           )}
 
-          {/* Sessions Section */}
-          <div className="card p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-foreground">Ближайшие игры</h3>
-              <button className="btn-primary" disabled>
-                Добавить игру
-              </button>
-            </div>
-            <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
-              Нет запланированных игр.
-            </div>
-          </div>
         </div>
 
         {/* Sidebar */}
@@ -320,12 +304,6 @@ export function MasterDashboardContent() {
                 Создать группу
               </button>
               <button 
-                className="w-full text-left px-3 py-3 text-base text-muted-foreground cursor-not-allowed rounded-md"
-                disabled
-              >
-                Запланировать игру
-              </button>
-              <button 
                 className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
                 onClick={() => router.push('/master/reports')}
               >
@@ -337,10 +315,6 @@ export function MasterDashboardContent() {
           <div className="card p-6">
             <h3 className="text-lg font-medium text-foreground mb-4">Статистика</h3>
             <div className="space-y-3">
-              <div className="flex justify-between text-base">
-                <span className="text-muted-foreground">Проведено игр:</span>
-                <span className="font-medium">0</span>
-              </div>
               <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">Активных игроков:</span>
                 <span className="font-medium">
