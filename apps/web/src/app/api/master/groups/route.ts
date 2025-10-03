@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
           maxMembers: group.maxMembers,
           members: members.map(member => ({
             id: member.userId,
-            name: member.nickname || member.email,
+            name: member.name || member.email,
             email: member.email,
             status: member.status
           }))

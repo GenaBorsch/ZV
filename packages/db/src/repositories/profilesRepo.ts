@@ -117,7 +117,7 @@ export class ProfilesRepo {
         if (data.bio !== undefined) updateData.bio = data.bio;
         if (data.format !== undefined) updateData.format = data.format;
         if (data.location !== undefined) updateData.location = data.location;
-        if (data.clubId !== undefined) updateData.clubId = data.clubId;
+        if (data.clubId !== undefined) updateData.clubId = data.clubId && data.clubId.trim() ? data.clubId : null;
 
         if (Object.keys(updateData).length > 0) {
           await tx.update(masterProfiles)
@@ -131,7 +131,7 @@ export class ProfilesRepo {
           bio: data.bio || null,
           format: data.format,
           location: data.location || null,
-          clubId: data.clubId || null,
+          clubId: data.clubId && data.clubId.trim() ? data.clubId : null,
         });
       }
 

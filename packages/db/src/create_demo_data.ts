@@ -217,7 +217,7 @@ async function createPlayerProfile(userId: string, email: string) {
   if (existingProfile.length === 0) {
     await db.insert(playerProfiles).values({
       userId,
-      nickname: 'Искатель приключений',
+      nickname: null,
       notes: 'Люблю играть за воинов и паладинов. Предпочитаю ролевые взаимодействия и эпические битвы. Всегда готов помочь команде!',
     });
     console.log('✅ Создан профиль игрока для', email);

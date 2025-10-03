@@ -60,7 +60,12 @@ export const CreateMasterProfileDto = z.object({
   clubId: z.string().optional(),
 });
 
-export const UpdateMasterProfileDto = CreateMasterProfileDto.partial();
+export const UpdateMasterProfileDto = z.object({
+  bio: z.string().max(500, 'Биография не должна превышать 500 символов').optional(),
+  format: z.enum(['ONLINE', 'OFFLINE', 'MIXED']).optional(),
+  location: z.string().optional(),
+  clubId: z.string().optional(),
+});
 
 // Character DTOs
 export const CreateCharacterDto = z.object({

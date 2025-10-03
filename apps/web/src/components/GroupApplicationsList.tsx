@@ -168,9 +168,6 @@ export function GroupApplicationsList({ groupId, groupName, onApplicationUpdate 
                           {application.player.user.name || 'Без имени'}
                         </CardTitle>
                         <div className="text-sm text-muted-foreground">
-                          {application.player.nickname && (
-                            <span>Ник: {application.player.nickname} • </span>
-                          )}
                           {application.player.user.rpgExperience && (
                             <span>Опыт: {experienceMap[application.player.user.rpgExperience]} • </span>
                           )}

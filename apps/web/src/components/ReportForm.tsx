@@ -313,7 +313,7 @@ export function ReportForm({
                       className={`border rounded-lg p-3 cursor-pointer transition-colors ${
                         selectedPlayers.some(p => p.id === player.id)
                           ? 'border-green-500 bg-green-50'
-                          : 'hover:bg-muted'
+                          : 'hover:bg-gray-50 hover:border-gray-300'
                       }`}
                       onClick={() => {
                         if (selectedPlayers.some(p => p.id === player.id)) {
@@ -362,14 +362,14 @@ export function ReportForm({
                   <Badge
                     key={player.id}
                     variant="secondary"
-                    className="flex items-center gap-2 pr-1"
+                    className="flex items-center gap-2 pr-2 py-1"
                   >
                     <span>{player.name || player.email}</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      className="h-5 w-5 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
                       onClick={() => removePlayer(player.id)}
                     >
                       <X className="h-3 w-3" />

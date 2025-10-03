@@ -117,7 +117,7 @@ async function createDemoProfiles() {
     if (existingPlayerProfile.length === 0) {
       await db.insert(playerProfiles).values({
         userId: demoPlayer[0].id,
-        nickname: 'Искатель приключений',
+        nickname: null,
         notes: 'Люблю играть за воинов и паладинов. Предпочитаю ролевые взаимодействия и эпические битвы. Всегда готов помочь команде!',
       });
       console.log('✅ Создан профиль игрока для demoplayer@zvezdnoe-vereteno.ru');

@@ -609,29 +609,6 @@ function ProfilePageContent() {
           </div>
         )}
 
-        {/* Показываем дополнительную информацию о профиле */}
-        <div className="mt-8 pt-6 border-t">
-          <h3 className="text-lg font-medium mb-3">Информация об аккаунте</h3>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p><strong>Email:</strong> {profile.email}</p>
-            {profile.playerProfile && profile.playerProfile.notes && (
-              <div>
-                <p><strong>Заметки игрока:</strong> {profile.playerProfile.notes}</p>
-              </div>
-            )}
-            {profile.masterProfile && (
-              <div>
-                <p><strong>Формат мастера:</strong> {profile.masterProfile.format}</p>
-                {profile.masterProfile.bio && (
-                  <p><strong>О мастере:</strong> {profile.masterProfile.bio}</p>
-                )}
-                {profile.masterProfile.location && (
-                  <p><strong>Локация:</strong> {profile.masterProfile.location}</p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
       </main>
     </div>

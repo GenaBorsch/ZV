@@ -46,6 +46,7 @@ export interface GroupMember {
   userId: string;
   playerProfileId: string;
   nickname: string | null;
+  name: string | null;
   email: string;
   status: 'ACTIVE' | 'INACTIVE' | 'BANNED';
   joinedAt: Date;
@@ -593,6 +594,7 @@ export class GroupsRepo {
         userId: users.id,
         playerProfileId: playerProfiles.id,
         nickname: playerProfiles.nickname,
+        name: users.name,
         email: users.email,
         status: groupMembers.status,
         joinedAt: groupMembers.createdAt,
@@ -608,6 +610,7 @@ export class GroupsRepo {
       userId: member.userId,
       playerProfileId: member.playerProfileId,
       nickname: member.nickname,
+      name: member.name,
       email: member.email,
       status: member.status as 'ACTIVE' | 'INACTIVE' | 'BANNED',
       joinedAt: member.joinedAt,

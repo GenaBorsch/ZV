@@ -53,12 +53,6 @@ export function PlayerProfileModal({ player, onClose }: PlayerProfileModalProps)
               </p>
             </div>
 
-            {player.nickname && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Игровой никнейм</label>
-                <p className="text-foreground">{player.nickname}</p>
-              </div>
-            )}
 
             <div>
               <label className="text-sm font-medium text-muted-foreground">Email</label>
@@ -89,23 +83,6 @@ export function PlayerProfileModal({ player, onClose }: PlayerProfileModalProps)
             )}
           </div>
 
-          {/* Дополнительная информация */}
-          <div className="border-t pt-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">
-              Дополнительная информация
-            </h3>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">ID игрока:</span>
-                <span className="text-foreground font-mono text-xs">{player.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">ID пользователя:</span>
-                <span className="text-foreground font-mono text-xs">{player.userId}</span>
-              </div>
-            </div>
-          </div>
 
           {/* Кнопки действий */}
           <div className="flex justify-end gap-2 pt-4 border-t">
