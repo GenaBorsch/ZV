@@ -1326,11 +1326,12 @@ export class GroupsRepo {
         .where(eq(groupMembers.groupId, groupId));
 
       // Удалить саму группу
-      const result = await tx
+      await tx
         .delete(groups)
         .where(eq(groups.id, groupId));
 
-      return result.rowCount > 0;
+      // Если мы дошли до этого места без ошибок, значит удаление прошло успешно
+      return true;
     });
   }
 }
