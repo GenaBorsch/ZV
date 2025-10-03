@@ -1292,4 +1292,45 @@ export class GroupsRepo {
       },
     }));
   }
+
+  /**
+   * Удалить группу
+   */
+  static async deleteGroup(groupId: string, userId: string): Promise<boolean> {
+    return db.transaction(async (tx) => {
+      // Проверить, что пользователь является мастером группы
+      const isMaster = await GroupsRepo.isGroupMaster(groupId, userId);
+      if (!isMaster) {
+        throw new Error('Access denied. You are not the master of this group.');
+      }
+
+      // Проверить, что группа существует
+      const group = await tx
+        .select()
+        .from(groups)
+        .where(eq(groups.id, groupId))
+        .limit(1);
+
+      if (!group[0]) {
+        throw new Error('Group not found');
+      }
+
+      // Удалить все заявки в группу
+      await tx
+        .delete(groupApplications)
+        .where(eq(groupApplications.groupId, groupId));
+
+      // Удалить всех участников группы
+      await tx
+        .delete(groupMembers)
+        .where(eq(groupMembers.groupId, groupId));
+
+      // Удалить саму группу
+      const result = await tx
+        .delete(groups)
+        .where(eq(groups.id, groupId));
+
+      return result.rowCount > 0;
+    });
+  }
 }

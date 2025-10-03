@@ -123,3 +123,32 @@ export async function PUT(
     return NextResponse.json({ error: error.message || 'Failed to update group' }, { status: 500 });
   }
 }
+
+// DELETE /api/groups/[id] - Удалить группу
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !isMaster((session.user as any).roles)) {
+      return NextResponse.json({ error: 'Доступ запрещен. Требуется роль MASTER.' }, { status: 403 });
+    }
+
+    const userId = (session.user as any).id;
+    const { id: groupId } = await params;
+
+    // Удалить группу
+    const deleted = await GroupsRepo.deleteGroup(groupId, userId);
+
+    if (!deleted) {
+      return NextResponse.json({ error: 'Группа не найдена или доступ запрещен' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Группа успешно удалена' });
+
+  } catch (error: any) {
+    console.error('Error deleting group:', error);
+    return NextResponse.json({ error: error.message || 'Failed to delete group' }, { status: 500 });
+  }
+}

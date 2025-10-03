@@ -33,27 +33,27 @@ export function JoinGroupSuccess({
       </div>
 
       {/* Информация о группе */}
-      <div className="bg-muted/50 p-4 rounded-md mb-6">
+      <div className="border border-border rounded-lg p-4 mb-6">
         <h4 className="font-medium text-foreground mb-2">{group.name}</h4>
         {group.description && (
-          <p className="text-sm text-muted-foreground mb-2 break-words overflow-wrap-anywhere">{group.description}</p>
+          <p className="text-base text-foreground mb-3 break-words overflow-wrap-anywhere">{group.description}</p>
         )}
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-2 gap-4 text-base">
           <div>
-            <span className="text-muted-foreground">Участники:</span>
-            <span className="ml-2 font-medium">{group.currentMembers}/{group.maxMembers}</span>
+            <span className="text-foreground">Участники:</span>
+            <span className="ml-2 font-medium text-foreground">{group.currentMembers}/{group.maxMembers}</span>
           </div>
           <div>
-            <span className="text-muted-foreground">Формат:</span>
-            <span className="ml-2 font-medium">
-              {group.format === 'ONLINE' ? 'Онлайн' : 
+            <span className="text-foreground">Формат:</span>
+            <span className="ml-2 font-medium text-foreground">
+              {group.format === 'ONLINE' ? 'Онлайн' :
                group.format === 'OFFLINE' ? 'Оффлайн' : 'Смешанный'}
             </span>
           </div>
           {group.place && (
             <div className="col-span-2">
-              <span className="text-muted-foreground">Место:</span>
-              <span className="ml-2 font-medium break-words overflow-wrap-anywhere">{group.place}</span>
+              <span className="text-foreground">Место:</span>
+              <span className="ml-2 font-medium text-foreground break-words overflow-wrap-anywhere">{group.place}</span>
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import { CreateGroupForm } from './CreateGroupForm';
 import { GroupCreatedSuccess } from './GroupCreatedSuccess';
 import { GroupDetailsModal } from './GroupDetailsModal';
 import { GroupApplicationsList } from './GroupApplicationsList';
+import { DeleteGroupModal } from './DeleteGroupModal';
 
 interface Group {
   id: string;
@@ -30,6 +31,9 @@ export function MasterDashboardContent() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [viewingApplicationsGroupId, setViewingApplicationsGroupId] = useState<string | null>(null);
   const [reportsCount, setReportsCount] = useState(0);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Загрузка групп с сервера
   const fetchGroups = async () => {
@@ -74,6 +78,43 @@ export function MasterDashboardContent() {
   const handleCreateAnother = () => {
     setCreatedGroup(null);
     setShowCreateForm(true);
+  };
+
+  const handleDeleteGroup = (groupId: string, groupName: string) => {
+    setGroupToDelete({ id: groupId, name: groupName });
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!groupToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/groups/${groupToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setDeleteModalOpen(false);
+        setGroupToDelete(null);
+        fetchGroups(); // Перезагружаем список групп
+        // Можно добавить toast уведомление вместо alert
+      } else {
+        const error = await response.json();
+        alert(`Ошибка при удалении группы: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Ошибка удаления группы:', error);
+      alert('Произошла ошибка при удалении группы');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setGroupToDelete(null);
+    setIsDeleting(false);
   };
 
   return (
@@ -237,6 +278,13 @@ export function MasterDashboardContent() {
                               </button>
                             </>
                           )}
+                          <button 
+                            className="text-red-600 hover:text-red-700 text-base font-medium"
+                            onClick={() => handleDeleteGroup(group.id, group.name)}
+                            title="Удалить группу"
+                          >
+                            🗑️ Удалить
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -331,6 +379,15 @@ export function MasterDashboardContent() {
           }}
         />
       )}
+
+      {/* Модальное окно подтверждения удаления */}
+      <DeleteGroupModal
+        isOpen={deleteModalOpen}
+        groupName={groupToDelete?.name || ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }
