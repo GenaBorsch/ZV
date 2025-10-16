@@ -20,7 +20,7 @@
 
 ---
 
-## ⚡ Быстрый старт (EasyPanel)
+## ⚡ Быстрый старт (EasyPanel/Облачные платформы)
 
 ### 1. Подготовка образа
 
@@ -36,7 +36,7 @@ docker build -f docker/Dockerfile.prod -t zv-app:latest .
 **Создание приложения:**
 - **Type**: `Docker Image`
 - **Image**: `zv-app:latest`
-- **Port**: `80`
+- **Port**: `80` (для продакшн) или `3000` (для разработки)
 - **Health Check**: `/api/health`
 
 ### 3. Обязательные переменные окружения
@@ -134,6 +134,50 @@ make app-status
 
 # 5. Просмотр логов
 make app-logs
+```
+
+### Развертывание только приложения (без инфраструктуры)
+
+Для случаев, когда PostgreSQL и MinIO развернуты отдельно:
+
+#### Подготовка внешних сервисов:
+
+**PostgreSQL:**
+```sql
+CREATE DATABASE zvezdnoe_vereteno;
+CREATE USER zv_user WITH ENCRYPTED PASSWORD 'secure_password';
+GRANT ALL PRIVILEGES ON DATABASE zvezdnoe_vereteno TO zv_user;
+```
+
+**MinIO/S3:**
+```bash
+# Создание необходимых buckets
+mc alias set myminio https://your-minio-host access_key secret_key
+mc mb myminio/avatars
+mc mb myminio/documents  
+mc mb myminio/uploads
+
+# Настройка политик доступа
+mc anonymous set public myminio/avatars
+mc anonymous set public myminio/uploads
+# documents остается приватным для безопасности
+```
+
+#### Переменные окружения для внешних сервисов:
+
+```env
+# База данных (внешняя)
+DATABASE_URL="postgresql://zv_user:secure_password@external-db-host:5432/zvezdnoe_vereteno"
+
+# MinIO/S3 (внешний)
+S3_ENDPOINT="https://external-minio-host"
+S3_ACCESS_KEY="your_external_access_key"
+S3_SECRET_KEY="your_external_secret_key"
+
+# Остальные настройки как обычно
+NEXTAUTH_SECRET="your-super-secret-32-chars-minimum"
+NEXTAUTH_URL="https://your-domain.com"
+PUBLIC_BASE_URL="https://your-domain.com"
 ```
 
 ### Продакшн с Nginx
