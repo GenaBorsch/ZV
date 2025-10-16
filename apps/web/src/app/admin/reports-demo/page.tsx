@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AdminHeader } from '@/components/AdminHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -157,21 +158,19 @@ export default function AdminReportsDemoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Модерация отчётов (ДЕМО)
-            </h1>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              Ожидают: {reports.filter(r => r.status === 'PENDING').length}
-            </Badge>
-          </div>
-        </div>
-      </header>
+      <AdminHeader 
+        title="Модерация отчётов (ДЕМО)"
+        backLink={{
+          href: "/admin",
+          label: "Админ-панель"
+        }}
+        actions={
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Ожидают: {reports.filter(r => r.status === 'PENDING').length}
+          </Badge>
+        }
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

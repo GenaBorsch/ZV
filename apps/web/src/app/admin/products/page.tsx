@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { db, products, and, eq, ilike, or } from '@zv/db';
+import { AdminHeader } from '@/components/AdminHeader';
 import { ProductImage } from '@/components/ProductImage';
 
 async function getData(searchParams: Record<string, string | string[] | undefined>) {
@@ -22,11 +23,19 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   const sp = await searchParams;
   const items = await getData(sp);
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-foreground">Офферы баттлпассов</h1>
-        <Link href="/admin/products/new" className="btn-primary">Создать оффер</Link>
-      </div>
+    <div className="min-h-screen bg-background">
+      <AdminHeader 
+        title="Офферы баттлпассов"
+        backLink={{
+          href: "/admin",
+          label: "Админ-панель"
+        }}
+        actions={
+          <Link href="/admin/products/new" className="btn-primary">Создать оффер</Link>
+        }
+      />
+      
+      <main className="max-w-6xl mx-auto py-8 px-4">
       <div className="mb-4 flex gap-2">
         <form className="flex gap-2">
           <input name="q" placeholder="Поиск SKU/Название" defaultValue={(sp.q as string) || ''} className="input" />
@@ -87,6 +96,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           </tbody>
         </table>
       </div>
+      </main>
     </div>
   );
 }

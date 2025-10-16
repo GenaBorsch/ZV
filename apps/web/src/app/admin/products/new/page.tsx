@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileUpload } from '@/components/FileUpload';
+import { AdminHeader } from '@/components/AdminHeader';
 
 export default function AdminNewProductPage() {
   const router = useRouter();
@@ -42,8 +43,16 @@ export default function AdminNewProductPage() {
   const update = (k: string, v: any) => setForm((s) => ({ ...s, [k]: v }));
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-semibold text-foreground mb-4">Создать оффер (BATTLEPASS)</h1>
+    <div className="min-h-screen bg-background">
+      <AdminHeader 
+        title="Создать оффер (BATTLEPASS)"
+        backLink={{
+          href: "/admin/products",
+          label: "Офферы баттлпассов"
+        }}
+      />
+      
+      <main className="max-w-3xl mx-auto py-8 px-4">
       <form className="space-y-4" onSubmit={submit}>
         <div>
           <label className="block text-sm mb-1">SKU</label>
@@ -94,6 +103,7 @@ export default function AdminNewProductPage() {
           <button type="button" className="btn-outline" onClick={() => history.back()}>Отмена</button>
         </div>
       </form>
+      </main>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 export interface FileUploadProps {
-  type: 'avatar' | 'character-avatar' | 'character-sheet' | 'product-image' | 'report-attachment';
+  type: 'avatar' | 'character-avatar' | 'character-sheet' | 'product-image' | 'report-attachment' | 'monster-image';
   value?: string;
   onChange: (url: string | null) => void;
   className?: string;

@@ -26,6 +26,8 @@ export const battlepassStatusEnum = pgEnum('battlepass_status', ['ACTIVE', 'EXPI
 export const rpgExperienceEnum = pgEnum('rpg_experience', ['NOVICE', 'INTERMEDIATE', 'VETERAN']);
 export const applicationStatusEnum = pgEnum('application_status', ['PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN']);
 export const reportStatusEnum = pgEnum('report_status', ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']);
+export const elementStatusEnum = pgEnum('element_status', ['AVAILABLE', 'LOCKED']);
+export const storyTextTypeEnum = pgEnum('story_text_type', ['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT']);
 
 // Таблицы
 export const users = pgTable('users', {
@@ -95,6 +97,51 @@ export const characters = pgTable('characters', {
 }, (table) => {
   return {
     levelCheck: sql`CHECK (${table.level} >= 1)`,
+  };
+});
+
+// Монстры (для системы планов мастеров)
+export const monsters = pgTable('monsters', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 200 }).unique().notNull(),
+  imageUrl: varchar('image_url', { length: 512 }),
+  description: text('description').notNull(),
+  lastKnownLocation: varchar('last_known_location', { length: 200 }),
+  bountyAlive: integer('bounty_alive'),
+  bountyDead: integer('bounty_dead'),
+  // Блокировка
+  status: elementStatusEnum('status').default('AVAILABLE').notNull(),
+  lockedByReportId: uuid('locked_by_report_id').references(() => reports.id, { onDelete: 'set null' }),
+  lockedByGroupId: uuid('locked_by_group_id').references(() => groups.id, { onDelete: 'set null' }),
+  lockedAt: timestamp('locked_at'),
+  // Мета
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    statusActiveIdx: sql`CREATE INDEX IF NOT EXISTS monsters_status_active_idx ON ${table} (status) WHERE is_active = TRUE`,
+  };
+});
+
+// Текстовые элементы (локации, события)
+export const storyTexts = pgTable('story_texts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  type: storyTextTypeEnum('type').notNull(),
+  text: text('text').notNull(),
+  // Блокировка
+  status: elementStatusEnum('status').default('AVAILABLE').notNull(),
+  lockedByReportId: uuid('locked_by_report_id').references(() => reports.id, { onDelete: 'set null' }),
+  lockedByGroupId: uuid('locked_by_group_id').references(() => groups.id, { onDelete: 'set null' }),
+  lockedAt: timestamp('locked_at'),
+  // Мета
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    typeTextUnique: unique().on(table.type, table.text),
+    typeStatusActiveIdx: sql`CREATE INDEX IF NOT EXISTS story_texts_type_status_active_idx ON ${table} (type, status) WHERE is_active = TRUE`,
   };
 });
 
@@ -170,6 +217,7 @@ export const enrollments = pgTable('enrollments', {
 
 export const reports = pgTable('reports', {
   id: uuid('id').primaryKey().defaultRandom(),
+  groupId: uuid('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }), // связь с группой
   sessionId: uuid('session_id').references(() => sessions.id, { onDelete: 'cascade' }), // optional для независимых отчётов
   masterId: uuid('master_id').notNull().references(() => users.id, { onDelete: 'cascade' }), // изменено на users для простоты
   summary: text('summary').notNull(), // старое поле, теперь алиас для description
@@ -180,6 +228,10 @@ export const reports = pgTable('reports', {
   attachments: json('attachments'), // массив URL файлов для будущего
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    groupStatusIdx: sql`CREATE INDEX IF NOT EXISTS reports_group_status_idx ON ${table} (group_id, status, created_at DESC)`,
+  };
 });
 
 export const ruleDocs = pgTable('rule_docs', {
@@ -277,6 +329,34 @@ export const reportPlayers = pgTable('report_players', {
   };
 });
 
+// План следующей игры (привязка к отчёту)
+export const reportNextPlans = pgTable('report_next_plans', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  reportId: uuid('report_id').unique().notNull().references(() => reports.id, { onDelete: 'cascade' }),
+  // Продолжение прошлой сессии
+  continuedFromReportId: uuid('continued_from_report_id').references(() => reports.id, { onDelete: 'set null' }),
+  // Текстовый план
+  nextPlanText: text('next_plan_text').notNull(),
+  // Сетка событий (4 слота)
+  monsterId: uuid('monster_id').notNull().references(() => monsters.id, { onDelete: 'restrict' }),
+  locationTextId: uuid('location_text_id').notNull().references(() => storyTexts.id, { onDelete: 'restrict' }),
+  mainEventTextId: uuid('main_event_text_id').notNull().references(() => storyTexts.id, { onDelete: 'restrict' }),
+  sideEventTextId: uuid('side_event_text_id').notNull().references(() => storyTexts.id, { onDelete: 'restrict' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    // Проверка длины плана
+    planLengthCheck: sql`CHECK (char_length(${table.nextPlanText}) <= 2000)`,
+    // Проверка уникальности текстовых элементов (нельзя один текст в разные слоты)
+    uniqueTextsCheck: sql`CHECK (
+      ${table.locationTextId} != ${table.mainEventTextId} AND
+      ${table.locationTextId} != ${table.sideEventTextId} AND
+      ${table.mainEventTextId} != ${table.sideEventTextId}
+    )`,
+  };
+});
+
 // Система уведомлений
 export const notifications = pgTable('notifications', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -371,6 +451,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   members: many(groupMembers),
   applications: many(groupApplications),
   sessions: many(sessions),
+  reports: many(reports),
 }));
 
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
@@ -420,6 +501,10 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
 }));
 
 export const reportsRelations = relations(reports, ({ one, many }) => ({
+  group: one(groups, {
+    fields: [reports.groupId],
+    references: [groups.id],
+  }),
   session: one(sessions, {
     fields: [reports.sessionId],
     references: [sessions.id],
@@ -430,6 +515,10 @@ export const reportsRelations = relations(reports, ({ one, many }) => ({
   }),
   players: many(reportPlayers),
   writeoffs: many(writeoffs),
+  nextPlan: one(reportNextPlans, {
+    fields: [reports.id],
+    references: [reportNextPlans.reportId],
+  }),
 }));
 
 export const reportPlayersRelations = relations(reportPlayers, ({ one }) => ({
@@ -520,6 +609,44 @@ export type NewBattlepass = typeof battlepasses.$inferInsert;
 export type Writeoff = typeof writeoffs.$inferSelect;
 export type NewWriteoff = typeof writeoffs.$inferInsert;
 
+// Relations для новых таблиц (монстры и планы)
+export const monstersRelations = relations(monsters, ({ many }) => ({
+  nextPlans: many(reportNextPlans),
+}));
+
+export const storyTextsRelations = relations(storyTexts, ({ many }) => ({
+  locationPlans: many(reportNextPlans),
+  mainEventPlans: many(reportNextPlans),
+  sideEventPlans: many(reportNextPlans),
+}));
+
+export const reportNextPlansRelations = relations(reportNextPlans, ({ one }) => ({
+  report: one(reports, {
+    fields: [reportNextPlans.reportId],
+    references: [reports.id],
+  }),
+  continuedFromReport: one(reports, {
+    fields: [reportNextPlans.continuedFromReportId],
+    references: [reports.id],
+  }),
+  monster: one(monsters, {
+    fields: [reportNextPlans.monsterId],
+    references: [monsters.id],
+  }),
+  locationText: one(storyTexts, {
+    fields: [reportNextPlans.locationTextId],
+    references: [storyTexts.id],
+  }),
+  mainEventText: one(storyTexts, {
+    fields: [reportNextPlans.mainEventTextId],
+    references: [storyTexts.id],
+  }),
+  sideEventText: one(storyTexts, {
+    fields: [reportNextPlans.sideEventTextId],
+    references: [storyTexts.id],
+  }),
+}));
+
 // Экспорт новых типов
 export type ReportPlayer = typeof reportPlayers.$inferSelect;
 export type NewReportPlayer = typeof reportPlayers.$inferInsert;
@@ -539,3 +666,13 @@ export type BattlepassStatus = typeof battlepassStatusEnum.enumValues[number];
 export type RpgExperience = typeof rpgExperienceEnum.enumValues[number];
 export type ApplicationStatus = typeof applicationStatusEnum.enumValues[number];
 export type ReportStatus = typeof reportStatusEnum.enumValues[number];
+export type ElementStatus = typeof elementStatusEnum.enumValues[number];
+export type StoryTextType = typeof storyTextTypeEnum.enumValues[number];
+
+// Типы новых таблиц
+export type Monster = typeof monsters.$inferSelect;
+export type NewMonster = typeof monsters.$inferInsert;
+export type StoryText = typeof storyTexts.$inferSelect;
+export type NewStoryText = typeof storyTexts.$inferInsert;
+export type ReportNextPlan = typeof reportNextPlans.$inferSelect;
+export type NewReportNextPlan = typeof reportNextPlans.$inferInsert;

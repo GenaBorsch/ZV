@@ -43,13 +43,18 @@ export const authOptions: NextAuthOptions = {
       
       // Периодически обновляем токен данными из БД (каждые несколько минут)
       // или если это специальный запрос на обновление
-      if (trigger === 'update' || !token.lastUpdated || Date.now() - token.lastUpdated > 5 * 60 * 1000) {
+      if (trigger === 'update' || !token.lastUpdated || Date.now() - (token.lastUpdated as number) > 5 * 60 * 1000) {
         if (token.id) {
           try {
             const userResult = await db.select().from(users).where(eq(users.id, token.id as string)).limit(1);
             if (userResult.length > 0) {
               const freshUser = userResult[0];
               token.name = freshUser.name;
+              
+              // Обновляем роли
+              const roles = await db.select().from(userRoles).where(eq(userRoles.userId, token.id as string));
+              token.roles = roles.map((r) => r.role);
+              
               token.lastUpdated = Date.now();
             }
           } catch (error) {

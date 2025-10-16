@@ -39,4 +39,7 @@ export { RolesRepo } from './repositories/rolesRepo';
 export { GroupsRepo, type GroupWithDetails, type GroupWithNotifications, type GroupMember, type GroupApplicationWithPlayer } from './repositories/groupsRepo';
 export { ProfilesRepo } from './repositories/profilesRepo';
 export { CharactersRepo } from './repositories/charactersRepo';
+export { monstersRepo } from './repositories/monstersRepo';
+export { storyTextsRepo } from './repositories/storyTextsRepo';
+export { reportNextPlansRepo } from './repositories/reportNextPlansRepo';
 

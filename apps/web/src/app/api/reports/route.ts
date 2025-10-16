@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@zv/db';
-import { reports, reportPlayers, users, userRoles, battlepasses, eq, and, or, desc } from '@zv/db';
+import { reports, reportPlayers, reportNextPlans, users, userRoles, battlepasses, monsters, storyTexts, eq, and, or, desc, sql } from '@zv/db';
+import { monstersRepo, storyTextsRepo, reportNextPlansRepo } from '@zv/db';
 import { CreateReportDto } from '@zv/contracts';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -85,22 +86,28 @@ export async function GET(req: NextRequest) {
 
     const reportsData = await query.orderBy(desc(reports.createdAt));
 
-    // Получаем игроков для каждого отчёта
+    // Получаем игроков и планы следующей игры для каждого отчёта
     const reportsWithPlayers = await Promise.all(
       reportsData.map(async (report) => {
-        const playersData = await db
-          .select({
-            id: users.id,
-            name: users.name,
-            email: users.email,
-          })
-          .from(reportPlayers)
-          .leftJoin(users, eq(reportPlayers.playerId, users.id))
-          .where(eq(reportPlayers.reportId, report.id));
+        const [playersData, nextPlan] = await Promise.all([
+          db
+            .select({
+              id: users.id,
+              name: users.name,
+              email: users.email,
+            })
+            .from(reportPlayers)
+            .leftJoin(users, eq(reportPlayers.playerId, users.id))
+            .where(eq(reportPlayers.reportId, report.id)),
+          
+          // Получаем план следующей игры с полными данными элементов
+          reportNextPlansRepo.getByReportIdWithElements(report.id)
+        ]);
 
         return {
           ...report,
           players: playersData,
+          nextPlan: nextPlan,
         };
       })
     );
@@ -112,7 +119,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/reports - создать новый отчёт
+// POST /api/reports - создать новый отчёт (с опциональным планом следующей игры)
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -179,31 +186,143 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Создаём отчёт в транзакции
-    const [newReport] = await db
-      .insert(reports)
-      .values({
-        sessionId: validatedData.sessionId || null,
-        masterId: session.user.id,
-        summary: validatedData.description, // для совместимости со старой схемой
-        description: validatedData.description,
-        highlights: validatedData.highlights || null,
-        status: 'PENDING',
-      })
-      .returning();
+    // Если передан nextPlan - валидируем и проверяем доступность элементов
+    if (validatedData.nextPlan) {
+      const plan = validatedData.nextPlan;
+      
+      // Проверяем доступность всех элементов АТОМАРНО
+      const [monster, location, mainEvent, sideEvent] = await Promise.all([
+        db.select().from(monsters).where(and(
+          eq(monsters.id, plan.monsterId),
+          eq(monsters.status, 'AVAILABLE'),
+          eq(monsters.isActive, true)
+        )).limit(1),
+        db.select().from(storyTexts).where(and(
+          eq(storyTexts.id, plan.locationTextId),
+          eq(storyTexts.type, 'LOCATION'),
+          eq(storyTexts.status, 'AVAILABLE'),
+          eq(storyTexts.isActive, true)
+        )).limit(1),
+        db.select().from(storyTexts).where(and(
+          eq(storyTexts.id, plan.mainEventTextId),
+          eq(storyTexts.type, 'MAIN_EVENT'),
+          eq(storyTexts.status, 'AVAILABLE'),
+          eq(storyTexts.isActive, true)
+        )).limit(1),
+        db.select().from(storyTexts).where(and(
+          eq(storyTexts.id, plan.sideEventTextId),
+          eq(storyTexts.type, 'SIDE_EVENT'),
+          eq(storyTexts.status, 'AVAILABLE'),
+          eq(storyTexts.isActive, true)
+        )).limit(1),
+      ]);
 
-    // Добавляем связи с игроками
-    await db.insert(reportPlayers).values(
-      validatedData.playerIds.map(playerId => ({
-        reportId: newReport.id,
-        playerId,
-      }))
-    );
+      const unavailable = [];
+      if (!monster[0]) unavailable.push('monster');
+      if (!location[0]) unavailable.push('location');
+      if (!mainEvent[0]) unavailable.push('main event');
+      if (!sideEvent[0]) unavailable.push('side event');
+
+      if (unavailable.length > 0) {
+        return NextResponse.json({ 
+          error: 'Elements no longer available', 
+          message: `Следующие элементы уже заняты или недоступны: ${unavailable.join(', ')}`,
+          unavailable 
+        }, { status: 409 });
+      }
+    }
+
+    // Создаём отчёт и план в транзакции
+    const result = await db.transaction(async (tx) => {
+      // Создаём отчёт
+      const [newReport] = await tx
+        .insert(reports)
+        .values({
+          groupId: validatedData.groupId, // NEW
+          sessionId: validatedData.sessionId || null,
+          masterId: session.user.id,
+          summary: validatedData.description,
+          description: validatedData.description,
+          highlights: validatedData.highlights || null,
+          status: 'PENDING',
+        })
+        .returning();
+
+      // Добавляем связи с игроками
+      await tx.insert(reportPlayers).values(
+        validatedData.playerIds.map(playerId => ({
+          reportId: newReport.id,
+          playerId,
+        }))
+      );
+
+      // Если есть nextPlan - создаём план и блокируем элементы
+      if (validatedData.nextPlan) {
+        const plan = validatedData.nextPlan;
+        
+        // Блокируем все элементы
+        await Promise.all([
+          tx.update(monsters)
+            .set({
+              status: 'LOCKED',
+              lockedByReportId: newReport.id,
+              lockedByGroupId: validatedData.groupId,
+              lockedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(monsters.id, plan.monsterId)),
+          
+          tx.update(storyTexts)
+            .set({
+              status: 'LOCKED',
+              lockedByReportId: newReport.id,
+              lockedByGroupId: validatedData.groupId,
+              lockedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(storyTexts.id, plan.locationTextId)),
+          
+          tx.update(storyTexts)
+            .set({
+              status: 'LOCKED',
+              lockedByReportId: newReport.id,
+              lockedByGroupId: validatedData.groupId,
+              lockedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(storyTexts.id, plan.mainEventTextId)),
+          
+          tx.update(storyTexts)
+            .set({
+              status: 'LOCKED',
+              lockedByReportId: newReport.id,
+              lockedByGroupId: validatedData.groupId,
+              lockedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(storyTexts.id, plan.sideEventTextId)),
+        ]);
+
+        // Создаём запись плана
+        await tx.insert(reportNextPlans).values({
+          reportId: newReport.id,
+          continuedFromReportId: plan.continuedFromReportId || null,
+          nextPlanText: plan.nextPlanText,
+          monsterId: plan.monsterId,
+          locationTextId: plan.locationTextId,
+          mainEventTextId: plan.mainEventTextId,
+          sideEventTextId: plan.sideEventTextId,
+        });
+      }
+
+      return newReport;
+    });
 
     // Получаем полные данные созданного отчёта
     const [reportWithData] = await db
       .select({
         id: reports.id,
+        groupId: reports.groupId,
         sessionId: reports.sessionId,
         masterId: reports.masterId,
         masterName: users.name,
@@ -217,7 +336,7 @@ export async function POST(req: NextRequest) {
       })
       .from(reports)
       .leftJoin(users, eq(reports.masterId, users.id))
-      .where(eq(reports.id, newReport.id));
+      .where(eq(reports.id, result.id));
 
     const reportPlayersData = await db
       .select({
@@ -227,14 +346,21 @@ export async function POST(req: NextRequest) {
       })
       .from(reportPlayers)
       .leftJoin(users, eq(reportPlayers.playerId, users.id))
-      .where(eq(reportPlayers.reportId, newReport.id));
+      .where(eq(reportPlayers.reportId, result.id));
 
-    const result = {
+    // Получаем план, если был создан
+    let nextPlan = null;
+    if (validatedData.nextPlan) {
+      nextPlan = await reportNextPlansRepo.getByReportIdWithElements(result.id);
+    }
+
+    const response = {
       ...reportWithData,
       players: reportPlayersData,
+      nextPlan,
     };
 
-    return NextResponse.json({ report: result }, { status: 201 });
+    return NextResponse.json({ report: response }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && 'issues' in error) {
       // Zod validation error

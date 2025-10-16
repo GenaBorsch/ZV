@@ -155,12 +155,34 @@ export const UpdateEnrollmentDto = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'WAITLIST']),
 });
 
+// Next Game Plan DTOs (must be defined before CreateReportDto)
+export const ReportNextPlanDto = z.object({
+  continuedFromReportId: z.string().uuid('Некорректный ID отчёта').nullable().optional(),
+  nextPlanText: z.string().min(1, 'План обязателен').max(2000, 'План не должен превышать 2000 символов'),
+  monsterId: z.string().uuid('Некорректный ID монстра'),
+  locationTextId: z.string().uuid('Некорректный ID локации'),
+  mainEventTextId: z.string().uuid('Некорректный ID основного события'),
+  sideEventTextId: z.string().uuid('Некорректный ID второстепенного события'),
+})
+  .refine(
+    (data) => {
+      // Проверка уникальности текстовых элементов
+      const textIds = [data.locationTextId, data.mainEventTextId, data.sideEventTextId];
+      return new Set(textIds).size === textIds.length;
+    },
+    {
+      message: 'Нельзя использовать один и тот же текстовый элемент в разных слотах',
+    }
+  );
+
 // Report DTOs
 export const CreateReportDto = z.object({
+  groupId: z.string().uuid('Некорректный ID группы'), // NEW: обязательная связь с группой
   sessionId: z.string().uuid('Некорректный ID сессии').optional(), // optional для независимых отчётов
   description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов'),
   playerIds: z.array(z.string().uuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока'),
   highlights: z.string().optional(),
+  nextPlan: ReportNextPlanDto.optional(), // NEW: план следующей игры (опциональный пока, станет обязательным после UI)
 });
 
 export const UpdateReportDto = z.object({
@@ -395,6 +417,148 @@ export type AdminUserDetailDtoType = z.infer<typeof AdminUserDetailDto>;
 export type AdminUpdateUserDtoType = z.infer<typeof AdminUpdateUserDto>;
 export type AdminManageUserRolesDtoType = z.infer<typeof AdminManageUserRolesDto>;
 export type AdminManageUserRolesResponseDtoType = z.infer<typeof AdminManageUserRolesResponseDto>;
+
+// ============================================
+// Монстры (Story Pool)
+// ============================================
+
+export const MonsterDto = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  imageUrl: z.string().url().nullable(),
+  description: z.string().min(1),
+  lastKnownLocation: z.string().max(200).nullable(),
+  bountyAlive: z.number().int().positive().nullable(),
+  bountyDead: z.number().int().positive().nullable(),
+  status: z.enum(['AVAILABLE', 'LOCKED']),
+  lockedByReportId: z.string().uuid().nullable(),
+  lockedByGroupId: z.string().uuid().nullable(),
+  lockedAt: z.string().datetime().nullable(),
+  isActive: z.boolean(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const CreateMonsterDto = z.object({
+  title: z.string().min(1, 'Название обязательно').max(200, 'Название не должно превышать 200 символов'),
+  imageUrl: z.string().url('Некорректная ссылка на изображение').optional().nullable(),
+  description: z.string().min(10, 'Описание должно содержать минимум 10 символов'),
+  lastKnownLocation: z.string().max(200, 'Локация не должна превышать 200 символов').optional().nullable(),
+  bountyAlive: z.number().int('Должно быть целое число').positive('Должно быть положительное число').optional().nullable(),
+  bountyDead: z.number().int('Должно быть целое число').positive('Должно быть положительное число').optional().nullable(),
+});
+
+export const UpdateMonsterDto = CreateMonsterDto.partial();
+
+export const MonstersListQueryDto = z.object({
+  status: z.enum(['AVAILABLE', 'LOCKED']).optional(),
+  isActive: z.boolean().optional(),
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
+// ============================================
+// Текстовые элементы (Story Texts)
+// ============================================
+
+export const StoryTextDto = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT']),
+  text: z.string().min(1).max(1000),
+  status: z.enum(['AVAILABLE', 'LOCKED']),
+  lockedByReportId: z.string().uuid().nullable(),
+  lockedByGroupId: z.string().uuid().nullable(),
+  lockedAt: z.string().datetime().nullable(),
+  isActive: z.boolean(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const CreateStoryTextDto = z.object({
+  type: z.enum(['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT'], { required_error: 'Тип обязателен' }),
+  text: z.string().min(2, 'Текст должен содержать минимум 2 символа').max(1000, 'Текст не должен превышать 1000 символов'),
+});
+
+export const UpdateStoryTextDto = z.object({
+  text: z.string().min(2, 'Текст должен содержать минимум 2 символа').max(1000, 'Текст не должен превышать 1000 символов').optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const StoryTextsListQueryDto = z.object({
+  type: z.enum(['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT']).optional(),
+  status: z.enum(['AVAILABLE', 'LOCKED']).optional(),
+  isActive: z.boolean().optional(),
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+});
+
+// ============================================
+// План следующей игры
+// ============================================
+
+export const CreateReportWithNextPlanDto = z.object({
+  groupId: z.string().uuid('Некорректный ID группы'),
+  sessionId: z.string().uuid('Некорректный ID сессии').optional(),
+  description: z.string().min(50, 'Описание игры должно содержать минимум 50 символов').max(5000, 'Описание не должно превышать 5000 символов'),
+  playerIds: z.array(z.string().uuid('Некорректный ID игрока')).min(1, 'Выберите хотя бы одного игрока'),
+  highlights: z.string().optional(),
+  nextPlan: ReportNextPlanDto,
+});
+
+// "Мне повезёт" - случайная генерация сетки
+export const FeelingLuckyRequestDto = z.object({
+  groupId: z.string().uuid('Некорректный ID группы'),
+});
+
+export const FeelingLuckyResponseDto = z.object({
+  monsterId: z.string().uuid(),
+  locationTextId: z.string().uuid(),
+  mainEventTextId: z.string().uuid(),
+  sideEventTextId: z.string().uuid(),
+  elements: z.object({
+    monster: MonsterDto,
+    location: StoryTextDto,
+    mainEvent: StoryTextDto,
+    sideEvent: StoryTextDto,
+  }),
+});
+
+// Резервирование элементов
+export const ReserveElementsRequestDto = z.object({
+  monsterId: z.string().uuid().optional(),
+  locationTextId: z.string().uuid().optional(),
+  mainEventTextId: z.string().uuid().optional(),
+  sideEventTextId: z.string().uuid().optional(),
+});
+
+export const ReserveElementsResponseDto = z.object({
+  success: z.array(z.string()),
+  conflicts: z.array(z.string()),
+  alternatives: z.object({
+    monsters: z.array(MonsterDto).optional(),
+    locations: z.array(StoryTextDto).optional(),
+    mainEvents: z.array(StoryTextDto).optional(),
+    sideEvents: z.array(StoryTextDto).optional(),
+  }).optional(),
+});
+
+// Типы для новых DTO
+export type MonsterDtoType = z.infer<typeof MonsterDto>;
+export type CreateMonsterDtoType = z.infer<typeof CreateMonsterDto>;
+export type UpdateMonsterDtoType = z.infer<typeof UpdateMonsterDto>;
+export type MonstersListQueryDtoType = z.infer<typeof MonstersListQueryDto>;
+export type StoryTextDtoType = z.infer<typeof StoryTextDto>;
+export type CreateStoryTextDtoType = z.infer<typeof CreateStoryTextDto>;
+export type UpdateStoryTextDtoType = z.infer<typeof UpdateStoryTextDto>;
+export type StoryTextsListQueryDtoType = z.infer<typeof StoryTextsListQueryDto>;
+export type ReportNextPlanDtoType = z.infer<typeof ReportNextPlanDto>;
+export type CreateReportWithNextPlanDtoType = z.infer<typeof CreateReportWithNextPlanDto>;
+export type FeelingLuckyRequestDtoType = z.infer<typeof FeelingLuckyRequestDto>;
+export type FeelingLuckyResponseDtoType = z.infer<typeof FeelingLuckyResponseDto>;
+export type ReserveElementsRequestDtoType = z.infer<typeof ReserveElementsRequestDto>;
+export type ReserveElementsResponseDtoType = z.infer<typeof ReserveElementsResponseDto>;
 
 // All schemas are already exported individually above
 

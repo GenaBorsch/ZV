@@ -43,6 +43,12 @@ const UPLOAD_CONFIGS: Record<string, FileUploadOptions> = {
     maxSizeMB: MAX_FILE_SIZES.DOCUMENT,
     allowedTypes: [...ALLOWED_TYPES.IMAGES, ...ALLOWED_TYPES.DOCUMENTS],
   },
+  'monster-image': {
+    bucket: BUCKETS.UPLOADS,
+    folder: 'monsters',
+    maxSizeMB: MAX_FILE_SIZES.DOCUMENT,
+    allowedTypes: ALLOWED_TYPES.IMAGES,
+  },
 };
 
 // Проверка прав доступа
@@ -59,6 +65,9 @@ function checkPermissions(type: string, userRoles: string[]): boolean {
     case 'report-attachment':
       // Мастера и админы могут загружать вложения к отчетам
       return userRoles.includes('MASTER') || userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
+    case 'monster-image':
+      // Только админы могут загружать изображения монстров
+      return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
     default:
       return false;
   }

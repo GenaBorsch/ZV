@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FileUpload } from '@/components/FileUpload';
+import { AdminHeader } from '@/components/AdminHeader';
 
 export default function AdminEditProductPage() {
   const params = useParams() as { id: string };
@@ -51,11 +52,30 @@ export default function AdminEditProductPage() {
     router.push('/admin/products');
   };
 
-  if (!form) return <div className="max-w-3xl mx-auto py-8 px-4">Загрузка...</div>;
+  if (!form) return (
+    <div className="min-h-screen bg-background">
+      <AdminHeader 
+        title="Редактировать оффер"
+        backLink={{
+          href: "/admin/products",
+          label: "Офферы баттлпассов"
+        }}
+      />
+      <main className="max-w-3xl mx-auto py-8 px-4">Загрузка...</main>
+    </div>
+  );
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-semibold text-foreground mb-4">Редактировать оффер</h1>
+    <div className="min-h-screen bg-background">
+      <AdminHeader 
+        title="Редактировать оффер"
+        backLink={{
+          href: "/admin/products",
+          label: "Офферы баттлпассов"
+        }}
+      />
+      
+      <main className="max-w-3xl mx-auto py-8 px-4">
       <form className="space-y-4" onSubmit={submit}>
         <div>
           <label className="block text-sm mb-1">SKU</label>
@@ -107,6 +127,7 @@ export default function AdminEditProductPage() {
         </div>
         <p className="text-xs text-muted-foreground mt-2">Изменение цены/количества игр влияет только на будущие покупки. Прошлые заказы используют снимок параметров на момент покупки.</p>
       </form>
+      </main>
     </div>
   );
 }

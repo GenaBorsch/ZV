@@ -117,3 +117,16 @@ export enum ApiStatusCode {
   SERVICE_UNAVAILABLE = 503
 }
 
+// Статусы элементов (монстры, тексты)
+export enum ElementStatus {
+  AVAILABLE = 'AVAILABLE',
+  LOCKED = 'LOCKED'
+}
+
+// Типы текстовых элементов
+export enum StoryTextType {
+  LOCATION = 'LOCATION',
+  MAIN_EVENT = 'MAIN_EVENT',
+  SIDE_EVENT = 'SIDE_EVENT'
+}
+

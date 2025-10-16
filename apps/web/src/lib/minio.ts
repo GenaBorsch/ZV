@@ -144,8 +144,8 @@ export async function initializeBuckets() {
         await minioClient.makeBucket(bucket, 'us-east-1');
         console.log(`✅ Created MinIO bucket: ${bucket}`);
         
-        // Устанавливаем политику для публичного чтения аватаров
-        if (bucket === BUCKETS.AVATARS) {
+        // Устанавливаем политику для публичного чтения аватаров и загрузок
+        if (bucket === BUCKETS.AVATARS || bucket === BUCKETS.UPLOADS) {
           const policy = {
             Version: '2012-10-17',
             Statement: [

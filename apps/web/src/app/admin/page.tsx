@@ -52,6 +52,7 @@ export default function AdminDashboard() {
                 <Link href="/admin/reports" className="btn-outline w-full text-left">Отчёты по играм</Link>
                 <Link href="/admin/payments" className="btn-outline w-full text-left">Платежи и путёвки</Link>
                 <Link href="/admin/products" className="btn-outline w-full text-left">Офферы путёвок</Link>
+                <Link href="/admin/story-pool" className="btn-outline w-full text-left">Пул событий</Link>
               </div>
             </div>
 

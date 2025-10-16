@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { X, Search, Users, AlertCircle, CheckCircle } from 'lucide-react';
 import { CreateReportDtoType, UpdateReportDtoType } from '@zv/contracts';
+import { NextPlanSelector, NextPlanData } from './NextPlanSelector';
 
 interface Player {
   id: string;
@@ -55,6 +56,7 @@ export function ReportForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [playersWithoutBattlepass, setPlayersWithoutBattlepass] = useState<string[]>([]);
   const [isCheckingBattlepasses, setIsCheckingBattlepasses] = useState(false);
+  const [nextPlan, setNextPlan] = useState<NextPlanData | null>(null);
 
   // Загрузка групп мастера
   const loadGroups = async () => {
@@ -146,6 +148,11 @@ export function ReportForm({
       newErrors.group = 'Выберите группу';
     }
 
+    // NEW: Валидация плана следующей игры (пока опционально)
+    // if (!nextPlan) {
+    //   newErrors.nextPlan = 'Заполните план следующей игры';
+    // }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -158,15 +165,21 @@ export function ReportForm({
       return;
     }
 
-    const formData: CreateReportDtoType | UpdateReportDtoType = {
+    const formData: any = {
+      groupId: selectedGroup!.id, // NEW: обязательный groupId
       description: description.trim(),
       highlights: highlights.trim() || undefined,
       playerIds: selectedPlayers.map(p => p.id),
     };
 
+    // NEW: Добавляем nextPlan если заполнен
+    if (nextPlan) {
+      formData.nextPlan = nextPlan;
+    }
+
     // Добавляем ID для обновления
     if (initialData?.id) {
-      (formData as UpdateReportDtoType).id = initialData.id;
+      formData.id = initialData.id;
     }
 
     await onSubmit(formData);
@@ -395,6 +408,17 @@ export function ReportForm({
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                 При одобрении игры будут списаны только у тех, у кого есть активные путёвки.
               </p>
+            </div>
+          )}
+
+          {/* NEW: План следующей игры */}
+          {selectedGroup && !initialData?.id && (
+            <div className="pt-6">
+              <NextPlanSelector
+                groupId={selectedGroup.id}
+                value={nextPlan}
+                onChange={setNextPlan}
+              />
             </div>
           )}
 

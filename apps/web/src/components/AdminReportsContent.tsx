@@ -37,6 +37,28 @@ interface ReportWithPlayers {
     name: string;
     email: string;
   }>;
+  nextPlan?: {
+    id: string;
+    nextPlanText: string;
+    monster: {
+      id: string;
+      title: string;
+      imageUrl: string | null;
+      description: string;
+    };
+    location: {
+      id: string;
+      text: string;
+    };
+    mainEvent: {
+      id: string;
+      text: string;
+    };
+    sideEvent: {
+      id: string;
+      text: string;
+    };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -382,6 +404,49 @@ export function AdminReportsContent() {
                                 ))}
                               </div>
                             </div>
+
+                            {/* План следующей игры */}
+                            {report.nextPlan && (
+                              <div className="border-l-2 border-border pl-4">
+                                <h4 className="text-base font-medium mb-3">План следующей игры:</h4>
+                                
+                                {/* Текстовый план */}
+                                <div className="mb-4">
+                                  <h5 className="text-sm font-medium text-muted-foreground mb-1">Описание плана:</h5>
+                                  <p className="text-base text-foreground whitespace-pre-wrap bg-card border border-border p-3 rounded">
+                                    {report.nextPlan.nextPlanText}
+                                  </p>
+                                </div>
+
+                                {/* Сетка событий */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                  {/* Монстр */}
+                                  <div className="p-3 bg-card border border-border rounded flex flex-col">
+                                    <h5 className="text-sm font-medium text-foreground mb-2">🐉 Монстр</h5>
+                                    <p className="font-medium text-foreground mb-1">{report.nextPlan.monster.title}</p>
+                                    <p className="text-sm text-muted-foreground flex-1">{report.nextPlan.monster.description}</p>
+                                  </div>
+
+                                  {/* Локация */}
+                                  <div className="p-3 bg-card border border-border rounded flex flex-col">
+                                    <h5 className="text-sm font-medium text-foreground mb-2">📍 Локация</h5>
+                                    <p className="text-sm text-muted-foreground flex-1">{report.nextPlan.location.text}</p>
+                                  </div>
+
+                                  {/* Основное событие */}
+                                  <div className="p-3 bg-card border border-border rounded flex flex-col">
+                                    <h5 className="text-sm font-medium text-foreground mb-2">⚡ Основное событие</h5>
+                                    <p className="text-sm text-muted-foreground flex-1">{report.nextPlan.mainEvent.text}</p>
+                                  </div>
+
+                                  {/* Побочное событие */}
+                                  <div className="p-3 bg-card border border-border rounded flex flex-col">
+                                    <h5 className="text-sm font-medium text-foreground mb-2">🎭 Побочное событие</h5>
+                                    <p className="text-sm text-muted-foreground flex-1">{report.nextPlan.sideEvent.text}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
 
                             {/* Причина отклонения */}
                             {report.status === 'REJECTED' && report.rejectionReason && (
