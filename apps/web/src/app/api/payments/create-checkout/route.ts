@@ -126,6 +126,24 @@ export async function POST(req: Request) {
         forUserId: targetUserId, 
         productSku: product.sku 
       },
+      receipt: {
+        customer: {
+          email: sessionUser.email || 'noreply@zvezdnoe-vereteno.ru'
+        },
+        items: [
+          {
+            description: product.title,
+            quantity: '1.00',
+            amount: {
+              value: (product.priceRub).toFixed(2),
+              currency: 'RUB'
+            },
+            vat_code: 1, // НДС не облагается
+            payment_mode: 'full_payment',
+            payment_subject: 'service'
+          }
+        ]
+      }
     };
 
     console.log('🎯 Creating ЮKassa payment:', {
