@@ -80,7 +80,6 @@ export function BattlepassPurchase({ products }: BattlepassPurchaseProps) {
                 />
               </div>
             )}
-            <div className="text-sm text-muted-foreground mb-1">{product.sku}</div>
             <div className="text-lg font-medium text-foreground">{product.title}</div>
             {product.description && (
               <div className="mt-1 text-sm text-muted-foreground">{product.description}</div>
