@@ -8,6 +8,13 @@ const PROFILE_REQUIRED_PATHS = ['/player', '/master'];
 
 // Функция для проверки базовой HTTP аутентификации
 function checkBasicAuth(req: NextRequest): boolean {
+  // Проверяем флаг включения базовой аутентификации
+  const basicAuthEnabled = process.env.NEXT_PUBLIC_BASIC_AUTH_ENABLED === 'true';
+  
+  if (!basicAuthEnabled) {
+    return true; // Пропускаем, если базовая аутентификация отключена
+  }
+  
   // Если переменные не установлены, пропускаем базовую аутентификацию
   const basicUser = process.env.BASIC_AUTH_USER;
   const basicPass = process.env.BASIC_AUTH_PASSWORD;
