@@ -47,6 +47,7 @@ interface Monster {
 interface StoryText {
   id: string;
   type: 'LOCATION' | 'MAIN_EVENT' | 'SIDE_EVENT';
+  title: string;
   text: string;
   status: 'AVAILABLE' | 'LOCKED';
   lockedByReportId: string | null;
@@ -396,7 +397,7 @@ function StoryTextsTab({ type }: { type: 'LOCATION' | 'MAIN_EVENT' | 'SIDE_EVENT
             <CardHeader>
               <div className="flex justify-between items-start">
                 <CardTitle className="text-lg font-bold">
-                  {text.text.substring(0, 100)}{text.text.length > 100 ? '...' : ''}
+                  {text.title}
                 </CardTitle>
                 <Badge variant={text.status === 'AVAILABLE' ? 'default' : 'destructive'}>
                   {STATUS_LABELS[text.status]}
@@ -652,13 +653,16 @@ function StoryTextDialog({
   type: 'LOCATION' | 'MAIN_EVENT' | 'SIDE_EVENT';
   onSuccess: () => void;
 }) {
+  const [title, setTitle] = useState('');
   const [textContent, setTextContent] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (text) {
+      setTitle(text.title);
       setTextContent(text.text);
     } else {
+      setTitle('');
       setTextContent('');
     }
   }, [text, open]);
@@ -670,6 +674,7 @@ function StoryTextDialog({
     try {
       const payload = {
         type,
+        title,
         text: textContent,
       };
 
@@ -712,6 +717,21 @@ function StoryTextDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="title">Заголовок *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              maxLength={50}
+              placeholder="Краткий заголовок (до 50 символов)"
+            />
+            <p className="text-sm text-muted-foreground mt-1">
+              {title.length}/50 символов
+            </p>
+          </div>
+          
           <div>
             <Label htmlFor="text">Текст *</Label>
             <Textarea

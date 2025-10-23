@@ -85,6 +85,13 @@
       "when": 1760619012353,
       "tag": "0011_numerous_rocket_racer",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1761214447821,
+      "tag": "0012_dry_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

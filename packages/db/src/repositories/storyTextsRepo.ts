@@ -34,7 +34,9 @@ export const storyTextsRepo = {
       conditions.push(eq(storyTexts.isActive, isActive));
     }
     if (search) {
-      conditions.push(ilike(storyTexts.text, `%${search}%`));
+      conditions.push(
+        sql`(${storyTexts.title} ILIKE ${`%${search}%`} OR ${storyTexts.text} ILIKE ${`%${search}%`})`
+      );
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -44,6 +46,7 @@ export const storyTextsRepo = {
         .select({
           id: storyTexts.id,
           type: storyTexts.type,
+          title: storyTexts.title,
           text: storyTexts.text,
           status: storyTexts.status,
           lockedByReportId: storyTexts.lockedByReportId,
@@ -94,14 +97,16 @@ export const storyTextsRepo = {
     ];
 
     if (search) {
-      conditions.push(ilike(storyTexts.text, `%${search}%`));
+      conditions.push(
+        sql`(${storyTexts.title} ILIKE ${`%${search}%`} OR ${storyTexts.text} ILIKE ${`%${search}%`})`
+      );
     }
 
     return db
       .select()
       .from(storyTexts)
       .where(and(...conditions))
-      .orderBy(storyTexts.text)
+      .orderBy(storyTexts.title)
       .limit(limit);
   },
 

@@ -128,6 +128,7 @@ export const monsters = pgTable('monsters', {
 export const storyTexts = pgTable('story_texts', {
   id: uuid('id').primaryKey().defaultRandom(),
   type: storyTextTypeEnum('type').notNull(),
+  title: varchar('title', { length: 50 }).notNull(),
   text: text('text').notNull(),
   // Блокировка
   status: elementStatusEnum('status').default('AVAILABLE').notNull(),
@@ -140,7 +141,7 @@ export const storyTexts = pgTable('story_texts', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => {
   return {
-    typeTextUnique: unique().on(table.type, table.text),
+    typeTitleUnique: unique().on(table.type, table.title),
     typeStatusActiveIdx: sql`CREATE INDEX IF NOT EXISTS story_texts_type_status_active_idx ON ${table} (type, status) WHERE is_active = TRUE`,
   };
 });

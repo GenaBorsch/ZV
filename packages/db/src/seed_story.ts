@@ -9,6 +9,14 @@ import { monsters, storyTexts } from './schema';
 async function seedStory() {
   console.log('🎲 Создание монстров и сюжетных элементов...');
 
+  // Функция для создания заголовка из текста
+  const createTitle = (text: string): string => {
+    // Берем первые 50 символов и обрезаем по последнему слову
+    const truncated = text.substring(0, 50);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return lastSpace > 20 ? truncated.substring(0, lastSpace) : truncated;
+  };
+
   // Монстры
   const monstersData = [
     {
@@ -179,6 +187,7 @@ async function seedStory() {
   await db.insert(storyTexts).values(
     locations.map((text) => ({
       type: 'LOCATION' as const,
+      title: createTitle(text),
       text,
     }))
   );
@@ -216,6 +225,7 @@ async function seedStory() {
   await db.insert(storyTexts).values(
     mainEvents.map((text) => ({
       type: 'MAIN_EVENT' as const,
+      title: createTitle(text),
       text,
     }))
   );
@@ -266,6 +276,7 @@ async function seedStory() {
   await db.insert(storyTexts).values(
     sideEvents.map((text) => ({
       type: 'SIDE_EVENT' as const,
+      title: createTitle(text),
       text,
     }))
   );

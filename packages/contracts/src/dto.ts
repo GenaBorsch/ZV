@@ -465,6 +465,7 @@ export const MonstersListQueryDto = z.object({
 export const StoryTextDto = z.object({
   id: z.string().uuid(),
   type: z.enum(['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT']),
+  title: z.string().min(1).max(50),
   text: z.string().min(1).max(1000),
   status: z.enum(['AVAILABLE', 'LOCKED']),
   lockedByReportId: z.string().uuid().nullable(),
@@ -477,10 +478,12 @@ export const StoryTextDto = z.object({
 
 export const CreateStoryTextDto = z.object({
   type: z.enum(['LOCATION', 'MAIN_EVENT', 'SIDE_EVENT'], { required_error: 'Тип обязателен' }),
+  title: z.string().min(1, 'Заголовок не может быть пустым').max(50, 'Заголовок не должен превышать 50 символов'),
   text: z.string().min(2, 'Текст должен содержать минимум 2 символа').max(1000, 'Текст не должен превышать 1000 символов'),
 });
 
 export const UpdateStoryTextDto = z.object({
+  title: z.string().min(1, 'Заголовок не может быть пустым').max(50, 'Заголовок не должен превышать 50 символов').optional(),
   text: z.string().min(2, 'Текст должен содержать минимум 2 символа').max(1000, 'Текст не должен превышать 1000 символов').optional(),
   isActive: z.boolean().optional(),
 });
