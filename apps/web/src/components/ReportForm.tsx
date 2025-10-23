@@ -278,7 +278,7 @@ export function ReportForm({
                     className={`border rounded-lg p-3 cursor-pointer transition-colors ${
                       selectedGroup?.id === group.id
                         ? 'border-primary bg-primary/5'
-                        : 'hover:bg-muted'
+                        : 'hover:bg-accent hover:text-accent-foreground'
                     }`}
                     onClick={() => setSelectedGroup(group)}
                   >

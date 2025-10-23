@@ -394,6 +394,58 @@ export default function StylePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Hover эффекты */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Hover эффекты</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Правильные hover эффекты</h4>
+                  <div className="space-y-3">
+                    <div className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
+                      <h5 className="font-medium">Правильный hover эффект</h5>
+                      <p className="text-sm text-muted-foreground hover:text-accent-foreground/70 mt-1">
+                        Используйте hover:bg-accent + hover:text-accent-foreground для хорошей контрастности
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors">
+                      <h5 className="font-medium">Альтернативный hover эффект</h5>
+                      <p className="text-sm text-muted-foreground hover:text-primary-foreground/70 mt-1">
+                        Или hover:bg-primary + hover:text-primary-foreground для более яркого эффекта
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Неправильные hover эффекты (НЕ ИСПОЛЬЗУЙТЕ)</h4>
+                  <div className="space-y-3">
+                    <div className="p-4 border rounded-lg hover:bg-muted cursor-pointer transition-colors">
+                      <h5 className="font-medium">Неправильный hover эффект</h5>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        ❌ hover:bg-muted создает серый текст на сером фоне - плохая читаемость!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Рекомендации</h4>
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <p>• <strong>Для интерактивных элементов:</strong> используйте hover:bg-accent + hover:text-accent-foreground</p>
+                    <p>• <strong>Для кнопок и важных элементов:</strong> используйте hover:bg-primary + hover:text-primary-foreground</p>
+                    <p>• <strong>Для второстепенного текста:</strong> добавляйте /70 или /60 для полупрозрачности</p>
+                    <p>• <strong>Всегда добавляйте:</strong> transition-colors для плавной анимации</p>
+                    <p>• <strong>Избегайте:</strong> hover:bg-muted без изменения цвета текста</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
 

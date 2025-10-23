@@ -211,7 +211,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
                     return (
                       <div
                         key={notification.id}
-                        className={`p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer ${
+                        className={`p-3 border-b border-border last:border-b-0 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors ${
                           !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                         }`}
                         onClick={() => {
