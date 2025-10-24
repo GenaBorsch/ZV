@@ -1,181 +1,192 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Миграция Story Texts</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin: 10px 0;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            font-weight: bold;
+'use client';
+
+import { useState } from 'react';
+
+export default function MigratePage() {
+  const [status, setStatus] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const runMigration = async () => {
+    setIsLoading(true);
+    setStatus('<div className="info">Начинаем миграцию...</div>');
+    
+    try {
+      const response = await fetch('/api/migrate-story-texts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setStatus(`
+          <div className="success">
+            ✅ Миграция выполнена успешно!<br>
+            ${data.message}<br>
+            Записей обновлено: ${data.recordsUpdated || 'N/A'}
+          </div>
+        `);
+      } else {
+        setStatus(`
+          <div className="error">
+            ❌ Ошибка миграции:<br>
+            ${data.error}<br>
+            <pre>${JSON.stringify(data.details, null, 2)}</pre>
+          </div>
+        `);
+      }
+    } catch (error) {
+      setStatus(`
+        <div className="error">
+          ❌ Ошибка сети:<br>
+          ${error instanceof Error ? error.message : 'Unknown error'}
+        </div>
+      `);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const checkStatus = async () => {
+    setIsLoading(true);
+    setStatus('<div className="info">Проверяем статус таблицы...</div>');
+    
+    try {
+      const response = await fetch('/api/check-story-texts');
+      const data = await response.json();
+      
+      if (data.success) {
+        setStatus(`
+          <div className="success">
+            ✅ Статус таблицы:<br>
+            Колонка title: ${data.hasTitleColumn ? '✅ Существует' : '❌ Отсутствует'}<br>
+            Записей в таблице: ${data.recordCount}<br>
+            <pre>${JSON.stringify(data.sampleData, null, 2)}</pre>
+          </div>
+        `);
+      } else {
+        setStatus(`
+          <div className="error">
+            ❌ Ошибка проверки:<br>
+            ${data.error}
+          </div>
+        `);
+      }
+    } catch (error) {
+      setStatus(`
+        <div className="error">
+          ❌ Ошибка сети:<br>
+          ${error instanceof Error ? error.message : 'Unknown error'}
+        </div>
+      `);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      fontFamily: 'Arial, sans-serif',
+      maxWidth: '800px',
+      margin: '50px auto',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      minHeight: '100vh'
+    }}>
+      <div style={{
+        background: 'white',
+        padding: '30px',
+        borderRadius: '10px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+      }}>
+        <h1 style={{ color: '#333', textAlign: 'center' }}>
+          🔄 Миграция Story Texts
+        </h1>
+        <p>
+          Этот инструмент добавит колонку <code>title</code> в таблицу <code>story_texts</code> и заполнит её данными.
+        </p>
+        
+        <button
+          onClick={runMigration}
+          disabled={isLoading}
+          style={{
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            padding: '15px 30px',
+            fontSize: '16px',
+            borderRadius: '5px',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            width: '100%',
+            margin: '10px 0',
+            opacity: isLoading ? 0.6 : 1
+          }}
+        >
+          {isLoading ? '⏳ Выполняется миграция...' : '🚀 Запустить миграцию'}
+        </button>
+        
+        <button
+          onClick={checkStatus}
+          disabled={isLoading}
+          style={{
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            padding: '15px 30px',
+            fontSize: '16px',
+            borderRadius: '5px',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            width: '100%',
+            margin: '10px 0',
+            opacity: isLoading ? 0.6 : 1
+          }}
+        >
+          {isLoading ? '⏳ Проверяем...' : '🔍 Проверить статус'}
+        </button>
+        
+        {status && (
+          <div
+            dangerouslySetInnerHTML={{ __html: status }}
+            style={{ marginTop: '20px' }}
+          />
+        )}
+      </div>
+      
+      <style jsx>{`
+        .info {
+          background-color: #d1ecf1;
+          color: #0c5460;
+          border: 1px solid #bee5eb;
+          padding: 15px;
+          border-radius: 5px;
+          font-weight: bold;
         }
         .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+          background-color: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+          padding: 15px;
+          border-radius: 5px;
+          font-weight: bold;
         }
         .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+          padding: 15px;
+          border-radius: 5px;
+          font-weight: bold;
         }
         pre {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            white-space: pre-wrap;
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 5px;
+          overflow-x: auto;
+          white-space: pre-wrap;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🔄 Миграция Story Texts</h1>
-        <p>Этот инструмент добавит колонку <code>title</code> в таблицу <code>story_texts</code> и заполнит её данными.</p>
-        
-        <button id="migrateBtn" onclick="runMigration()">
-            🚀 Запустить миграцию
-        </button>
-        
-        <button id="checkBtn" onclick="checkStatus()">
-            🔍 Проверить статус
-        </button>
-        
-        <div id="status"></div>
+      `}</style>
     </div>
-
-    <script>
-        async function runMigration() {
-            const btn = document.getElementById('migrateBtn');
-            const status = document.getElementById('status');
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Выполняется миграция...';
-            status.innerHTML = '<div class="info">Начинаем миграцию...</div>';
-            
-            try {
-                const response = await fetch('/api/migrate-story-texts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    status.innerHTML = `
-                        <div class="success">
-                            ✅ Миграция выполнена успешно!<br>
-                            ${data.message}<br>
-                            Записей обновлено: ${data.recordsUpdated || 'N/A'}
-                        </div>
-                    `;
-                } else {
-                    status.innerHTML = `
-                        <div class="error">
-                            ❌ Ошибка миграции:<br>
-                            ${data.error}<br>
-                            <pre>${JSON.stringify(data.details, null, 2)}</pre>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                status.innerHTML = `
-                    <div class="error">
-                        ❌ Ошибка сети:<br>
-                        ${error.message}
-                    </div>
-                `;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🚀 Запустить миграцию';
-            }
-        }
-        
-        async function checkStatus() {
-            const btn = document.getElementById('checkBtn');
-            const status = document.getElementById('status');
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Проверяем...';
-            status.innerHTML = '<div class="info">Проверяем статус таблицы...</div>';
-            
-            try {
-                const response = await fetch('/api/check-story-texts');
-                const data = await response.json();
-                
-                if (data.success) {
-                    status.innerHTML = `
-                        <div class="success">
-                            ✅ Статус таблицы:<br>
-                            Колонка title: ${data.hasTitleColumn ? '✅ Существует' : '❌ Отсутствует'}<br>
-                            Записей в таблице: ${data.recordCount}<br>
-                            <pre>${JSON.stringify(data.sampleData, null, 2)}</pre>
-                        </div>
-                    `;
-                } else {
-                    status.innerHTML = `
-                        <div class="error">
-                            ❌ Ошибка проверки:<br>
-                            ${data.error}
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                status.innerHTML = `
-                    <div class="error">
-                        ❌ Ошибка сети:<br>
-                        ${error.message}
-                    </div>
-                `;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔍 Проверить статус';
-            }
-        }
-    </script>
-</body>
-</html>
+  );
+}
