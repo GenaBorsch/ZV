@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     
     const columnExists = await db.execute(checkColumnQuery);
     
-    if (columnExists.rows.length > 0) {
+    if (columnExists.length > 0) {
       console.log('Column title already exists');
       return NextResponse.json({ 
         success: true, 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     `;
     
     const result = await db.execute(verifyQuery);
-    const count = result.rows[0]?.count || 0;
+    const count = result[0]?.count || 0;
 
     console.log(`Migration completed successfully. ${count} records updated.`);
 

@@ -14,23 +14,23 @@ export async function GET(request: NextRequest) {
     `;
     
     const columnResult = await db.execute(checkColumnQuery);
-    const hasTitleColumn = columnResult.rows.length > 0;
+    const hasTitleColumn = columnResult.length > 0;
 
     // Получаем количество записей
     const countQuery = `SELECT COUNT(*) as count FROM "story_texts"`;
     const countResult = await db.execute(countQuery);
-    const recordCount = countResult.rows[0]?.count || 0;
+    const recordCount = countResult[0]?.count || 0;
 
     // Получаем примеры данных
     let sampleData = null;
     if (hasTitleColumn) {
       const sampleQuery = `SELECT "id", "type", "title", "text" FROM "story_texts" LIMIT 3`;
       const sampleResult = await db.execute(sampleQuery);
-      sampleData = sampleResult.rows;
+      sampleData = sampleResult;
     } else {
       const sampleQuery = `SELECT "id", "type", "text" FROM "story_texts" LIMIT 3`;
       const sampleResult = await db.execute(sampleQuery);
-      sampleData = sampleResult.rows;
+      sampleData = sampleResult;
     }
 
     console.log(`Table status: hasTitleColumn=${hasTitleColumn}, recordCount=${recordCount}`);
