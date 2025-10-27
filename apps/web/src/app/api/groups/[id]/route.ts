@@ -55,7 +55,7 @@ export async function GET(
       members: members.map(member => ({
         id: member.id,
         userId: member.userId,
-        nickname: member.nickname || member.email,
+        nickname: member.name || member.nickname || member.email,
         email: member.email,
         status: member.status,
         joinedAt: member.joinedAt.toISOString(),
