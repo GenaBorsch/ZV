@@ -34,11 +34,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = (user as any).id;
         token.roles = (user as any).roles || [];
         token.name = (user as any).name;
+      }
+      
+      // Если обновляется сессия через update, сохраняем activeRole
+      if (trigger === 'update' && session?.activeRole) {
+        token.activeRole = session.activeRole;
       }
       
       // Периодически обновляем токен данными из БД (каждые несколько минут)
@@ -69,6 +74,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = (token as any).id;
         (session.user as any).roles = (token as any).roles || [];
+        (session.user as any).activeRole = (token as any).activeRole;
       }
       return session;
     },

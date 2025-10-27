@@ -18,7 +18,18 @@ export function useRoleCheck(requiredRoles: Role[], redirectTo: string = '/') {
 
     if (session?.user) {
       const userRoles = (session.user as any).roles || [];
-      const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+      const activeRole = (session.user as any).activeRole;
+      
+      // Проверяем активную роль или все роли пользователя
+      let hasRequiredRole: boolean;
+      
+      if (activeRole) {
+        // Если есть активная роль, проверяем её
+        hasRequiredRole = requiredRoles.includes(activeRole as Role);
+      } else {
+        // Если нет активной роли, проверяем все роли
+        hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+      }
       
       if (!hasRequiredRole) {
         router.push(redirectTo);
@@ -28,13 +39,19 @@ export function useRoleCheck(requiredRoles: Role[], redirectTo: string = '/') {
   }, [session, status, requiredRoles, redirectTo, router]);
 
   const userRoles = session?.user ? (session.user as any).roles || [] : [];
-  const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+  const activeRole = session?.user ? (session.user as any).activeRole : null;
+  
+  // Проверяем активную роль или все роли
+  const hasRequiredRole = activeRole 
+    ? requiredRoles.includes(activeRole as Role)
+    : requiredRoles.some(role => userRoles.includes(role));
   
   return {
     isLoading: status === 'loading',
     isAuthenticated: status === 'authenticated',
     hasRequiredRole,
     userRoles,
+    activeRole,
   };
 }
 

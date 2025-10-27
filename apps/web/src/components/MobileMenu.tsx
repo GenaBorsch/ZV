@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from './LogoutButton';
+import { RoleSwitcher } from './RoleSwitcher';
 
 interface MobileMenuProps {
   navItems: Array<{
@@ -64,6 +65,10 @@ export function MobileMenu({ navItems, title, subtitle }: MobileMenuProps) {
                     <span>{item.label}</span>
                   </Link>
                 ))}
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-border space-y-4">
+                <RoleSwitcher fullWidth className="px-4" />
               </div>
               
               <div className="mt-4 pt-4 border-t border-border">

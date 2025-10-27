@@ -71,6 +71,15 @@ export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const userRoles = (token?.roles as string[]) || [];
     const userName = token?.name as string | null;
+    const activeRole = token?.activeRole as string | null;
+
+    // Если у пользователя несколько ролей и нет активной роли, перенаправляем на выбор
+    if (userRoles.length > 1 && !activeRole && pathname !== '/select-role' && pathname !== '/profile' && pathname !== '/auth/login') {
+      const url = req.nextUrl.clone();
+      url.pathname = '/select-role';
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
+    }
 
     // Проверяем, нужно ли заполнить профиль
     const requiresProfile = PROFILE_REQUIRED_PATHS.some((path) => pathname.startsWith(path));

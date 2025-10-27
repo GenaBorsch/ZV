@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { MobileMenu } from '@/components/MobileMenu';
 import { PlayerDashboardContent } from '@/components/PlayerDashboardContent';
 import { NotificationBell } from '@/components/NotificationBell';
+import { RoleSwitcher } from '@/components/RoleSwitcher';
 import { usePlayerCheck } from '@/lib/hooks/useRoleCheck';
 import { useSession } from 'next-auth/react';
 
@@ -62,6 +63,7 @@ export default function PlayerDashboard() {
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
               {/* Desktop navigation */}
               <div className="hidden md:flex items-center space-x-4">
+                <RoleSwitcher />
                 <LogoutButton className="text-muted-foreground hover:text-foreground" />
               </div>
               {/* Mobile menu */}
