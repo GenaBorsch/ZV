@@ -41,6 +41,11 @@ export interface GroupWithNotifications extends GroupWithDetails {
   pendingApplicationsCount: number;
 }
 
+export interface UserGroupWithRole extends GroupWithDetails {
+  role: 'MASTER' | 'PLAYER';
+  pendingApplicationsCount?: number;
+}
+
 export interface GroupMember {
   id: string;
   userId: string;
@@ -794,6 +799,41 @@ export class GroupsRepo {
         ...group,
         currentMembers,
       });
+    }
+
+    return result;
+  }
+
+  /**
+   * Получить все группы пользователя (как мастера и как игрока)
+   */
+  static async getAllUserGroups(userId: string): Promise<UserGroupWithRole[]> {
+    const result: UserGroupWithRole[] = [];
+    const seenGroupIds = new Set<string>();
+
+    // Получить группы, где пользователь является мастером
+    const masterGroups = await this.getByMasterIdWithNotifications(userId);
+    for (const group of masterGroups) {
+      if (!seenGroupIds.has(group.id)) {
+        seenGroupIds.add(group.id);
+        result.push({
+          ...group,
+          role: 'MASTER' as const,
+          pendingApplicationsCount: group.pendingApplicationsCount,
+        });
+      }
+    }
+
+    // Получить группы, где пользователь является игроком
+    const playerGroups = await this.getPlayerGroups(userId);
+    for (const group of playerGroups) {
+      if (!seenGroupIds.has(group.id)) {
+        seenGroupIds.add(group.id);
+        result.push({
+          ...group,
+          role: 'PLAYER' as const,
+        });
+      }
     }
 
     return result;

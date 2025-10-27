@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
-import { MobileMenu } from '@/components/MobileMenu';
-import { PlayerDashboardContent } from '@/components/PlayerDashboardContent';
-import { NotificationBell } from '@/components/NotificationBell';
-import { usePlayerCheck } from '@/lib/hooks/useRoleCheck';
+import { SearchGroupsList } from '@/components/SearchGroupsList';
+import { useMasterCheck } from '@/lib/hooks/useRoleCheck';
 import { useSession } from 'next-auth/react';
+import { NotificationBell } from '@/components/NotificationBell';
+import { MobileMenu } from '@/components/MobileMenu';
 
-export default function PlayerDashboard() {
-  const { isLoading, hasRequiredRole } = usePlayerCheck();
+export default function MasterSearchPage() {
+  const { isLoading, hasRequiredRole } = useMasterCheck();
   const { data: session } = useSession();
 
   const navItems = [
+    { label: 'Мой кабинет', href: '/master' },
+    { label: 'Отчёты', href: '/master/reports' },
     { label: 'Профиль', href: '/profile' },
   ];
 
@@ -40,6 +42,7 @@ export default function PlayerDashboard() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -47,28 +50,37 @@ export default function PlayerDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2 md:space-x-4">
+              <Link href="/master" className="hidden md:block text-muted-foreground hover:text-foreground">
+                ← Кабинет мастера
+              </Link>
               <h1 className="text-base md:text-xl font-semibold text-foreground">
-                Кабинет игрока
+                Просмотр групп
               </h1>
               <Link 
                 href="/profile" 
                 className="hidden md:block px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full hover:bg-accent/50 transition-colors cursor-pointer"
                 title="Редактировать профиль"
               >
-                {session?.user?.name || 'Игрок'}
+                {session?.user?.name || 'Мастер'}
               </Link>
             </div>
             <nav className="flex items-center space-x-2 md:space-x-4">
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
               {/* Desktop navigation */}
               <div className="hidden md:flex items-center space-x-4">
+                <Link href="/master" className="text-muted-foreground hover:text-foreground">
+                  Мой кабинет
+                </Link>
+                <Link href="/master/reports" className="text-muted-foreground hover:text-foreground">
+                  Отчёты
+                </Link>
                 <LogoutButton className="text-muted-foreground hover:text-foreground" />
               </div>
               {/* Mobile menu */}
               <MobileMenu 
                 navItems={navItems}
-                title="Кабинет игрока"
-                subtitle={session?.user?.name || 'Игрок'}
+                title="Просмотр групп"
+                subtitle={session?.user?.name || 'Мастер'}
               />
             </nav>
           </div>
@@ -77,8 +89,21 @@ export default function PlayerDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <PlayerDashboardContent />
+        <div className="px-4 py-6 sm:px-0">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Найдите группу для игры
+            </h2>
+            <p className="text-muted-foreground">
+              Просмотрите доступные игровые группы и присоединитесь к понравившейся. 
+              Все группы открыты для набора участников и имеют свободные места.
+            </p>
+          </div>
+
+          <SearchGroupsList />
+        </div>
       </main>
     </div>
   );
 }
+

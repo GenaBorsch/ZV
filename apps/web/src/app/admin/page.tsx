@@ -1,28 +1,31 @@
 import Link from 'next/link';
-import { LogoutButton } from '@/components/LogoutButton';
 import { NotificationBell } from '@/components/NotificationBell';
+import { MobileMenu } from '@/components/MobileMenu';
 
 export default function AdminDashboard() {
+  const navItems = [];
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold text-foreground">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <h1 className="text-base md:text-xl font-semibold text-foreground">
                 Админ-панель
               </h1>
-              <span className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
+              <span className="hidden md:block px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
                 Модератор
               </span>
             </div>
-            <nav className="flex items-center space-x-4">
+            <nav className="flex items-center space-x-2 md:space-x-4">
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
-              <Link href="/" className="text-muted-foreground hover:text-foreground">
-                На главную
-              </Link>
-              <LogoutButton className="text-muted-foreground hover:text-foreground" />
+              <MobileMenu 
+                navItems={navItems}
+                title="Админ-панель"
+                subtitle="Модератор"
+              />
             </nav>
           </div>
         </div>

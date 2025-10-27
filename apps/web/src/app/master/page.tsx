@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
+import { MobileMenu } from '@/components/MobileMenu';
 import { MasterDashboardContent } from '@/components/MasterDashboardContent';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useMasterCheck } from '@/lib/hooks/useRoleCheck';
@@ -10,6 +11,11 @@ import { useSession } from 'next-auth/react';
 export default function MasterDashboard() {
   const { isLoading, hasRequiredRole } = useMasterCheck();
   const { data: session } = useSession();
+
+  const navItems = [
+    { label: 'Отчёты', href: '/master/reports' },
+    { label: 'Профиль', href: '/profile' },
+  ];
 
   if (isLoading) {
     return (
@@ -41,27 +47,33 @@ export default function MasterDashboard() {
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold text-foreground">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <h1 className="text-base md:text-xl font-semibold text-foreground">
                 Кабинет мастера
               </h1>
               <Link 
                 href="/profile" 
-                className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full hover:bg-accent/50 transition-colors cursor-pointer"
+                className="hidden md:block px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full hover:bg-accent/50 transition-colors cursor-pointer"
                 title="Редактировать профиль"
               >
                 {session?.user?.name || 'Мастер'}
               </Link>
             </div>
-            <nav className="flex items-center space-x-4">
+            <nav className="flex items-center space-x-2 md:space-x-4">
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
-              <Link href="/master/reports" className="text-muted-foreground hover:text-foreground">
-                Отчёты
-              </Link>
-              <Link href="/" className="text-muted-foreground hover:text-foreground">
-                На главную
-              </Link>
-              <LogoutButton className="text-muted-foreground hover:text-foreground" />
+              {/* Desktop navigation */}
+              <div className="hidden md:flex items-center space-x-4">
+                <Link href="/master/reports" className="text-muted-foreground hover:text-foreground">
+                  Отчёты
+                </Link>
+                <LogoutButton className="text-muted-foreground hover:text-foreground" />
+              </div>
+              {/* Mobile menu */}
+              <MobileMenu 
+                navItems={navItems}
+                title="Кабинет мастера"
+                subtitle={session?.user?.name || 'Мастер'}
+              />
             </nav>
           </div>
         </div>

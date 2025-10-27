@@ -63,15 +63,10 @@ export default function StylePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold text-foreground">
+              <h1 className="text-base md:text-xl font-semibold text-foreground">
                 Гид по стилям компонентов
               </h1>
             </div>
-            <nav className="flex space-x-4">
-              <a href="/" className="text-muted-foreground hover:text-foreground">
-                На главную
-              </a>
-            </nav>
           </div>
         </div>
       </header>

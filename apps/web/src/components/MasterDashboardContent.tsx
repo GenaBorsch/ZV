@@ -186,10 +186,10 @@ export function MasterDashboardContent() {
           ) : (
             /* Groups Section */
             <div className="card p-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
                 <h3 className="text-lg font-medium text-foreground">Мои группы</h3>
                 <button 
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                   onClick={() => setShowCreateForm(true)}
                 >
                   Создать группу
@@ -224,45 +224,48 @@ export function MasterDashboardContent() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between text-base text-muted-foreground">
-                        <div className="flex items-center space-x-4">
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                           <span>👥 {group.currentMembers}/{group.maxMembers}</span>
                           <span>🎮 {group.format}</span>
                           {group.place && <span>📍 {group.place}</span>}
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button 
-                            className="text-primary hover:text-primary/80 text-base font-medium flex items-center gap-2"
+                            className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-accent"
                             onClick={() => setViewingApplicationsGroupId(group.id)}
                           >
-                            📝 Заявки
+                            <span>📝</span>
+                            <span className="hidden sm:inline">Заявки</span>
                             {(group.pendingApplicationsCount || 0) > 0 && (
-                              <span className="bg-red-500 text-white text-sm rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                              <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[16px] h-4 flex items-center justify-center animate-pulse">
                                 {group.pendingApplicationsCount}
                               </span>
                             )}
                           </button>
                           <button 
-                            className="text-primary hover:text-primary/80 text-base font-medium"
+                            className="text-primary hover:text-primary/80 text-sm font-medium px-2 py-1 rounded hover:bg-accent"
                             onClick={() => setSelectedGroupId(group.id)}
                           >
-                            📋 Подробнее
+                            <span className="hidden sm:inline">📋 Подробнее</span>
+                            <span className="sm:hidden">📋</span>
                           </button>
                           {group.referralCode && (
                             <>
                               <button 
-                                className="text-primary hover:text-primary/80 text-base font-medium"
+                                className="text-primary hover:text-primary/80 text-sm font-medium px-2 py-1 rounded hover:bg-accent"
                                 onClick={() => {
                                   navigator.clipboard.writeText(group.referralCode!);
                                   alert('Код приглашения скопирован!');
                                 }}
                                 title="Скопировать код приглашения"
                               >
-                                🔗 Код
+                                <span className="hidden sm:inline">🔗 Код</span>
+                                <span className="sm:hidden">🔗</span>
                               </button>
                               <button 
-                                className="text-primary hover:text-primary/80 text-base font-medium"
+                                className="text-primary hover:text-primary/80 text-sm font-medium px-2 py-1 rounded hover:bg-accent"
                                 onClick={() => {
                                   const link = `${window.location.origin}/join?code=${group.referralCode}`;
                                   navigator.clipboard.writeText(link);
@@ -270,16 +273,18 @@ export function MasterDashboardContent() {
                                 }}
                                 title="Скопировать реферальную ссылку"
                               >
-                                📋 Ссылка
+                                <span className="hidden sm:inline">📋 Ссылка</span>
+                                <span className="sm:hidden">📋</span>
                               </button>
                             </>
                           )}
                           <button 
-                            className="text-red-600 hover:text-red-700 text-base font-medium"
+                            className="text-red-600 hover:text-red-700 text-sm font-medium px-2 py-1 rounded hover:bg-accent"
                             onClick={() => handleDeleteGroup(group.id, group.name)}
                             title="Удалить группу"
                           >
-                            🗑️ Удалить
+                            <span className="hidden sm:inline">🗑️ Удалить</span>
+                            <span className="sm:hidden">🗑️</span>
                           </button>
                         </div>
                       </div>
@@ -303,6 +308,12 @@ export function MasterDashboardContent() {
               >
                 Создать группу
               </button>
+              <a 
+                href="/master/search"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+              >
+                Просмотр групп
+              </a>
               <button 
                 className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
                 onClick={() => router.push('/master/reports')}

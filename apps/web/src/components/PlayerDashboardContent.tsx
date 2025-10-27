@@ -227,17 +227,17 @@ export function PlayerDashboardContent() {
           ) : (
             /* Groups Section */
             <div className="card p-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h3 className="text-lg font-medium text-foreground">Мои группы</h3>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-col sm:flex-row">
                   <a 
                     href="/player/search"
-                    className="btn-primary"
+                    className="btn-primary w-full sm:w-auto"
                   >
                     🔍 Найти группу
                   </a>
                   <button 
-                    className="btn-outline"
+                    className="btn-outline w-full sm:w-auto"
                     onClick={() => setShowJoinForm(true)}
                   >
                     По коду
@@ -273,18 +273,19 @@ export function PlayerDashboardContent() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between text-base text-muted-foreground">
-                        <div className="flex items-center space-x-4">
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                           <span>👥 {group.currentMembers}/{group.maxMembers}</span>
                           <span>🎮 {group.format}</span>
                           {group.place && <span>📍 {group.place}</span>}
                         </div>
                         
                         <button
-                          className="text-primary hover:text-primary/80 text-base font-medium"
+                          className="text-primary hover:text-primary/80 text-sm font-medium px-2 py-1 rounded hover:bg-accent w-fit"
                           onClick={() => setSelectedGroupId(group.id)}
                         >
-                          📋 Подробнее
+                          <span className="hidden sm:inline">📋 Подробнее</span>
+                          <span className="sm:hidden">📋 Подробнее</span>
                         </button>
                       </div>
                     </div>

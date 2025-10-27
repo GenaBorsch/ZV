@@ -164,7 +164,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
           />
           
           {/* Dropdown */}
-          <Card className="absolute right-0 top-full mt-2 w-96 max-h-[28rem] z-50 shadow-lg">
+          <Card className="fixed right-2 top-20 sm:absolute sm:right-0 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 sm:max-w-sm max-h-[calc(100vh-6rem)] z-50 shadow-lg sm:shadow-xl">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">
@@ -193,7 +193,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
               </div>
             </CardHeader>
             
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-hidden">
               {isLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   Загрузка...
@@ -203,7 +203,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
                   Уведомлений пока нет
                 </div>
               ) : (
-                <div className="max-h-48 overflow-y-auto">
+                <div className="max-h-72 sm:max-h-48 overflow-y-auto">
                   {notifications.map((notification) => {
                     const Icon = getNotificationIcon(notification.type);
                     const colorClass = getNotificationColor(notification.type);
@@ -222,19 +222,19 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
                       >
                         <div className="flex gap-3">
                           <Icon className={`h-4 w-4 mt-0.5 flex-shrink-0 ${colorClass}`} />
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 overflow-hidden">
                             <div className="flex items-start justify-between gap-2">
-                              <h4 className="text-sm font-medium text-foreground line-clamp-1">
+                              <h4 className="text-sm font-medium text-foreground line-clamp-1 break-words">
                                 {notification.title}
                               </h4>
                               {!notification.isRead && (
                                 <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1" />
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
                               {notification.message}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-1 break-words">
                               {formatTime(notification.createdAt)}
                             </p>
                           </div>

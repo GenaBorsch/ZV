@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { BasicAuthInfo } from '@/components/BasicAuthInfo';
@@ -33,6 +34,10 @@ export default function RootLayout({ children, }: { children: React.ReactNode; }
           </div>
           <BasicAuthInfo />
         </Providers>
+        <Script id="replain-settings" strategy="beforeInteractive">
+          {`window.replainSettings = { id: '7ac00e66-9a9f-4485-b28c-6cec7357d135' };`}
+        </Script>
+        <Script src="https://widget.replain.cc/dist/client.js" strategy="afterInteractive" />
       </body>
     </html>
   );

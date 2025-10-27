@@ -19,6 +19,7 @@ import { getRedirectUrlByRoles } from '@/lib/redirectUtils';
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
 import { NotificationBell } from '@/components/NotificationBell';
+import { MobileMenu } from '@/components/MobileMenu';
 
 interface ProfileData {
   id: string;
@@ -62,6 +63,11 @@ function ProfilePageContent() {
   const [masterSuccess, setMasterSuccess] = useState('');
   const [isEditingMaster, setIsEditingMaster] = useState(false);
   const [masterSaving, setMasterSaving] = useState(false);
+
+  // Определяем навигационные элементы в зависимости от ролей
+  const navItems = (profile?.roles.includes('MASTER') || profile?.roles.includes('SUPERADMIN') || profile?.roles.includes('MODERATOR')) 
+    ? [{ label: 'Кабинет мастера', href: '/master' }]
+    : [{ label: 'Кабинет игрока', href: '/player' }];
 
   // Форма для основной информации
   const mainForm = useForm({
@@ -303,29 +309,35 @@ function ProfilePageContent() {
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold text-foreground">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <h1 className="text-base md:text-xl font-semibold text-foreground">
                 Профиль
               </h1>
-              <span className="px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
+              <span className="hidden md:block px-2 py-1 text-xs font-medium bg-accent/30 text-foreground rounded-full">
                 {session?.user?.name || 'Пользователь'}
               </span>
             </div>
-            <nav className="flex items-center space-x-4">
+            <nav className="flex items-center space-x-2 md:space-x-4">
               <NotificationBell className="text-muted-foreground hover:text-foreground" />
-              {profile?.roles.includes('MASTER') || profile?.roles.includes('SUPERADMIN') || profile?.roles.includes('MODERATOR') ? (
-                <Link href="/master" className="text-muted-foreground hover:text-foreground">
-                  Кабинет мастера
-                </Link>
-              ) : (
-                <Link href="/player" className="text-muted-foreground hover:text-foreground">
-                  Кабинет игрока
-                </Link>
-              )}
-              <Link href="/" className="text-muted-foreground hover:text-foreground">
-                На главную
-              </Link>
-              <LogoutButton className="text-muted-foreground hover:text-foreground" />
+              {/* Desktop navigation */}
+              <div className="hidden md:flex items-center space-x-4">
+                {profile?.roles.includes('MASTER') || profile?.roles.includes('SUPERADMIN') || profile?.roles.includes('MODERATOR') ? (
+                  <Link href="/master" className="text-muted-foreground hover:text-foreground">
+                    Кабинет мастера
+                  </Link>
+                ) : (
+                  <Link href="/player" className="text-muted-foreground hover:text-foreground">
+                    Кабинет игрока
+                  </Link>
+                )}
+                <LogoutButton className="text-muted-foreground hover:text-foreground" />
+              </div>
+              {/* Mobile menu */}
+              <MobileMenu 
+                navItems={navItems}
+                title="Профиль"
+                subtitle={session?.user?.name || 'Пользователь'}
+              />
             </nav>
           </div>
         </div>
