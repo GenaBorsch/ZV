@@ -36,20 +36,34 @@ function convertMinioUrlToApiUrl(url: string): string {
     try {
       const urlObj = new URL(url);
       const path = urlObj.pathname;
-      return `/api/files${path}`;
+      // Если путь начинается с /uploads/, возвращаем как есть
+      if (path.startsWith('/uploads/')) {
+        return `/api/files${path}`;
+      }
+      // Иначе добавляем /uploads/
+      return `/api/files/uploads${path}`;
     } catch (e) {
       // Если не удалось распарсить URL, возвращаем как есть
       return url;
     }
   }
   
-  // Если это относительный путь, добавляем префикс API
+  // Если это относительный путь
   if (url.startsWith('/')) {
+    // Если путь не начинается с uploads/, добавляем его с monsters/
+    if (!url.startsWith('/uploads/')) {
+      return `/api/files/uploads/monsters${url}`;
+    }
+    // Если уже начинается с /uploads/, добавляем monsters/ после uploads/
+    const remainingPath = url.substring('/uploads/'.length);
+    if (remainingPath && !remainingPath.startsWith('monsters/')) {
+      return `/api/files/uploads/monsters/${remainingPath}`;
+    }
     return `/api/files${url}`;
   }
   
-  // Возвращаем URL как есть для других случаев
-  return url;
+  // Если путь не начинается с /, добавляем полный путь с monsters/
+  return `/api/files/uploads/monsters/${url}`;
 }
 
 export interface NextPlanData {
