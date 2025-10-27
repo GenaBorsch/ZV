@@ -24,6 +24,34 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+// Функция для преобразования MinIO URL в API URL
+function convertMinioUrlToApiUrl(url: string): string {
+  // Если это уже API URL, возвращаем как есть
+  if (url.startsWith('/api/files/')) {
+    return url;
+  }
+  
+  // Если это полный URL (http/https), извлекаем путь
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const urlObj = new URL(url);
+      const path = urlObj.pathname;
+      return `/api/files${path}`;
+    } catch (e) {
+      // Если не удалось распарсить URL, возвращаем как есть
+      return url;
+    }
+  }
+  
+  // Если это относительный путь, добавляем префикс API
+  if (url.startsWith('/')) {
+    return `/api/files${url}`;
+  }
+  
+  // Возвращаем URL как есть для других случаев
+  return url;
+}
+
 export interface NextPlanData {
   continuedFromReportId?: string;
   nextPlanText: string;
@@ -39,6 +67,9 @@ interface Monster {
   imageUrl: string | null;
   description: string;
   status: 'AVAILABLE' | 'LOCKED';
+  lastKnownLocation?: string | null;
+  bountyAlive?: number | null;
+  bountyDead?: number | null;
 }
 
 interface StoryText {
@@ -513,7 +544,7 @@ export function NextPlanSelector({ groupId, value, onChange }: NextPlanSelectorP
                   <h3 className="text-lg font-semibold">{(previewDialog.item as Monster).title}</h3>
                   {(previewDialog.item as Monster).imageUrl && (
                     <img 
-                      src={(previewDialog.item as Monster).imageUrl!} 
+                      src={convertMinioUrlToApiUrl((previewDialog.item as Monster).imageUrl!)} 
                       alt={(previewDialog.item as Monster).title}
                       className="w-full h-48 object-cover rounded-lg mt-2"
                     />

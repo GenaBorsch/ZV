@@ -24,6 +24,34 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from '@/components/FileUpload';
 
+// Функция для преобразования MinIO URL в API URL
+function convertMinioUrlToApiUrl(url: string): string {
+  // Если это уже API URL, возвращаем как есть
+  if (url.startsWith('/api/files/')) {
+    return url;
+  }
+  
+  // Если это полный URL (http/https), извлекаем путь
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const urlObj = new URL(url);
+      const path = urlObj.pathname;
+      return `/api/files${path}`;
+    } catch (e) {
+      // Если не удалось распарсить URL, возвращаем как есть
+      return url;
+    }
+  }
+  
+  // Если это относительный путь, добавляем префикс API
+  if (url.startsWith('/')) {
+    return `/api/files${url}`;
+  }
+  
+  // Возвращаем URL как есть для других случаев
+  return url;
+}
+
 // Types
 interface Monster {
   id: string;
@@ -227,7 +255,7 @@ function MonstersTab() {
             <CardContent>
               {monster.imageUrl && (
                 <img
-                  src={monster.imageUrl}
+                  src={convertMinioUrlToApiUrl(monster.imageUrl)}
                   alt={monster.title}
                   className="w-full h-40 object-cover rounded-md mb-3"
                 />
