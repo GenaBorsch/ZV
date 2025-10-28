@@ -65,6 +65,7 @@ export default function AdminDashboard() {
                 <Link href="/admin/rules" className="btn-outline w-full text-left">Правила и регламенты</Link>
                 <Link href="/admin/schedule" className="btn-outline w-full text-left">Расписание игр</Link>
                 <Link href="/admin/users" className="btn-outline w-full text-left">Управление пользователями</Link>
+                <Link href="/admin/exclusive-materials" className="btn-outline w-full text-left">Эксклюзивные материалы</Link>
               </div>
             </div>
           </div>

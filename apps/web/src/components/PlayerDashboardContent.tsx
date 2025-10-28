@@ -45,6 +45,11 @@ export function PlayerDashboardContent() {
   const [battlepasses, setBattlepasses] = useState<any[]>([]);
   const [battlepassesLoading, setBattlepassesLoading] = useState(true);
 
+  // Exclusive materials state
+  const [exclusiveMaterials, setExclusiveMaterials] = useState<any[]>([]);
+  const [exclusiveMaterialsLoading, setExclusiveMaterialsLoading] = useState(true);
+  const [hasBattlepass, setHasBattlepass] = useState(false);
+
   // Загрузка групп с сервера
   const fetchGroups = async () => {
     try {
@@ -86,6 +91,8 @@ export function PlayerDashboardContent() {
       if (response.ok) {
         const data = await response.json();
         setBattlepasses(data.battlepasses || []);
+        // Проверяем наличие хотя бы одного баттлпасса
+        setHasBattlepass((data.battlepasses || []).length > 0);
       } else {
         console.error('Failed to fetch battlepasses:', response.statusText);
       }
@@ -93,6 +100,53 @@ export function PlayerDashboardContent() {
       console.error('Ошибка загрузки баттлпассов:', error);
     } finally {
       setBattlepassesLoading(false);
+    }
+  };
+
+  // Загрузка эксклюзивных материалов
+  const fetchExclusiveMaterials = async () => {
+    try {
+      setExclusiveMaterialsLoading(true);
+      const response = await fetch('/api/player/exclusive-materials');
+      if (response.ok) {
+        const data = await response.json();
+        setExclusiveMaterials(data.materials || []);
+      } else if (response.status === 403) {
+        // Нет доступа (нет баттлпасса)
+        setExclusiveMaterials([]);
+      } else {
+        console.error('Failed to fetch exclusive materials:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки эксклюзивных материалов:', error);
+    } finally {
+      setExclusiveMaterialsLoading(false);
+    }
+  };
+
+  // Обработка скачивания файла
+  const handleDownload = async (fileUrl: string, fileName: string) => {
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(fileUrl)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.downloadUrl) {
+          // Используем presigned URL для скачивания
+          const link = document.createElement('a');
+          link.href = data.downloadUrl;
+          link.download = fileName;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Ошибка при скачивании файла');
+      }
+    } catch (error) {
+      console.error('Ошибка при скачивании файла:', error);
+      alert('Ошибка при скачивании файла');
     }
   };
 
@@ -191,6 +245,13 @@ export function PlayerDashboardContent() {
     fetchCharacters();
     fetchBattlepasses();
   }, []);
+
+  // Загружаем эксклюзивные материалы, если есть баттлпасс
+  useEffect(() => {
+    if (hasBattlepass) {
+      fetchExclusiveMaterials();
+    }
+  }, [hasBattlepass]);
 
   const handleJoinSuccess = (data: any) => {
     setJoinedGroup(data);
@@ -405,6 +466,55 @@ export function PlayerDashboardContent() {
               </div>
             )}
           </div>
+
+          {/* Exclusive Materials Section */}
+          {hasBattlepass && (
+            <div className="card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-medium text-foreground">🎁 Эксклюзивные материалы</h3>
+                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full">
+                  Доступно
+                </span>
+              </div>
+              
+              {exclusiveMaterialsLoading ? (
+                <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                  Загрузка материалов...
+                </div>
+              ) : exclusiveMaterials.length > 0 ? (
+                <div className="space-y-3">
+                  {exclusiveMaterials.map((material) => (
+                    <div key={material.id} className="border border-border rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground mb-1 flex items-center gap-2">
+                            📄 {material.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {material.fileName} {material.fileSize && `(${(material.fileSize / 1024 / 1024).toFixed(2)} МБ)`}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDownload(material.fileUrl, material.fileName)}
+                          className="btn-primary flex items-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Скачать
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground">
+                  Эксклюзивных материалов пока нет.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}

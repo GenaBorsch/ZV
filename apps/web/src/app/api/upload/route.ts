@@ -49,6 +49,12 @@ const UPLOAD_CONFIGS: Record<string, FileUploadOptions> = {
     maxSizeMB: MAX_FILE_SIZES.DOCUMENT,
     allowedTypes: ALLOWED_TYPES.IMAGES,
   },
+  'exclusive-material': {
+    bucket: BUCKETS.DOCUMENTS,
+    folder: 'exclusive-materials',
+    maxSizeMB: 500, // PDF могут быть большие
+    allowedTypes: ['application/pdf'],
+  },
 };
 
 // Проверка прав доступа
@@ -67,6 +73,9 @@ function checkPermissions(type: string, userRoles: string[]): boolean {
       return userRoles.includes('MASTER') || userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
     case 'monster-image':
       // Только админы могут загружать изображения монстров
+      return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
+    case 'exclusive-material':
+      // Только админы могут загружать эксклюзивные материалы
       return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
     default:
       return false;

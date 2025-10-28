@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { parseMinioUrl, getPresignedUrl } from '@/lib/minio';
+import { db, battlepasses, eq } from '@zv/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,8 +38,24 @@ export async function GET(request: NextRequest) {
     const { bucket, key } = parsed;
 
     // Проверяем права доступа к файлу
-    // Для упрощения пока разрешаем доступ всем авторизованным пользователям
-    // В будущем можно добавить более строгую проверку прав
+    // Если это файл из папки exclusive-materials, проверяем наличие баттлпасса
+    if (key.startsWith('exclusive-materials/')) {
+      const userId = (session.user as any).id;
+      
+      // Проверяем наличие баттлпасса у пользователя
+      const userBattlepasses = await db
+        .select()
+        .from(battlepasses)
+        .where(eq(battlepasses.userId, userId))
+        .limit(1);
+
+      if (userBattlepasses.length === 0) {
+        return NextResponse.json(
+          { error: 'У вас нет доступа к эксклюзивным материалам. Необходимо наличие путёвки.' },
+          { status: 403 }
+        );
+      }
+    }
 
     try {
       // Генерируем presigned URL для скачивания (действует 1 час)

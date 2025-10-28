@@ -42,4 +42,5 @@ export { CharactersRepo } from './repositories/charactersRepo';
 export { monstersRepo } from './repositories/monstersRepo';
 export { storyTextsRepo } from './repositories/storyTextsRepo';
 export { reportNextPlansRepo } from './repositories/reportNextPlansRepo';
+export { ExclusiveMaterialsRepo } from './repositories/exclusiveMaterialsRepo';
 

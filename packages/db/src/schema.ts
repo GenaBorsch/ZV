@@ -318,6 +318,18 @@ export const writeoffs = pgTable('writeoffs', {
   };
 });
 
+export const exclusiveMaterials = pgTable('exclusive_materials', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  fileUrl: text('file_url').notNull(),
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  fileSize: integer('file_size'), // размер в байтах
+  isVisible: boolean('is_visible').default(true).notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Связь отчётов с игроками
 export const reportPlayers = pgTable('report_players', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -653,6 +665,8 @@ export type ReportPlayer = typeof reportPlayers.$inferSelect;
 export type NewReportPlayer = typeof reportPlayers.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+export type ExclusiveMaterial = typeof exclusiveMaterials.$inferSelect;
+export type NewExclusiveMaterial = typeof exclusiveMaterials.$inferInsert;
 
 // Типы энумов
 export type Role = typeof roleEnum.enumValues[number];
