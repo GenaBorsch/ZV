@@ -27,13 +27,18 @@ export default function AdminWikiPage() {
   // Загрузка разделов
   const loadSections = async () => {
     try {
+      setError(null);
       const response = await fetch('/api/wiki/sections');
-      if (!response.ok) throw new Error('Failed to load sections');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to load sections');
+      }
       
       const data = await response.json();
       setSections(data.sections || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load sections');
+      setSections([]); // Очищаем разделы при ошибке
     }
   };
 
