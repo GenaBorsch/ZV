@@ -34,6 +34,35 @@ const ROLE_COLORS = {
   SUPERADMIN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 };
 
+// Функция для преобразования MinIO URL в API URL
+function convertMinioUrlToApiUrl(url: string): string {
+  // Если это уже API URL, возвращаем как есть
+  if (url.startsWith('/api/files/')) {
+    return url;
+  }
+  
+  // Если это полный URL (http/https), извлекаем путь
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const urlObj = new URL(url);
+      const path = urlObj.pathname;
+      // Преобразуем путь в API URL
+      return `/api/files${path}`;
+    } catch (e) {
+      // Если не удалось распарсить URL, возвращаем как есть
+      return url;
+    }
+  }
+  
+  // Если это относительный путь
+  if (url.startsWith('/')) {
+    return `/api/files${url}`;
+  }
+  
+  // Если путь не начинается с /, добавляем полный путь
+  return `/api/files/uploads/wiki/${url}`;
+}
+
 export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
   const [comments, setComments] = useState<WikiCommentWithUser[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -167,10 +196,14 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
             components={{
               img: ({ src, alt, ...props }) => (
                 <img
-                  src={src}
+                  src={src ? convertMinioUrlToApiUrl(src) : ''}
                   alt={alt}
                   className="max-w-full h-auto rounded-lg shadow-sm"
                   loading="lazy"
+                  onError={(e) => {
+                    console.error('Failed to load image:', src);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
                   {...props}
                 />
               ),

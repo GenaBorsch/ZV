@@ -63,6 +63,35 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
   const handleOrderedList = () => insertText('1. ', '', 'элемент списка');
   const handleLink = () => insertText('[', '](https://example.com)', 'текст ссылки');
 
+  // Функция для преобразования MinIO URL в API URL
+  const convertMinioUrlToApiUrl = (url: string): string => {
+    // Если это уже API URL, возвращаем как есть
+    if (url.startsWith('/api/files/')) {
+      return url;
+    }
+    
+    // Если это полный URL (http/https), извлекаем путь
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      try {
+        const urlObj = new URL(url);
+        const path = urlObj.pathname;
+        // Преобразуем путь в API URL
+        return `/api/files${path}`;
+      } catch (e) {
+        // Если не удалось распарсить URL, возвращаем как есть
+        return url;
+      }
+    }
+    
+    // Если это относительный путь
+    if (url.startsWith('/')) {
+      return `/api/files${url}`;
+    }
+    
+    // Если путь не начинается с /, добавляем полный путь
+    return `/api/files/uploads/wiki/${url}`;
+  };
+
   // Обработчик загрузки изображения
   const handleImageUpload = (imageUrl: string | null) => {
     if (imageUrl) {
@@ -201,7 +230,25 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
         {showPreview && (
           <div className="p-4 overflow-y-auto bg-background">
             <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{value || '*Предпросмотр появится здесь...*'}</ReactMarkdown>
+              <ReactMarkdown
+                components={{
+                  img: ({ src, alt, ...props }) => (
+                    <img
+                      src={src ? convertMinioUrlToApiUrl(src) : ''}
+                      alt={alt}
+                      className="max-w-full h-auto rounded-lg shadow-sm"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.error('Failed to load image:', src);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                      {...props}
+                    />
+                  ),
+                }}
+              >
+                {value || '*Предпросмотр появится здесь...*'}
+              </ReactMarkdown>
             </div>
           </div>
         )}
