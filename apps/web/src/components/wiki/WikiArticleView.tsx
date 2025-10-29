@@ -143,38 +143,39 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
     <div className="min-h-screen bg-background">
       {/* Шапка статьи */}
       <div className="border-b bg-card">
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl mx-auto p-4 md:p-6">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="mb-4"
+            className="mb-4 -ml-2"
+            size="sm"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Назад
           </Button>
 
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold">{article.title}</h1>
+          <div className="space-y-3 md:space-y-4">
+            <h1 className="text-2xl md:text-3xl font-bold">{article.title}</h1>
             
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs md:text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
-                <Shield className="h-4 w-4" />
+                <Shield className="h-3 md:h-4 w-3 md:w-4" />
                 <Badge 
                   variant="secondary" 
-                  className={ROLE_COLORS[article.minRole]}
+                  className={`text-xs ${ROLE_COLORS[article.minRole]}`}
                 >
                   {ROLE_LABELS[article.minRole]}
                 </Badge>
               </div>
 
               <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-3 md:h-4 w-3 md:w-4" />
                 <span>Обновлено {formatDate(article.lastUpdatedAt)}</span>
               </div>
 
               {article.author && (
                 <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
+                  <User className="h-3 md:h-4 w-3 md:w-4" />
                   <span>Автор: {article.author.name || article.author.email}</span>
                 </div>
               )}
@@ -190,8 +191,8 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
       </div>
 
       {/* Содержимое статьи */}
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="prose prose-sm md:prose-lg max-w-none dark:prose-invert mb-8 md:mb-12">
           <ReactMarkdown
             components={{
               img: ({ src, alt, ...props }) => (
@@ -214,22 +215,22 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
         </div>
 
         {/* Комментарии */}
-        <div className="border-t pt-8">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageCircle className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">
+        <div className="border-t pt-6 md:pt-8">
+          <div className="flex items-center gap-2 mb-4 md:mb-6">
+            <MessageCircle className="h-4 md:h-5 w-4 md:w-5" />
+            <h2 className="text-lg md:text-xl font-semibold">
               Комментарии ({comments.length})
             </h2>
           </div>
 
           {/* Форма добавления комментария */}
-          <form onSubmit={handleSubmitComment} className="mb-8">
+          <form onSubmit={handleSubmitComment} className="mb-6 md:mb-8">
             <div className="space-y-3">
               <Textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Оставьте комментарий..."
-                className="min-h-[100px]"
+                className="min-h-[80px] md:min-h-[100px] text-sm md:text-base"
                 disabled={loading}
               />
               <div className="flex justify-end">
@@ -247,35 +248,35 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
 
           {/* Список комментариев */}
           {commentsLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground text-sm">
               Загрузка комментариев...
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Пока нет комментариев</p>
-              <p className="text-sm">Будьте первым, кто оставит комментарий!</p>
+              <p className="text-sm md:text-base">Пока нет комментариев</p>
+              <p className="text-xs md:text-sm">Будьте первым, кто оставит комментарий!</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {comments.map((comment) => (
-                <div key={comment.id} className="border rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-3">
+                <div key={comment.id} className="border rounded-lg p-3 md:p-4">
+                  <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
                     {comment.user.avatarUrl ? (
                       <img
                         src={comment.user.avatarUrl}
                         alt={comment.user.name || comment.user.email}
-                        className="h-8 w-8 rounded-full"
+                        className="h-7 w-7 md:h-8 md:w-8 rounded-full"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                        <User className="h-4 w-4" />
+                      <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-muted flex items-center justify-center">
+                        <User className="h-3 md:h-4 w-3 md:w-4" />
                       </div>
                     )}
                     
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-xs md:text-sm truncate">
                           {comment.user.name || comment.user.email}
                         </span>
                         <span className="text-xs text-muted-foreground">
@@ -285,7 +286,7 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
                     </div>
                   </div>
                   
-                  <div className="text-sm whitespace-pre-wrap">
+                  <div className="text-xs md:text-sm whitespace-pre-wrap">
                     {comment.body}
                   </div>
                 </div>

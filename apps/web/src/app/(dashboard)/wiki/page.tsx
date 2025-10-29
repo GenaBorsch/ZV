@@ -229,17 +229,8 @@ function WikiPageContent() {
               </span>
             </div>
             <nav className="flex items-center space-x-2 md:space-x-4">
-              {/* Кнопка открытия боковой панели для мобильных */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="lg:hidden"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-              <NotificationBell className="text-muted-foreground hover:text-foreground" />
               {/* Desktop navigation */}
+              <NotificationBell className="hidden md:block text-muted-foreground hover:text-foreground" />
               <div className="hidden md:flex items-center space-x-4">
                 <RoleSwitcher />
                 {navItems.map((item) => (
@@ -253,12 +244,15 @@ function WikiPageContent() {
                 ))}
                 <LogoutButton className="text-muted-foreground hover:text-foreground" />
               </div>
-              {/* Mobile menu */}
-              <MobileMenu 
-                navItems={navItems}
-                title="База знаний"
-                subtitle={session?.user?.name || roleLabel}
-              />
+              {/* Mobile menu button (единственная кнопка на мобильных) */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
             </nav>
           </div>
         </div>
@@ -267,27 +261,89 @@ function WikiPageContent() {
       <div className="flex">
         {/* Боковая панель */}
         <div className={`
-          ${sidebarOpen ? 'block' : 'hidden'} lg:block
-          w-full lg:w-80 border-r bg-card
-          ${sidebarOpen ? 'fixed inset-0 z-50 pt-16 lg:relative lg:pt-0' : ''}
+          ${sidebarOpen ? 'block' : 'hidden'} md:block
+          w-full md:w-80 border-r bg-card
+          ${sidebarOpen ? 'fixed inset-0 z-50 md:relative' : ''}
         `}>
+          {/* Шапка боковой панели для мобильных */}
+          {sidebarOpen && (
+            <div className="md:hidden border-b bg-card p-4 flex items-center justify-between">
+              <div>
+                <div className="font-semibold">{session?.user?.name || 'Пользователь'}</div>
+                <div className="text-sm text-muted-foreground">{roleLabel}</div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+          
           <WikiSidebar
             sections={sections}
             selectedSection={selectedSection}
-            onSectionSelect={handleSectionSelect}
+            onSectionSelect={(section) => {
+              handleSectionSelect(section);
+              // Закрываем sidebar на мобильных после выбора
+              if (window.innerWidth < 768) {
+                setSidebarOpen(false);
+              }
+            }}
             onSearch={handleSearch}
             searchResults={searchResults}
-            onSearchResultSelect={handleArticleSelect}
+            onSearchResultSelect={(article) => {
+              handleArticleSelect(article);
+              // Закрываем sidebar на мобильных после выбора
+              if (window.innerWidth < 768) {
+                setSidebarOpen(false);
+              }
+            }}
             showSearch={showSearch}
             onSearchToggle={() => setShowSearch(!showSearch)}
           />
+          
+          {/* Навигационные ссылки для мобильных */}
+          {sidebarOpen && (
+            <div className="md:hidden border-t bg-card">
+              <div className="p-4 space-y-2">
+                <div className="pb-2 mb-2 border-b">
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Навигация
+                  </div>
+                </div>
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3"
+                  onClick={() => {
+                    setSidebarOpen(false);
+                    // LogoutButton будет обрабатывать выход
+                  }}
+                >
+                  <LogoutButton className="w-full text-left" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Основной контент */}
         <div className="flex-1 min-w-0">
           {error && (
             <div className="p-4 bg-destructive/10 border-b border-destructive/20">
-              <p className="text-destructive">{error}</p>
+              <p className="text-destructive text-sm">{error}</p>
             </div>
           )}
 
@@ -303,18 +359,18 @@ function WikiPageContent() {
             />
           ) : selectedSection ? (
             // Список статей раздела
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="max-w-4xl mx-auto">
                 <div className="mb-6">
                   <Button
                     variant="ghost"
                     onClick={handleBackToSections}
-                    className="mb-4"
+                    className="mb-4 -ml-2"
                   >
                     ← Назад к разделам
                   </Button>
-                  <h1 className="text-2xl font-bold mb-2">{selectedSection.title}</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className="text-xl md:text-2xl font-bold mb-2">{selectedSection.title}</h1>
+                  <p className="text-sm text-muted-foreground">
                     {articles.length} {articles.length === 1 ? 'статья' : 'статей'}
                   </p>
                 </div>
@@ -327,16 +383,24 @@ function WikiPageContent() {
             </div>
           ) : (
             // Главная страница вики
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="max-w-4xl mx-auto text-center">
-                <BookOpen className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
-                <h1 className="text-3xl font-bold mb-4">База знаний</h1>
-                <p className="text-lg text-muted-foreground mb-8">
-                  Выберите раздел в боковой панели или воспользуйтесь поиском
+                <BookOpen className="h-12 md:h-16 w-12 md:w-16 mx-auto mb-4 md:mb-6 text-muted-foreground" />
+                <h1 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">База знаний</h1>
+                <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 px-4">
+                  Выберите раздел в{' '}
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="md:hidden text-primary underline"
+                  >
+                    меню
+                  </button>
+                  <span className="hidden md:inline">боковой панели</span>
+                  {' '}или воспользуйтесь поиском
                 </p>
 
                 {/* Поиск на главной странице */}
-                <div className="max-w-md mx-auto">
+                <div className="max-w-md mx-auto px-4">
                   <WikiSearch
                     onSearch={handleSearch}
                     searchResults={searchResults}
@@ -352,7 +416,7 @@ function WikiPageContent() {
       {/* Оверлей для мобильной боковой панели */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
