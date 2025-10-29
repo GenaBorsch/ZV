@@ -134,6 +134,7 @@ export async function POST(req: NextRequest) {
       CREATE INDEX IF NOT EXISTS wiki_articles_search_idx ON wiki_articles USING GIN(search_vector);
     `);
 
+    // Создаем функцию для обновления search_vector
     await db.execute(sql`
       CREATE OR REPLACE FUNCTION update_wiki_article_search_vector()
       RETURNS TRIGGER AS $$
@@ -147,8 +148,12 @@ export async function POST(req: NextRequest) {
       $$ LANGUAGE plpgsql;
     `);
 
+    // Удаляем триггер если есть, затем создаем новый
     await db.execute(sql`
       DROP TRIGGER IF EXISTS wiki_articles_search_vector_update ON wiki_articles;
+    `);
+    
+    await db.execute(sql`
       CREATE TRIGGER wiki_articles_search_vector_update
         BEFORE INSERT OR UPDATE ON wiki_articles
         FOR EACH ROW EXECUTE FUNCTION update_wiki_article_search_vector();
