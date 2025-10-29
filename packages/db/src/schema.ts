@@ -691,3 +691,99 @@ export type StoryText = typeof storyTexts.$inferSelect;
 export type NewStoryText = typeof storyTexts.$inferInsert;
 export type ReportNextPlan = typeof reportNextPlans.$inferSelect;
 export type NewReportNextPlan = typeof reportNextPlans.$inferInsert;
+
+// === WIKI СИСТЕМА ===
+
+// Разделы вики (иерархическая структура)
+export const wikiSections = pgTable('wiki_sections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  parentId: uuid('parent_id').references(() => wikiSections.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 200 }).notNull(),
+  slug: varchar('slug', { length: 200 }).notNull(),
+  orderIndex: integer('order_index').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  // Уникальность slug в рамках родительского раздела
+  parentSlugUnique: unique().on(table.parentId, table.slug),
+}));
+
+// Статьи вики
+export const wikiArticles = pgTable('wiki_articles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sectionId: uuid('section_id').notNull().references(() => wikiSections.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 200 }).notNull(),
+  slug: varchar('slug', { length: 200 }).notNull(),
+  // Храним Markdown для редактирования
+  contentMd: text('content_md').notNull(),
+  // Минимальная роль для просмотра
+  minRole: roleEnum('min_role').default('MASTER').notNull(),
+  // Служебное
+  authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
+  updatedByUserId: uuid('updated_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  lastUpdatedAt: timestamp('last_updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  sectionSlugUnique: unique().on(table.sectionId, table.slug),
+  // Полнотекстовый поиск будет добавлен через миграцию
+}));
+
+// Комментарии к статьям
+export const wikiComments = pgTable('wiki_comments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  articleId: uuid('article_id').notNull().references(() => wikiArticles.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  body: varchar('body', { length: 2000 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Relations для вики
+export const wikiSectionsRelations = relations(wikiSections, ({ one, many }) => ({
+  parent: one(wikiSections, {
+    fields: [wikiSections.parentId],
+    references: [wikiSections.id],
+    relationName: 'parentChild',
+  }),
+  children: many(wikiSections, {
+    relationName: 'parentChild',
+  }),
+  articles: many(wikiArticles),
+}));
+
+export const wikiArticlesRelations = relations(wikiArticles, ({ one, many }) => ({
+  section: one(wikiSections, {
+    fields: [wikiArticles.sectionId],
+    references: [wikiSections.id],
+  }),
+  author: one(users, {
+    fields: [wikiArticles.authorUserId],
+    references: [users.id],
+    relationName: 'wikiAuthor',
+  }),
+  updatedBy: one(users, {
+    fields: [wikiArticles.updatedByUserId],
+    references: [users.id],
+    relationName: 'wikiUpdater',
+  }),
+  comments: many(wikiComments),
+}));
+
+export const wikiCommentsRelations = relations(wikiComments, ({ one }) => ({
+  article: one(wikiArticles, {
+    fields: [wikiComments.articleId],
+    references: [wikiArticles.id],
+  }),
+  user: one(users, {
+    fields: [wikiComments.userId],
+    references: [users.id],
+  }),
+}));
+
+// Типы для вики
+export type WikiSection = typeof wikiSections.$inferSelect;
+export type NewWikiSection = typeof wikiSections.$inferInsert;
+export type WikiArticle = typeof wikiArticles.$inferSelect;
+export type NewWikiArticle = typeof wikiArticles.$inferInsert;
+export type WikiComment = typeof wikiComments.$inferSelect;
+export type NewWikiComment = typeof wikiComments.$inferInsert;

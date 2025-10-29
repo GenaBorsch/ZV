@@ -15,6 +15,7 @@ export default function MasterDashboard() {
 
   const navItems = [
     { label: 'Отчёты', href: '/master/reports' },
+    { label: 'База знаний', href: '/wiki' },
     { label: 'Профиль', href: '/profile' },
   ];
 
@@ -67,6 +68,9 @@ export default function MasterDashboard() {
                 <RoleSwitcher />
                 <Link href="/master/reports" className="text-muted-foreground hover:text-foreground">
                   Отчёты
+                </Link>
+                <Link href="/wiki" className="text-muted-foreground hover:text-foreground">
+                  База знаний
                 </Link>
                 <LogoutButton className="text-muted-foreground hover:text-foreground" />
               </div>

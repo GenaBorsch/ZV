@@ -1,0 +1,266 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { 
+  ArrowLeft, 
+  Calendar, 
+  User, 
+  Shield, 
+  MessageCircle,
+  Send
+} from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import type { WikiArticleWithDetails, WikiCommentWithUser } from '@zv/contracts';
+
+interface WikiArticleViewProps {
+  article: WikiArticleWithDetails;
+  onBack: () => void;
+}
+
+const ROLE_LABELS = {
+  PLAYER: 'Игрок',
+  MASTER: 'Мастер',
+  MODERATOR: 'Модератор',
+  SUPERADMIN: 'Суперадмин'
+};
+
+const ROLE_COLORS = {
+  PLAYER: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  MASTER: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  MODERATOR: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  SUPERADMIN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+};
+
+export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
+  const [comments, setComments] = useState<WikiCommentWithUser[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(true);
+
+  // Загрузка комментариев
+  const loadComments = async () => {
+    try {
+      const response = await fetch(`/api/wiki/articles/${article.id}/comments`);
+      if (!response.ok) throw new Error('Failed to load comments');
+      
+      const data = await response.json();
+      setComments(data.comments || []);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  // Отправка комментария
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || loading) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/wiki/articles/${article.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          body: newComment.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to post comment');
+      }
+
+      const data = await response.json();
+      setComments(prev => [...prev, data.comment]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      alert(error instanceof Error ? error.message : 'Ошибка при отправке комментария');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDateShort = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  useEffect(() => {
+    loadComments();
+  }, [article.id]);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Шапка статьи */}
+      <div className="border-b bg-card">
+        <div className="max-w-4xl mx-auto p-6">
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Назад
+          </Button>
+
+          <div className="space-y-4">
+            <h1 className="text-3xl font-bold">{article.title}</h1>
+            
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Shield className="h-4 w-4" />
+                <Badge 
+                  variant="secondary" 
+                  className={ROLE_COLORS[article.minRole]}
+                >
+                  {ROLE_LABELS[article.minRole]}
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                <span>Обновлено {formatDate(article.lastUpdatedAt)}</span>
+              </div>
+
+              {article.author && (
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>Автор: {article.author.name || article.author.email}</span>
+                </div>
+              )}
+
+              {article.section && (
+                <div>
+                  Раздел: {article.section.title}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Содержимое статьи */}
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
+          <ReactMarkdown
+            components={{
+              img: ({ src, alt, ...props }) => (
+                <img
+                  src={src}
+                  alt={alt}
+                  className="max-w-full h-auto rounded-lg shadow-sm"
+                  loading="lazy"
+                  {...props}
+                />
+              ),
+            }}
+          >
+            {article.contentMd}
+          </ReactMarkdown>
+        </div>
+
+        {/* Комментарии */}
+        <div className="border-t pt-8">
+          <div className="flex items-center gap-2 mb-6">
+            <MessageCircle className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">
+              Комментарии ({comments.length})
+            </h2>
+          </div>
+
+          {/* Форма добавления комментария */}
+          <form onSubmit={handleSubmitComment} className="mb-8">
+            <div className="space-y-3">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Оставьте комментарий..."
+                className="min-h-[100px]"
+                disabled={loading}
+              />
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={!newComment.trim() || loading}
+                  size="sm"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {loading ? 'Отправка...' : 'Отправить'}
+                </Button>
+              </div>
+            </div>
+          </form>
+
+          {/* Список комментариев */}
+          {commentsLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Загрузка комментариев...
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>Пока нет комментариев</p>
+              <p className="text-sm">Будьте первым, кто оставит комментарий!</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {comments.map((comment) => (
+                <div key={comment.id} className="border rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    {comment.user.avatarUrl ? (
+                      <img
+                        src={comment.user.avatarUrl}
+                        alt={comment.user.name || comment.user.email}
+                        className="h-8 w-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                        <User className="h-4 w-4" />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">
+                          {comment.user.name || comment.user.email}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDateShort(comment.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm whitespace-pre-wrap">
+                    {comment.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

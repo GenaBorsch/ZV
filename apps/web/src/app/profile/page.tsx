@@ -66,8 +66,13 @@ function ProfilePageContent() {
 
   // Определяем навигационные элементы в зависимости от ролей
   const navItems = (profile?.roles.includes('MASTER') || profile?.roles.includes('SUPERADMIN') || profile?.roles.includes('MODERATOR')) 
-    ? [{ label: 'Кабинет мастера', href: '/master' }]
-    : [{ label: 'Кабинет игрока', href: '/player' }];
+    ? [
+        { label: 'Кабинет мастера', href: '/master' },
+        { label: 'База знаний', href: '/wiki' },
+      ]
+    : [
+        { label: 'Кабинет игрока', href: '/player' },
+      ];
 
   // Форма для основной информации
   const mainForm = useForm({

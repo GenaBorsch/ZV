@@ -31,7 +31,7 @@ if (process.env.NODE_ENV !== 'production') {
 // Алиас для удобства миграции с Prisma
 export const prisma = drizzleDb;
 
-export { and, or, eq, ilike, asc, desc, sql, inArray, count } from 'drizzle-orm';
+export { and, or, eq, ilike, like, asc, desc, sql, inArray, count, isNull } from 'drizzle-orm';
 
 // Export repositories
 export { UsersRepo } from './repositories/usersRepo';
@@ -43,4 +43,5 @@ export { monstersRepo } from './repositories/monstersRepo';
 export { storyTextsRepo } from './repositories/storyTextsRepo';
 export { reportNextPlansRepo } from './repositories/reportNextPlansRepo';
 export { ExclusiveMaterialsRepo } from './repositories/exclusiveMaterialsRepo';
+export { wikiRepo } from './repositories/wikiRepo';
 

@@ -3,7 +3,9 @@ import { NotificationBell } from '@/components/NotificationBell';
 import { MobileMenu } from '@/components/MobileMenu';
 
 export default function AdminDashboard() {
-  const navItems = [];
+  const navItems = [
+    { label: 'База знаний', href: '/admin/wiki' },
+  ];
   
   return (
     <div className="min-h-screen bg-background">
@@ -62,6 +64,7 @@ export default function AdminDashboard() {
             <div className="card p-6">
               <h3 className="text-lg font-medium text-foreground mb-4">Контент и правила</h3>
               <div className="space-y-3">
+                <Link href="/admin/wiki" className="btn-outline w-full text-left">База знаний</Link>
                 <Link href="/admin/rules" className="btn-outline w-full text-left">Правила и регламенты</Link>
                 <Link href="/admin/schedule" className="btn-outline w-full text-left">Расписание игр</Link>
                 <Link href="/admin/users" className="btn-outline w-full text-left">Управление пользователями</Link>

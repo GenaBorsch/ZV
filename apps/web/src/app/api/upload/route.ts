@@ -55,6 +55,12 @@ const UPLOAD_CONFIGS: Record<string, FileUploadOptions> = {
     maxSizeMB: 500, // PDF могут быть большие
     allowedTypes: ['application/pdf'],
   },
+  'wiki-image': {
+    bucket: BUCKETS.UPLOADS,
+    folder: 'wiki',
+    maxSizeMB: MAX_FILE_SIZES.DOCUMENT,
+    allowedTypes: ALLOWED_TYPES.IMAGES,
+  },
 };
 
 // Проверка прав доступа
@@ -76,6 +82,9 @@ function checkPermissions(type: string, userRoles: string[]): boolean {
       return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
     case 'exclusive-material':
       // Только админы могут загружать эксклюзивные материалы
+      return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
+    case 'wiki-image':
+      // Только админы могут загружать изображения для вики
       return userRoles.includes('SUPERADMIN') || userRoles.includes('MODERATOR');
     default:
       return false;

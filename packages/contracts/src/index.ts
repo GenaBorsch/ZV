@@ -10,3 +10,6 @@ export * from './events';
 // Enums and constants
 export * from './enums';
 
+// Wiki
+export * from './wiki';
+
