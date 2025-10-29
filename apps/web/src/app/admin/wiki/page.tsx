@@ -21,6 +21,7 @@ export default function AdminWikiPage() {
   const [showSectionForm, setShowSectionForm] = useState(false);
   const [showArticleForm, setShowArticleForm] = useState(false);
   const [editingSection, setEditingSection] = useState<WikiSectionWithChildren | null>(null);
+  const [parentSection, setParentSection] = useState<WikiSectionWithChildren | null>(null);
   const [editingArticle, setEditingArticle] = useState<WikiArticleWithDetails | null>(null);
 
   // Загрузка разделов
@@ -74,12 +75,14 @@ export default function AdminWikiPage() {
   };
 
   const handleCreateSection = (parentSection?: WikiSectionWithChildren) => {
-    setEditingSection(parentSection || null);
+    setEditingSection(null); // Для создания всегда null
+    setParentSection(parentSection || null); // Отдельно храним родительский раздел
     setShowSectionForm(true);
   };
 
   const handleEditSection = (section: WikiSectionWithChildren) => {
     setEditingSection(section);
+    setParentSection(null); // При редактировании родителя нет
     setShowSectionForm(true);
   };
 
@@ -97,6 +100,7 @@ export default function AdminWikiPage() {
   const handleSectionSaved = () => {
     setShowSectionForm(false);
     setEditingSection(null);
+    setParentSection(null);
     loadSections();
   };
 
@@ -228,11 +232,12 @@ export default function AdminWikiPage() {
       {showSectionForm && (
         <WikiSectionForm
           section={editingSection}
-          parentSection={editingSection?.parentId ? sections.find(s => s.id === editingSection.parentId) : undefined}
+          parentSection={parentSection}
           onSave={handleSectionSaved}
           onCancel={() => {
             setShowSectionForm(false);
             setEditingSection(null);
+            setParentSection(null);
           }}
         />
       )}

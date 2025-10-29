@@ -41,6 +41,25 @@ const ROLE_COLORS = {
 export function WikiArticlesList({ articles, onArticleEdit }: WikiArticlesListProps) {
   const [loading, setLoading] = useState(false);
 
+  const handleEdit = async (article: WikiArticleWithDetails) => {
+    setLoading(true);
+    try {
+      // Загружаем полную статью с contentMd
+      const response = await fetch(`/api/wiki/articles/${article.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to load article');
+      }
+      
+      const data = await response.json();
+      onArticleEdit(data.article);
+    } catch (error) {
+      console.error('Error loading article:', error);
+      alert(error instanceof Error ? error.message : 'Ошибка при загрузке статьи');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async (article: WikiArticleWithDetails) => {
     if (!confirm(`Вы уверены, что хотите удалить статью "${article.title}"?`)) {
       return;
@@ -144,7 +163,7 @@ export function WikiArticlesList({ articles, onArticleEdit }: WikiArticlesListPr
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onArticleEdit(article)}>
+                <DropdownMenuItem onClick={() => handleEdit(article)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Редактировать
                 </DropdownMenuItem>

@@ -3,7 +3,7 @@ import { z } from 'zod';
 // === РАЗДЕЛЫ ВИКИ ===
 
 export const CreateSectionDto = z.object({
-  parentId: z.string().uuid().nullable().optional(),
+  parentId: z.union([z.string().uuid(), z.null()]).optional(),
   title: z.string().min(2, 'Название должно содержать минимум 2 символа').max(200, 'Название не должно превышать 200 символов'),
   slug: z.string().min(2, 'Slug должен содержать минимум 2 символа').max(200, 'Slug не должен превышать 200 символов')
     .regex(/^[a-z0-9-]+$/, 'Slug может содержать только строчные буквы, цифры и дефисы'),

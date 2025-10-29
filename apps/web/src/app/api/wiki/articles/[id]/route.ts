@@ -4,6 +4,57 @@ import { authOptions } from '@/lib/auth';
 import { wikiRepo } from '@zv/db';
 import { UpdateArticleDto } from '@zv/contracts';
 
+// GET /api/wiki/articles/[id] - получить статью по ID
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userRoles = (session.user as any)?.roles as string[] || [];
+    const article = await wikiRepo.articles.getArticleById(id);
+    
+    if (!article) {
+      return NextResponse.json(
+        { error: 'Статья не найдена' },
+        { status: 404 }
+      );
+    }
+
+    // Проверяем права доступа на основе minRole
+    const roleHierarchy = ['PLAYER', 'MASTER', 'MODERATOR', 'SUPERADMIN'];
+    const maxUserRole = userRoles.reduce((max, role) => {
+      const roleIndex = roleHierarchy.indexOf(role);
+      const maxIndex = roleHierarchy.indexOf(max);
+      return roleIndex > maxIndex ? role : max;
+    }, 'PLAYER');
+
+    const maxRoleIndex = roleHierarchy.indexOf(maxUserRole);
+    const articleRoleIndex = roleHierarchy.indexOf(article.minRole);
+
+    if (articleRoleIndex > maxRoleIndex) {
+      return NextResponse.json(
+        { error: 'Недостаточно прав для просмотра этой статьи' },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({ article });
+  } catch (error) {
+    console.error('Error fetching wiki article:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 // PATCH /api/wiki/articles/[id] - обновить статью (только админы)
 export async function PATCH(
   req: NextRequest,

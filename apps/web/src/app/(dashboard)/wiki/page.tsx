@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { WikiSidebar } from '@/components/wiki/WikiSidebar';
@@ -13,16 +13,17 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { NotificationBell } from '@/components/NotificationBell';
 import { RoleSwitcher } from '@/components/RoleSwitcher';
 import { MobileMenu } from '@/components/MobileMenu';
-import { Search, BookOpen, Menu, X, ArrowLeft } from 'lucide-react';
+import { BookOpen, Menu, X, ArrowLeft } from 'lucide-react';
 import type { 
   WikiSectionWithChildren, 
   WikiArticleWithDetails,
   SearchResponse 
 } from '@zv/contracts';
 
-export default function WikiPage() {
+function WikiPageContent() {
   const searchParams = useSearchParams();
-  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
+  const { data: session } = useSession();
   const [sections, setSections] = useState<WikiSectionWithChildren[]>([]);
   const [selectedSection, setSelectedSection] = useState<WikiSectionWithChildren | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<WikiArticleWithDetails | null>(null);
@@ -51,6 +52,23 @@ export default function WikiPage() {
   // Определяем URL для возврата назад и название роли
   const backUrl = isMaster ? '/master' : '/player';
   const roleLabel = isAdmin ? 'Модератор' : isMaster ? 'Мастер' : 'Игрок';
+
+  // Функция для поиска раздела в дереве (рекурсивно)
+  const findSectionInTree = (
+    sections: WikiSectionWithChildren[],
+    sectionId: string
+  ): WikiSectionWithChildren | null => {
+    for (const section of sections) {
+      if (section.id === sectionId) {
+        return section;
+      }
+      if (section.children && section.children.length > 0) {
+        const found = findSectionInTree(section.children, sectionId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
 
   // Загрузка разделов
   const loadSections = async () => {
@@ -111,14 +129,14 @@ export default function WikiPage() {
       loadArticle(sectionId, articleSlug);
       // Устанавливаем раздел только если sections уже загружены
       if (sections.length > 0) {
-        setSelectedSection(sections.find(s => s.id === sectionId) || null);
+        setSelectedSection(findSectionInTree(sections, sectionId));
       }
     } else if (sectionId) {
       // Загружаем список статей раздела
       loadArticles(sectionId);
       // Устанавливаем раздел только если sections уже загружены
       if (sections.length > 0) {
-        setSelectedSection(sections.find(s => s.id === sectionId) || null);
+        setSelectedSection(findSectionInTree(sections, sectionId));
       }
       setSelectedArticle(null);
     } else {
@@ -134,24 +152,24 @@ export default function WikiPage() {
     if (sections.length > 0) {
       const sectionId = searchParams.get('section');
       if (sectionId) {
-        setSelectedSection(sections.find(s => s.id === sectionId) || null);
+        setSelectedSection(findSectionInTree(sections, sectionId));
       }
     }
   }, [sections, searchParams]);
 
   // Обработчики
   const handleSectionSelect = (section: WikiSectionWithChildren) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('section', section.id);
-    url.searchParams.delete('article');
-    window.history.pushState({}, '', url.toString());
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', section.id);
+    params.delete('article');
+    router.push(`/wiki?${params.toString()}`);
   };
 
   const handleArticleSelect = (article: WikiArticleWithDetails) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('section', article.sectionId);
-    url.searchParams.set('article', article.slug);
-    window.history.pushState({}, '', url.toString());
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', article.sectionId);
+    params.set('article', article.slug);
+    router.push(`/wiki?${params.toString()}`);
   };
 
   const handleSearch = useCallback(async (query: string) => {
@@ -339,5 +357,17 @@ export default function WikiPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function WikiPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Загрузка...</div>
+      </div>
+    }>
+      <WikiPageContent />
+    </Suspense>
   );
 }

@@ -33,9 +33,10 @@ interface SectionNodeProps {
   level: number;
   isSelected: boolean;
   onSelect: (section: WikiSectionWithChildren) => void;
+  selectedSection: WikiSectionWithChildren | null;
 }
 
-function SectionNode({ section, level, isSelected, onSelect }: SectionNodeProps) {
+function SectionNode({ section, level, isSelected, onSelect, selectedSection }: SectionNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = section.children && section.children.length > 0;
 
@@ -98,6 +99,7 @@ function SectionNode({ section, level, isSelected, onSelect }: SectionNodeProps)
               level={level + 1}
               isSelected={selectedSection?.id === child.id}
               onSelect={onSelect}
+              selectedSection={selectedSection}
             />
           ))}
         </div>
@@ -161,6 +163,7 @@ export function WikiSidebar({
                 level={0}
                 isSelected={selectedSection?.id === section.id}
                 onSelect={onSectionSelect}
+                selectedSection={selectedSection}
               />
             ))}
           </div>
