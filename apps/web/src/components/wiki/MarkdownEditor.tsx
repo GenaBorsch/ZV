@@ -100,11 +100,11 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
     const imageSrc = src ? convertMinioUrlToApiUrl(src) : '';
 
     return (
-      <div className="relative inline-block">
+      <span className="relative inline-block">
         {loading && !error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
+          <span className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          </span>
         )}
         <img
           src={imageSrc}
@@ -121,7 +121,7 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
           }}
           {...props}
         />
-      </div>
+      </span>
     );
   };
 

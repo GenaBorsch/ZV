@@ -71,11 +71,11 @@ function ImageWithLoader({ src, alt, ...props }: { src?: string; alt?: string; [
   const imageSrc = src ? convertMinioUrlToApiUrl(src) : '';
 
   return (
-    <div className="relative">
+    <span className="relative inline-block">
       {loading && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
+        <span className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        </span>
       )}
       <img
         src={imageSrc}
@@ -92,7 +92,7 @@ function ImageWithLoader({ src, alt, ...props }: { src?: string; alt?: string; [
         }}
         {...props}
       />
-    </div>
+    </span>
   );
 }
 
