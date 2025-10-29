@@ -30,6 +30,7 @@ function WikiPageContent() {
   const [articles, setArticles] = useState<WikiArticleWithDetails[]>([]);
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [articlesLoading, setArticlesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -85,6 +86,7 @@ function WikiPageContent() {
 
   // Загрузка статей раздела
   const loadArticles = async (sectionId: string) => {
+    setArticlesLoading(true);
     try {
       const response = await fetch(`/api/wiki/articles?sectionId=${sectionId}`);
       if (!response.ok) throw new Error('Failed to load articles');
@@ -93,6 +95,8 @@ function WikiPageContent() {
       setArticles(data.articles || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load articles');
+    } finally {
+      setArticlesLoading(false);
     }
   };
 
@@ -324,16 +328,7 @@ function WikiPageContent() {
                     {item.label}
                   </Link>
                 ))}
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-3"
-                  onClick={() => {
-                    setSidebarOpen(false);
-                    // LogoutButton будет обрабатывать выход
-                  }}
-                >
-                  <LogoutButton className="w-full text-left" />
-                </Button>
+                <LogoutButton className="block px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors text-left" />
               </div>
             </div>
           )}
@@ -378,6 +373,7 @@ function WikiPageContent() {
                 <WikiArticlesListUser
                   articles={articles}
                   onArticleSelect={handleArticleSelect}
+                  loading={articlesLoading}
                 />
               </div>
             </div>

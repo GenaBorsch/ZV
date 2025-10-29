@@ -10,7 +10,8 @@ import {
   User, 
   Shield, 
   MessageCircle,
-  Send
+  Send,
+  Loader2
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import type { WikiArticleWithDetails, WikiCommentWithUser } from '@zv/contracts';
@@ -61,6 +62,38 @@ function convertMinioUrlToApiUrl(url: string): string {
   
   // Если путь не начинается с /, добавляем полный путь
   return `/api/files/uploads/wiki/${url}`;
+}
+
+// Компонент для изображения с состоянием загрузки
+function ImageWithLoader({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: any }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const imageSrc = src ? convertMinioUrlToApiUrl(src) : '';
+
+  return (
+    <div className="relative">
+      {loading && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      <img
+        src={imageSrc}
+        alt={alt}
+        className={`max-w-full h-auto rounded-lg shadow-sm transition-opacity ${
+          loading ? 'opacity-0' : 'opacity-100'
+        } ${error ? 'hidden' : ''}`}
+        loading="lazy"
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          console.error('Failed to load image:', src);
+          setLoading(false);
+          setError(true);
+        }}
+        {...props}
+      />
+    </div>
+  );
 }
 
 export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
@@ -196,17 +229,7 @@ export function WikiArticleView({ article, onBack }: WikiArticleViewProps) {
           <ReactMarkdown
             components={{
               img: ({ src, alt, ...props }) => (
-                <img
-                  src={src ? convertMinioUrlToApiUrl(src) : ''}
-                  alt={alt}
-                  className="max-w-full h-auto rounded-lg shadow-sm"
-                  loading="lazy"
-                  onError={(e) => {
-                    console.error('Failed to load image:', src);
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                  {...props}
-                />
+                <ImageWithLoader src={src} alt={alt} {...props} />
               ),
             }}
           >

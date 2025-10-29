@@ -12,6 +12,7 @@ import type { WikiArticleWithDetails } from '@zv/contracts';
 interface WikiArticlesListUserProps {
   articles: WikiArticleWithDetails[];
   onArticleSelect: (article: WikiArticleWithDetails) => void;
+  loading?: boolean;
 }
 
 const ROLE_LABELS = {
@@ -28,7 +29,29 @@ const ROLE_COLORS = {
   SUPERADMIN: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 };
 
-export function WikiArticlesListUser({ articles, onArticleSelect }: WikiArticlesListUserProps) {
+// Скелетон для статьи
+function ArticleSkeleton() {
+  return (
+    <div className="border rounded-lg p-4 animate-pulse">
+      <div className="space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="h-5 w-5 bg-muted rounded flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-muted rounded w-3/4" />
+            <div className="h-4 bg-muted rounded w-1/2" />
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="h-6 bg-muted rounded w-16" />
+          <div className="h-6 bg-muted rounded w-20" />
+        </div>
+        <div className="h-3 bg-muted rounded w-24" />
+      </div>
+    </div>
+  );
+}
+
+export function WikiArticlesListUser({ articles, onArticleSelect, loading = false }: WikiArticlesListUserProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
@@ -37,6 +60,18 @@ export function WikiArticlesListUser({ articles, onArticleSelect }: WikiArticles
     });
   };
 
+  // Показываем скелетоны во время загрузки
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <ArticleSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  // Показываем пустое состояние только после загрузки
   if (articles.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">

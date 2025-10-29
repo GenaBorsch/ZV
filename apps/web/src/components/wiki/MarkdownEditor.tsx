@@ -13,7 +13,8 @@ import {
   Heading2,
   Heading3,
   Eye,
-  EyeOff
+  EyeOff,
+  Loader2
 } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
 import ReactMarkdown from 'react-markdown';
@@ -90,6 +91,38 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
     
     // Если путь не начинается с /, добавляем полный путь
     return `/api/files/uploads/wiki/${url}`;
+  };
+
+  // Компонент для изображения с состоянием загрузки в предпросмотре
+  const ImageWithLoader = ({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: any }) => {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const imageSrc = src ? convertMinioUrlToApiUrl(src) : '';
+
+    return (
+      <div className="relative inline-block">
+        {loading && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        <img
+          src={imageSrc}
+          alt={alt}
+          className={`max-w-full h-auto rounded-lg shadow-sm transition-opacity ${
+            loading ? 'opacity-0' : 'opacity-100'
+          } ${error ? 'hidden' : ''}`}
+          loading="lazy"
+          onLoad={() => setLoading(false)}
+          onError={() => {
+            console.error('Failed to load image:', src);
+            setLoading(false);
+            setError(true);
+          }}
+          {...props}
+        />
+      </div>
+    );
   };
 
   // Обработчик загрузки изображения
@@ -233,17 +266,7 @@ export function MarkdownEditor({ value, onChange, disabled = false }: MarkdownEd
               <ReactMarkdown
                 components={{
                   img: ({ src, alt, ...props }) => (
-                    <img
-                      src={src ? convertMinioUrlToApiUrl(src) : ''}
-                      alt={alt}
-                      className="max-w-full h-auto rounded-lg shadow-sm"
-                      loading="lazy"
-                      onError={(e) => {
-                        console.error('Failed to load image:', src);
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                      {...props}
-                    />
+                    <ImageWithLoader src={src} alt={alt} {...props} />
                   ),
                 }}
               >
