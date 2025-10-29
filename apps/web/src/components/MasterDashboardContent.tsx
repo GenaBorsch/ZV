@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { CreateGroupForm } from './CreateGroupForm';
 import { GroupCreatedSuccess } from './GroupCreatedSuccess';
 import { GroupDetailsModal } from './GroupDetailsModal';
@@ -303,23 +304,29 @@ export function MasterDashboardContent() {
             <h3 className="text-lg font-medium text-foreground mb-4">Быстрые действия</h3>
             <div className="space-y-2">
               <button 
-                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                 onClick={() => setShowCreateForm(true)}
               >
                 Создать группу
               </button>
               <a 
                 href="/master/search"
-                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
               >
                 Просмотр групп
               </a>
               <button 
-                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                 onClick={() => router.push('/master/reports')}
               >
                 Создать отчёт
               </button>
+              <Link 
+                href="/master/exclusive-materials"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+              >
+                🎁 Доп. материалы
+              </Link>
             </div>
           </div>
 
