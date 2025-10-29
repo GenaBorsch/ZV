@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { JoinGroupForm } from './JoinGroupForm';
 import { JoinGroupSuccess } from './JoinGroupSuccess';
 import { PlayerGroupDetailsModal } from './PlayerGroupDetailsModal';
@@ -524,21 +525,21 @@ export function PlayerDashboardContent() {
             <div className="space-y-2">
               <a 
                 href="/player/search"
-                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
               >
                 🔍 Найти группу
               </a>
               <button 
-                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                 onClick={() => setShowJoinForm(true)}
               >
                 Присоединиться по коду
               </button>
               <button 
-                className={`w-full text-left px-3 py-3 text-base rounded-md ${
+                className={`w-full text-left px-3 py-3 text-base rounded-md transition-colors ${
                   characters.length >= 5 
                     ? 'text-muted-foreground cursor-not-allowed' 
-                    : 'text-foreground hover:bg-accent'
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
                 onClick={() => setShowCharacterForm(true)}
                 disabled={characters.length >= 5}
@@ -547,10 +548,23 @@ export function PlayerDashboardContent() {
               </button>
               <a 
                 href="/player/battlepass"
-                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent rounded-md"
+                className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
               >
                 Купить путёвки
               </a>
+              {hasBattlepass ? (
+                <Link 
+                  href="/player/exclusive-materials"
+                  className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                >
+                  🎁 Доп. материалы
+                </Link>
+              ) : (
+                <div className="block w-full text-left px-3 py-3 text-base text-muted-foreground cursor-not-allowed opacity-60">
+                  🎁 Доп. материалы
+                  <span className="block text-xs mt-1">необходима путёвка</span>
+                </div>
+              )}
             </div>
           </div>
 

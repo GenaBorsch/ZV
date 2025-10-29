@@ -136,22 +136,47 @@ export default function StylePage() {
               <CardTitle>Кнопки</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <Button>Primary Button</Button>
-                  <Button variant="outline">Outline Button</Button>
-                  <Button variant="secondary">Secondary Button</Button>
-                  <Button variant="ghost">Ghost Button</Button>
-                  <Button variant="link">Link Button</Button>
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    <Button>Primary Button</Button>
+                    <Button variant="outline">Outline Button</Button>
+                    <Button variant="secondary">Secondary Button</Button>
+                    <Button variant="ghost">Ghost Button</Button>
+                    <Button variant="link">Link Button</Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm">Small</Button>
+                    <Button size="default">Default</Button>
+                    <Button size="lg">Large</Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button disabled>Disabled</Button>
+                    <Button variant="outline" disabled>Disabled Outline</Button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm">Small</Button>
-                  <Button size="default">Default</Button>
-                  <Button size="lg">Large</Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button disabled>Disabled</Button>
-                  <Button variant="outline" disabled>Disabled Outline</Button>
+                
+                <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Красные кнопки (btn-primary) для центральной панели</h4>
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      <a href="#" className="btn-primary" onClick={(e) => e.preventDefault()}>
+                        🔍 Найти группу
+                      </a>
+                      <a href="#" className="btn-primary" onClick={(e) => e.preventDefault()}>
+                        Купить путёвки
+                      </a>
+                      <button className="btn-primary">
+                        Создать персонажа
+                      </button>
+                    </div>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• <strong>Класс:</strong> <code className="bg-accent px-1 rounded">btn-primary</code></p>
+                      <p>• <strong>Цвет:</strong> Красный фон (bg-primary) с белым текстом (text-primary-foreground)</p>
+                      <p>• <strong>Hover:</strong> Затемнение фона (hover:bg-primary/90) с сохранением белого текста (hover:text-primary-foreground)</p>
+                      <p>• <strong>Важно:</strong> При наведении текст всегда остается белым, зеленый текст - это ошибка!</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -429,13 +454,39 @@ export default function StylePage() {
                 </div>
 
                 <div>
+                  <h4 className="text-sm font-medium mb-3 text-muted-foreground">Примеры для боковой панели</h4>
+                  <div className="space-y-2 border rounded-lg p-4 bg-card">
+                    <a 
+                      href="#"
+                      className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      🔍 Найти группу
+                    </a>
+                    <a 
+                      href="#"
+                      className="block w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      Купить путёвки
+                    </a>
+                    <button 
+                      className="w-full text-left px-3 py-3 text-base text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      Создать персонажа
+                    </button>
+                  </div>
+                </div>
+
+                <div>
                   <h4 className="text-sm font-medium mb-3 text-muted-foreground">Рекомендации</h4>
                   <div className="text-sm space-y-2 text-muted-foreground">
-                    <p>• <strong>Для интерактивных элементов:</strong> используйте hover:bg-accent + hover:text-accent-foreground</p>
+                    <p>• <strong>Для интерактивных элементов боковой панели:</strong> используйте <code className="bg-accent px-1 rounded">hover:bg-accent hover:text-accent-foreground transition-colors</code></p>
                     <p>• <strong>Для кнопок и важных элементов:</strong> используйте hover:bg-primary + hover:text-primary-foreground</p>
                     <p>• <strong>Для второстепенного текста:</strong> добавляйте /70 или /60 для полупрозрачности</p>
                     <p>• <strong>Всегда добавляйте:</strong> transition-colors для плавной анимации</p>
-                    <p>• <strong>Избегайте:</strong> hover:bg-muted без изменения цвета текста</p>
+                    <p>• <strong>Избегайте:</strong> hover:bg-accent без hover:text-accent-foreground (теряется контраст)</p>
                   </div>
                 </div>
               </div>

@@ -145,7 +145,7 @@
   }
   
   .btn-primary {
-    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4;
+    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground py-2 px-4;
     min-height: 44px;
   }
   
