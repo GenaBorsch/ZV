@@ -441,7 +441,10 @@ export const MonsterDto = z.object({
 
 export const CreateMonsterDto = z.object({
   title: z.string().min(1, 'Название обязательно').max(200, 'Название не должно превышать 200 символов'),
-  imageUrl: z.string().url('Некорректная ссылка на изображение').optional().nullable(),
+  imageUrl: z.union([
+    z.string().url('Некорректная ссылка на изображение'),
+    z.null(),
+  ]).optional(),
   description: z.string().min(10, 'Описание должно содержать минимум 10 символов'),
   lastKnownLocation: z.string().max(200, 'Локация не должна превышать 200 символов').optional().nullable(),
   bountyAlive: z.number().int('Должно быть целое число').positive('Должно быть положительное число').optional().nullable(),

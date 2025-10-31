@@ -554,12 +554,12 @@ function MonsterDialog({
 
     try {
       const payload = {
-        title: form.title,
-        imageUrl: form.imageUrl || null,
-        description: form.description,
-        lastKnownLocation: form.lastKnownLocation || null,
-        bountyAlive: form.bountyAlive ? parseInt(form.bountyAlive) : null,
-        bountyDead: form.bountyDead ? parseInt(form.bountyDead) : null,
+        title: form.title.trim(),
+        imageUrl: form.imageUrl.trim() || null,
+        description: form.description.trim(),
+        lastKnownLocation: form.lastKnownLocation.trim() || null,
+        bountyAlive: form.bountyAlive ? (isNaN(parseInt(form.bountyAlive)) ? null : parseInt(form.bountyAlive)) : null,
+        bountyDead: form.bountyDead ? (isNaN(parseInt(form.bountyDead)) ? null : parseInt(form.bountyDead)) : null,
       };
 
       const res = monster
@@ -576,7 +576,10 @@ function MonsterDialog({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || 'Failed to save');
+        const errorMessage = error.details 
+          ? `Ошибка валидации: ${error.details.map((d: any) => `${d.path.join('.')}: ${d.message}`).join(', ')}`
+          : error.error || error.message || 'Failed to save';
+        throw new Error(errorMessage);
       }
 
       onSuccess();
